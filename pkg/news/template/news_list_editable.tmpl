@@ -1,0 +1,44 @@
+[%- OI.page_title( MSG( 'news.edit_list.title' ) );
+    OI.box_add( 'news_tools_box' );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message;
+    PROCESS status_message; -%]
+
+<h2>[% MSG( 'news.edit_list.title' ) %]</h2>
+
+<p>[% MSG( 'news.edit_list.summary' ) %]</p>
+
+[% PROCESS form_begin( ACTION = 'news',
+                       TASK   = 'edit_summary',
+                       method = 'POST',
+                       name   = 'multiple_news' ) -%]
+
+<table border="0" cellpadding="3" cellspacing="0">
+
+[% INCLUDE header_row( label_keys = [
+        'news.edit_list.edit', 'news.info.title', 'news.info.section'
+] ) -%]
+
+[% FOREACH news = news_list -%]
+  [%- id = news.id -%]
+  <tr valign="middle" [% PROCESS row_color( count = loop.count ) %]>
+    <td>
+     [% INCLUDE form_checkbox( name="do_edit" value = id,  picked = id ) %]
+    </td>
+    <td>
+     [% INCLUDE form_text( name="title_$id" value = news.title, size = 30 ) %]
+    </td>
+    <td>
+     [% INCLUDE form_select( name        = "section_$id",
+                             list        = section_list,
+                             value_field = "section",
+                             picked      = news.section ) %]
+    </td>
+  </tr>
+[% END %]
+  <tr><td colspan="3">
+    [%- INCLUDE form_submit( value_key = 'global.button.modify' ) -%]
+  </td></tr>
+</table>
+
+[% PROCESS form_end %]

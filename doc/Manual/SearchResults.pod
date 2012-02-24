@@ -1,0 +1,63 @@
+=head1 NAME
+
+OpenInteract2::Manual::SearchResults - Managing Search Results in OpenInteract2
+
+=head1 SYNOPSIS
+
+This part of the manual briefly describes how to save search results
+and retrieve them later, either piecemeal or all at once.
+
+=head1 DESCRIPTION
+
+OpenInteract2 comes with the ability to serialize and later retrieve
+search results. This enables users to run large-ish searches and have
+the results be accessible at a later time, or in a paged result form
+(Page 1 of 12, results 1 - 20, etc.) without running the entire search
+again and ensuring that successive pages are consistent..
+
+OpenInteract2 comes with two classes to perform these actions. The
+main one is
+L<OpenInteract2::ResultsManage|OpenInteract2::ResultsManage>, which
+serializes and retrieves the results. The other is
+L<OpenInteract2::ResultsIterator|OpenInteract2::ResultsIterator>,
+which is an implementation of L<SPOPS::Iterator|SPOPS::Iterator> that
+works with the first class to kick out results one at a time.
+
+=head2 Example
+
+First we'll get a list of objects from some method C<perform_search()>
+(it doesn't matter what this is) and serialize them:
+
+ my $object_list = perform_search( ... );
+ my $results = OpenInteract2::ResultsManage->new();
+ my $search_id = $results->save( $object_list );
+
+Next, we'll use that same search ID to retrieve the resultset and get
+the first 50 entries back:
+
+ my $search_id = $request->param( 'search_id' );
+ my $results = OpenInteract2::ResultsManage->new({
+     search_id => $search_id
+ });
+ my $iterator = $results->retrieve({ max => 50 });
+
+Later we'll retrieve results 51 to 100 from the resultset:
+
+ my $search_id = $request->param( 'search_id' );
+ my $results = OpenInteract2::ResultsManage->new({
+     search_id => $search_id
+ });
+ my $iterator = $results->retrieve({ min => 51, max => 100 });
+
+=head1 SEE ALSO
+
+L<OpenInteract2::ResultsManage|OpenInteract2::ResultsManage> has the
+implementation documentation and more examples.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

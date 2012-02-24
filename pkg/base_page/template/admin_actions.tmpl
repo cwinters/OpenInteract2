@@ -1,0 +1,45 @@
+[% OI.page_title( "Page Administrative Actions" ) -%]
+
+[% MACRO action_row( label, desc, url ) BLOCK -%]
+<tr [% PROCESS row_color %] valign="top">
+  <td align="right"><b><a href="[% url %]">[% label %]</a></b></td>
+  <td>[% desc %]</td>
+</tr>
+[% END -%]
+
+<div align="center" class="demarcatePage">
+
+<h2>Page Admin Actions</h2>
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0 -%]
+
+[%- count = count + 1 -%]
+[% action_row( 'Create', 'Create a new page',
+               OI.make_url( ACTION = 'page', TASK = 'display_add' ) ) %]
+
+[%- count = count + 1 -%]
+[% action_row( 'List', 'List directories and browse pages',
+               OI.make_url( ACTION = 'page', TASK = 'directory_list' ) ) %]
+
+[%- count = count + 1 -%]
+[% action_row( 'Search', 'Search pages',
+               OI.make_url( ACTION = 'page', TASK = 'search_form' ) ) %]
+
+[%- count = count + 1 -%]
+[% action_row( 'Directory Index', 'Edit directory index maps',
+               OI.make_url( ACTION = 'pagedirectory' ) ) %]
+
+[%- count = count + 1 -%]
+[% action_row( 'Scan', 'Scan filesystem for new pages',
+               OI.make_url( ACTION = 'pagescan' ) ) %]
+
+[%- count = count + 1 -%]
+[% action_row( 'Content Types', 'Edit content types',
+               OI.make_url( ACTION      = 'lookups',
+                            TASK        = 'listing', 
+                            lookup_type = 'content_type' ) ) %]
+
+[% PROCESS table_bordered_end %]
+
+</div>

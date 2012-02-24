@@ -1,0 +1,531 @@
+---
+name: OpenInteract
+version: 1.99_07
+author: []
+abstract: Pure-perl extensible application server
+license: perl
+resources:
+  license: http://dev.perl.org/licenses/
+requires:
+  Algorithm::Dependency: 1.03
+  Apache::Session: 1.5
+  Archive::Zip: 0
+  CGI::Cookie: 0
+  Cache::FileCache: 0
+  Carp::Assert: 0
+  Class::Accessor: 0
+  Class::Factory: 1
+  Class::Fields: 0
+  Class::Observable: 1
+  Class::Singleton: 1.03
+  DBD::SQLite: 0.25
+  DateTime: 0.13
+  DateTime::Format::Strptime: 1
+  Devel::StackTrace: 0
+  Digest::MD5: 0
+  Email::Valid: 0.12
+  Exception::Class: 1.1
+  File::MMagic: 0
+  Getopt::Long: 2.32
+  HTML::Entities: 1.13
+  HTML::TagCloud: 0
+  LWP::Simple: 0
+  Lingua::Stem: 0.5
+  Locale::Maketext: 1.06
+  Log::Dispatch: 2
+  Log::Log4perl: 0.34
+  MIME::Lite: 2
+  Mail::RFC822::Address: 0.3
+  Mail::Sendmail: 0.77
+  Pod::POM: 0
+  SPOPS: 0.87
+  Scalar::Util: 0
+  Template: 2.04
+  Test::MockObject: 0.12
+  Test::More: 0.41
+  Text::Sentence: 0
+  URI: 1
+provides:
+  Apache2::OpenInteract2:
+    file: lib/Apache2/OpenInteract2.pm
+    version: 1.05
+  Apache::OpenInteract2:
+    file: lib/Apache/OpenInteract2.pm
+    version: 1.18
+  Apache::OpenInteract2::HttpAuth:
+    file: lib/Apache/OpenInteract2/HttpAuth.pm
+    version: 1.12
+  HTTP::Daemon::OpenInteract2:
+    file: lib/HTTP/Daemon/OpenInteract2.pm
+  HTTP::Daemon::OpenInteract2Daemon:
+    file: lib/HTTP/Daemon/OpenInteract2.pm
+    version: 1.13
+  OpenInteract2::Action:
+    file: lib/OpenInteract2/Action.pm
+    version: 1.77
+  OpenInteract2::Action::Common:
+    file: lib/OpenInteract2/Action/Common.pm
+    version: 1.25
+  OpenInteract2::Action::CommonAdd:
+    file: lib/OpenInteract2/Action/CommonAdd.pm
+    version: 1.25
+  OpenInteract2::Action::CommonDisplay:
+    file: lib/OpenInteract2/Action/CommonDisplay.pm
+    version: 1.17
+  OpenInteract2::Action::CommonRemove:
+    file: lib/OpenInteract2/Action/CommonRemove.pm
+    version: 1.21
+  OpenInteract2::Action::CommonSearch:
+    file: lib/OpenInteract2/Action/CommonSearch.pm
+    version: 1.24
+  OpenInteract2::Action::CommonUpdate:
+    file: lib/OpenInteract2/Action/CommonUpdate.pm
+    version: 1.23
+  OpenInteract2::Action::TemplateOnly:
+    file: lib/OpenInteract2/Action/TemplateOnly.pm
+    version: 1.07
+  OpenInteract2::ActionResolver:
+    file: lib/OpenInteract2/ActionResolver.pm
+    version: 1.04
+  OpenInteract2::ActionResolver::NameAndTask:
+    file: lib/OpenInteract2/ActionResolver/NameAndTask.pm
+    version: 1.02
+  OpenInteract2::ActionResolver::NotFoundOrEmpty:
+    file: lib/OpenInteract2/ActionResolver/NotFoundOrEmpty.pm
+    version: 1.03
+  OpenInteract2::ActionResolver::UserDir:
+    file: lib/OpenInteract2/ActionResolver/UserDir.pm
+    version: 1.04
+  OpenInteract2::App:
+    file: lib/OpenInteract2/App.pm
+    version: 1.03
+  OpenInteract2::Auth:
+    file: lib/OpenInteract2/Auth.pm
+    version: 1.22
+  OpenInteract2::Auth::AdminCheck:
+    file: lib/OpenInteract2/Auth/AdminCheck.pm
+    version: 1.13
+  OpenInteract2::Auth::Group:
+    file: lib/OpenInteract2/Auth/Group.pm
+    version: 1.17
+  OpenInteract2::Auth::User:
+    file: lib/OpenInteract2/Auth/User.pm
+    version: 1.23
+  OpenInteract2::Brick:
+    file: lib/OpenInteract2/Brick.pm
+    version: 1.07
+  OpenInteract2::Cache:
+    file: lib/OpenInteract2/Cache.pm
+    version: 1.15
+  OpenInteract2::Cache::File:
+    file: lib/OpenInteract2/Cache/File.pm
+    version: 1.12
+  OpenInteract2::Config:
+    file: lib/OpenInteract2/Config.pm
+    version: 1.16
+  OpenInteract2::Config::Bootstrap:
+    file: lib/OpenInteract2/Config/Bootstrap.pm
+    version: 1.02
+  OpenInteract2::Config::GlobalOverride:
+    file: lib/OpenInteract2/Config/GlobalOverride.pm
+    version: 1.11
+  OpenInteract2::Config::Ini:
+    file: lib/OpenInteract2/Config/Ini.pm
+    version: 1.22
+  OpenInteract2::Config::IniFile:
+    file: lib/OpenInteract2/Config/IniFile.pm
+    version: 1.09
+  OpenInteract2::Config::Initializer:
+    file: lib/OpenInteract2/Config/Initializer.pm
+    version: 1.24
+  OpenInteract2::Config::Package:
+    file: lib/OpenInteract2/Config/Package.pm
+    version: 1.25
+  OpenInteract2::Config::PackageChanges:
+    file: lib/OpenInteract2/Config/PackageChanges.pm
+    version: 1.12
+  OpenInteract2::Config::PerlFile:
+    file: lib/OpenInteract2/Config/PerlFile.pm
+    version: 1.08
+  OpenInteract2::Config::Readonly:
+    file: lib/OpenInteract2/Config/Readonly.pm
+    version: 1.13
+  OpenInteract2::Constants:
+    file: lib/OpenInteract2/Constants.pm
+    version: 1.11
+  OpenInteract2::ContentGenerator:
+    file: lib/OpenInteract2/ContentGenerator.pm
+    version: 1.16
+  OpenInteract2::ContentGenerator::HtmlTemplate:
+    file: lib/OpenInteract2/ContentGenerator/HtmlTemplate.pm
+    version: 1.08
+  OpenInteract2::ContentGenerator::TT2Process:
+    file: lib/OpenInteract2/ContentGenerator/TT2Process.pm
+    version: 1.23
+  OpenInteract2::ContentGenerator::TemplateSource:
+    file: lib/OpenInteract2/ContentGenerator/TemplateSource.pm
+    version: 1.16
+  OpenInteract2::ContentGenerator::TextTemplate:
+    file: lib/OpenInteract2/ContentGenerator/TextTemplate.pm
+    version: 1.10
+  OpenInteract2::Context:
+    file: lib/OpenInteract2/Context.pm
+    version: 1.91
+  OpenInteract2::Controller:
+    file: lib/OpenInteract2/Controller.pm
+    version: 1.27
+  OpenInteract2::Controller::MainTemplate:
+    file: lib/OpenInteract2/Controller/MainTemplate.pm
+    version: 1.13
+  OpenInteract2::Controller::ManageBoxes:
+    file: lib/OpenInteract2/Controller/ManageBoxes.pm
+  OpenInteract2::Controller::ManageTemplates:
+    file: lib/OpenInteract2/Controller/ManageTemplates.pm
+  OpenInteract2::Controller::MangeBoxes:
+    file: lib/OpenInteract2/Controller/ManageBoxes.pm
+    version: 1.13
+  OpenInteract2::Controller::MangeTemplates:
+    file: lib/OpenInteract2/Controller/ManageTemplates.pm
+    version: 1.10
+  OpenInteract2::Controller::Raw:
+    file: lib/OpenInteract2/Controller/Raw.pm
+    version: 1.12
+  OpenInteract2::Conversion::ActionConfig:
+    file: lib/OpenInteract2/Conversion/ActionConfig.pm
+    version: 1.06
+  OpenInteract2::Conversion::IniConfig:
+    file: lib/OpenInteract2/Conversion/IniConfig.pm
+    version: 1.09
+  OpenInteract2::Conversion::SPOPSConfig:
+    file: lib/OpenInteract2/Conversion/SPOPSConfig.pm
+    version: 1.09
+  OpenInteract2::Cookie:
+    file: lib/OpenInteract2/Cookie.pm
+    version: 1.12
+  OpenInteract2::CreateSecurity:
+    file: lib/OpenInteract2/CreateSecurity.pm
+    version: 1.03
+  OpenInteract2::Datasource::DBI:
+    file: lib/OpenInteract2/Datasource/DBI.pm
+    version: 1.20
+  OpenInteract2::Datasource::LDAP:
+    file: lib/OpenInteract2/Datasource/LDAP.pm
+    version: 1.11
+  OpenInteract2::DatasourceManager:
+    file: lib/OpenInteract2/DatasourceManager.pm
+    version: 1.17
+  OpenInteract2::Error:
+    file: lib/OpenInteract2/Error.pm
+    version: 1.02
+  OpenInteract2::ErrorStorage:
+    file: lib/OpenInteract2/ErrorStorage.pm
+    version: 1.02
+  OpenInteract2::Exception:
+    file: lib/OpenInteract2/Exception.pm
+    version: 1.12
+  OpenInteract2::Exception::Parameter:
+    file: lib/OpenInteract2/Exception/Parameter.pm
+    version: 1.07
+  OpenInteract2::Exception::Security:
+    file: lib/OpenInteract2/Exception/Security.pm
+    version: 1.13
+  OpenInteract2::File:
+    file: lib/OpenInteract2/File.pm
+    version: 1.12
+  OpenInteract2::Filter::AllCaps:
+    file: lib/OpenInteract2/Filter/AllCaps.pm
+    version: 1.03
+  OpenInteract2::FullTextIndexer:
+    file: lib/OpenInteract2/FullTextIndexer.pm
+    version: 1.02
+  OpenInteract2::FullTextIterator:
+    file: lib/OpenInteract2/FullTextIterator.pm
+    version: 1.02
+  OpenInteract2::FullTextRules:
+    file: lib/OpenInteract2/FullTextRules.pm
+    version: 1.04
+  OpenInteract2::I18N:
+    file: lib/OpenInteract2/I18N.pm
+    version: 1.11
+  OpenInteract2::I18N::Initializer:
+    file: lib/OpenInteract2/I18N/Initializer.pm
+    version: 1.18
+  OpenInteract2::Log:
+    file: lib/OpenInteract2/Log.pm
+    version: 1.08
+  OpenInteract2::Log::OIAppender:
+    file: lib/OpenInteract2/Log/OIAppender.pm
+    version: 1.05
+  OpenInteract2::Manage:
+    file: lib/OpenInteract2/Manage.pm
+    version: 1.52
+  OpenInteract2::Manage::Package:
+    file: lib/OpenInteract2/Manage/Package.pm
+    version: 1.17
+  OpenInteract2::Manage::Package::Check:
+    file: lib/OpenInteract2/Manage/Package/Check.pm
+    version: 1.11
+  OpenInteract2::Manage::Package::CreateCPAN:
+    file: lib/OpenInteract2/Manage/Package/CreateCPAN.pm
+    version: 1.04
+  OpenInteract2::Manage::Package::CreatePackage:
+    file: lib/OpenInteract2/Manage/Package/CreatePackage.pm
+    version: 1.16
+  OpenInteract2::Manage::Package::CreatePackageFromTable:
+    file: lib/OpenInteract2/Manage/Package/CreatePackageFromTable.pm
+    version: 1.03
+  OpenInteract2::Manage::Package::Export:
+    file: lib/OpenInteract2/Manage/Package/Export.pm
+    version: 1.16
+  OpenInteract2::Manage::Website:
+    file: lib/OpenInteract2/Manage/Website.pm
+    version: 1.26
+  OpenInteract2::Manage::Website::CleanExpiredSessions:
+    file: lib/OpenInteract2/Manage/Website/CleanExpiredSessions.pm
+    version: 1.06
+  OpenInteract2::Manage::Website::CleanOrphanedUsers:
+    file: lib/OpenInteract2/Manage/Website/CleanOrphanedUsers.pm
+    version: 1.02
+  OpenInteract2::Manage::Website::Create:
+    file: lib/OpenInteract2/Manage/Website/Create.pm
+    version: 1.31
+  OpenInteract2::Manage::Website::CreateSecurity:
+    file: lib/OpenInteract2/Manage/Website/CreateSecurity.pm
+    version: 1.07
+  OpenInteract2::Manage::Website::CreateSecurityForAction:
+    file: lib/OpenInteract2/Manage/Website/CreateSecurityForAction.pm
+    version: 1.02
+  OpenInteract2::Manage::Website::CreateSecurityForSPOPS:
+    file: lib/OpenInteract2/Manage/Website/CreateSecurityForSPOPS.pm
+    version: 1.02
+  OpenInteract2::Manage::Website::CreateSuperuserPassword:
+    file: lib/OpenInteract2/Manage/Website/CreateSuperuserPassword.pm
+    version: 1.12
+  OpenInteract2::Manage::Website::Install:
+    file: lib/OpenInteract2/Manage/Website/InstallPackage.pm
+    version: 1.23
+  OpenInteract2::Manage::Website::InstallPackage:
+    file: lib/OpenInteract2/Manage/Website/InstallPackage.pm
+  OpenInteract2::Manage::Website::InstallPackageData:
+    file: lib/OpenInteract2/Manage/Website/InstallPackageData.pm
+    version: 1.10
+  OpenInteract2::Manage::Website::InstallPackageSecurity:
+    file: lib/OpenInteract2/Manage/Website/InstallPackageSecurity.pm
+    version: 1.10
+  OpenInteract2::Manage::Website::InstallPackageSql:
+    file: lib/OpenInteract2/Manage/Website/InstallPackageSql.pm
+    version: 1.16
+  OpenInteract2::Manage::Website::InstallPackageStructure:
+    file: lib/OpenInteract2/Manage/Website/InstallPackageStructure.pm
+    version: 1.15
+  OpenInteract2::Manage::Website::ListActions:
+    file: lib/OpenInteract2/Manage/Website/ListActions.pm
+    version: 1.13
+  OpenInteract2::Manage::Website::ListObjects:
+    file: lib/OpenInteract2/Manage/Website/ListObjects.pm
+    version: 1.10
+  OpenInteract2::Manage::Website::ListPackages:
+    file: lib/OpenInteract2/Manage/Website/ListPackages.pm
+    version: 1.11
+  OpenInteract2::Manage::Website::PackageCheckExportInstall:
+    file: lib/OpenInteract2/Manage/Website/PackageCheckExportInstall.pm
+    version: 1.08
+  OpenInteract2::Manage::Website::ReindexObjects:
+    file: lib/OpenInteract2/Manage/Website/ReindexObjects.pm
+    version: 1.07
+  OpenInteract2::Manage::Website::RemovePackage:
+    file: lib/OpenInteract2/Manage/Website/RemovePackage.pm
+    version: 1.08
+  OpenInteract2::Manage::Website::TestDB:
+    file: lib/OpenInteract2/Manage/Website/TestDB.pm
+    version: 1.14
+  OpenInteract2::Manage::Website::TestLDAP:
+    file: lib/OpenInteract2/Manage/Website/TestLDAP.pm
+    version: 1.13
+  OpenInteract2::Manage::Website::ThemeDump:
+    file: lib/OpenInteract2/Manage/Website/ThemeDump.pm
+    version: 1.10
+  OpenInteract2::Manage::Website::ThemeInstall:
+    file: lib/OpenInteract2/Manage/Website/ThemeInstall.pm
+    version: 1.12
+  OpenInteract2::Manage::Website::UpdatePackageFromWebsite:
+    file: lib/OpenInteract2/Manage/Website/UpdatePackageFromWebsite.pm
+    version: 1.06
+  OpenInteract2::Manage::Website::Upgrade:
+    file: lib/OpenInteract2/Manage/Website/Upgrade.pm
+    version: 1.20
+  OpenInteract2::Manage::Website::ViewSession:
+    file: lib/OpenInteract2/Manage/Website/ViewSession.pm
+    version: 1.11
+  OpenInteract2::Observer:
+    file: lib/OpenInteract2/Observer.pm
+    version: 1.07
+  OpenInteract2::Observer::Controller::GetFiltersFromRequest:
+    file: lib/OpenInteract2/Observer/Controller/GetFiltersFromRequest.pm
+    version: 1.02
+  OpenInteract2::Package:
+    file: lib/OpenInteract2/Package.pm
+    version: 1.64
+  OpenInteract2::ParamContainer:
+    file: lib/OpenInteract2/ParamContainer.pm
+    version: 1.02
+  OpenInteract2::Repository:
+    file: lib/OpenInteract2/Repository.pm
+    version: 1.25
+  OpenInteract2::Request:
+    file: lib/OpenInteract2/Request.pm
+    version: 1.59
+  OpenInteract2::Request::Apache:
+    file: lib/OpenInteract2/Request/Apache.pm
+    version: 1.21
+  OpenInteract2::Request::Apache2:
+    file: lib/OpenInteract2/Request/Apache2.pm
+    version: 1.05
+  OpenInteract2::Request::CGI:
+    file: lib/OpenInteract2/Request/CGI.pm
+    version: 1.26
+  OpenInteract2::Request::LWP:
+    file: lib/OpenInteract2/Request/LWP.pm
+    version: 1.24
+  OpenInteract2::Request::Standalone:
+    file: lib/OpenInteract2/Request/Standalone.pm
+    version: 1.16
+  OpenInteract2::Response:
+    file: lib/OpenInteract2/Response.pm
+    version: 1.30
+  OpenInteract2::Response::Apache:
+    file: lib/OpenInteract2/Response/Apache.pm
+    version: 1.23
+  OpenInteract2::Response::Apache2:
+    file: lib/OpenInteract2/Response/Apache2.pm
+    version: 1.08
+  OpenInteract2::Response::CGI:
+    file: lib/OpenInteract2/Response/CGI.pm
+    version: 1.22
+  OpenInteract2::Response::LWP:
+    file: lib/OpenInteract2/Response/LWP.pm
+    version: 1.23
+  OpenInteract2::Response::Standalone:
+    file: lib/OpenInteract2/Response/Standalone.pm
+    version: 1.16
+  OpenInteract2::ResultsIterator:
+    file: lib/OpenInteract2/ResultsIterator.pm
+    version: 1.07
+  OpenInteract2::ResultsManage:
+    file: lib/OpenInteract2/ResultsManage.pm
+    version: 1.14
+  OpenInteract2::SPOPS:
+    file: lib/OpenInteract2/SPOPS.pm
+    version: 1.31
+  OpenInteract2::SPOPS::DBI:
+    file: lib/OpenInteract2/SPOPS/DBI.pm
+    version: 1.08
+  OpenInteract2::SPOPS::LDAP:
+    file: lib/OpenInteract2/SPOPS/LDAP.pm
+    version: 1.08
+  OpenInteract2::SQLInstall:
+    file: lib/OpenInteract2/SQLInstall.pm
+    version: 1.31
+  OpenInteract2::SessionManager:
+    file: lib/OpenInteract2/SessionManager.pm
+    version: 1.11
+  OpenInteract2::SessionManager::DBI:
+    file: lib/OpenInteract2/SessionManager/DBI.pm
+    version: 1.06
+  OpenInteract2::SessionManager::File:
+    file: lib/OpenInteract2/SessionManager/File.pm
+    version: 1.07
+  OpenInteract2::SessionManager::SQLite:
+    file: lib/OpenInteract2/SessionManager/SQLite.pm
+    version: 1.06
+  OpenInteract2::Setup:
+    file: lib/OpenInteract2/Setup.pm
+    version: 1.62
+  OpenInteract2::Setup::CheckDatasources:
+    file: lib/OpenInteract2/Setup/CheckDatasources.pm
+    version: 1.03
+  OpenInteract2::Setup::CreateTemporaryLibraryDirectory:
+    file: lib/OpenInteract2/Setup/CreateTemporaryLibraryDirectory.pm
+    version: 1.05
+  OpenInteract2::Setup::DependencySource:
+    file: lib/OpenInteract2/Setup/DependencySource.pm
+    version: 1.02
+  OpenInteract2::Setup::InitializeActions:
+    file: lib/OpenInteract2/Setup/InitializeActions.pm
+    version: 1.03
+  OpenInteract2::Setup::InitializeCache:
+    file: lib/OpenInteract2/Setup/InitializeCache.pm
+    version: 1.02
+  OpenInteract2::Setup::InitializeContentGenerators:
+    file: lib/OpenInteract2/Setup/InitializeContentGenerators.pm
+    version: 1.03
+  OpenInteract2::Setup::InitializeControllers:
+    file: lib/OpenInteract2/Setup/InitializeControllers.pm
+    version: 1.04
+  OpenInteract2::Setup::InitializeObservers:
+    file: lib/OpenInteract2/Setup/InitializeObservers.pm
+    version: 1.03
+  OpenInteract2::Setup::InitializeSPOPS:
+    file: lib/OpenInteract2/Setup/InitializeSPOPS.pm
+    version: 1.03
+  OpenInteract2::Setup::InitializeTimezone:
+    file: lib/OpenInteract2/Setup/InitializeTimezone.pm
+    version: 1.02
+  OpenInteract2::Setup::ReadActionTable:
+    file: lib/OpenInteract2/Setup/ReadActionTable.pm
+    version: 1.03
+  OpenInteract2::Setup::ReadLocalizedMessages:
+    file: lib/OpenInteract2/Setup/ReadLocalizedMessages.pm
+    version: 1.04
+  OpenInteract2::Setup::ReadPackages:
+    file: lib/OpenInteract2/Setup/ReadPackages.pm
+    version: 1.02
+  OpenInteract2::Setup::ReadRepository:
+    file: lib/OpenInteract2/Setup/ReadRepository.pm
+    version: 1.03
+  OpenInteract2::Setup::ReadSPOPSConfig:
+    file: lib/OpenInteract2/Setup/ReadSPOPSConfig.pm
+    version: 1.04
+  OpenInteract2::Setup::ReadServerConfig:
+    file: lib/OpenInteract2/Setup/ReadServerConfig.pm
+    version: 1.03
+  OpenInteract2::Setup::RegisterActionTypes:
+    file: lib/OpenInteract2/Setup/RegisterActionTypes.pm
+    version: 1.02
+  OpenInteract2::Setup::RegisterRequestAndResponse:
+    file: lib/OpenInteract2/Setup/RegisterRequestAndResponse.pm
+    version: 1.02
+  OpenInteract2::Setup::RequireClasses:
+    file: lib/OpenInteract2/Setup/RequireClasses.pm
+    version: 1.03
+  OpenInteract2::Setup::RequireIndexers:
+    file: lib/OpenInteract2/Setup/RequireIndexers.pm
+    version: 1.02
+  OpenInteract2::Setup::RequireSessionClasses:
+    file: lib/OpenInteract2/Setup/RequireSessionClasses.pm
+    version: 1.02
+  OpenInteract2::Setup::RequireSystemClasses:
+    file: lib/OpenInteract2/Setup/RequireSystemClasses.pm
+    version: 1.02
+  OpenInteract2::TT2::Context:
+    file: lib/OpenInteract2/TT2/Context.pm
+    version: 1.03
+  OpenInteract2::TT2::Plugin:
+    file: lib/OpenInteract2/TT2/Plugin.pm
+    version: 1.19
+  OpenInteract2::TT2::Provider:
+    file: lib/OpenInteract2/TT2/Provider.pm
+    version: 1.06
+  OpenInteract2::URL:
+    file: lib/OpenInteract2/URL.pm
+    version: 1.33
+  OpenInteract2::Upload:
+    file: lib/OpenInteract2/Upload.pm
+    version: 1.06
+  OpenInteract2::Util:
+    file: lib/OpenInteract2/Util.pm
+    version: 1.23
+generated_by: Module::Build version 0.3
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.2.html
+  version: 1.2

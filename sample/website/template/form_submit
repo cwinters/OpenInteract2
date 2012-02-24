@@ -1,0 +1,7 @@
+[%- DEFAULT name  = 'form_submit';
+    IF value_key;
+        value = MSG( value_key );
+    END;
+    DEFAULT value = MSG( 'global.button.submit' );
+-%]
+<input type="submit" value="[% value %]" name="[% name %]"> [% field_label %]

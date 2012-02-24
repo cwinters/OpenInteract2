@@ -1,0 +1,267 @@
+[%- DEFAULT theme = OI.theme_properties;
+    DEFAULT max_temp = 10;
+    is_saved = theme_object.id;
+    title = ( is_saved )
+              ? MSG( 'base_theme.form.title_update', theme_object.title )
+              : MSG( 'base_theme.form.title_new' );
+    OI.page_title( title );
+    PROCESS error_message -%]
+
+<div align="center">
+
+<h2>[% title %]</h2>
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+[% PROCESS form_begin( ACTION   = 'theme',
+                       TASK     = task,
+                       method   = 'POST',
+                       name     = 'theme',
+                       onsubmit = 'return data_check( this )' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '50%' ) -%]
+[%- count = 0; valign = 'top' -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'base_theme.info.label.title',
+                                is_required = 1,
+                                name        = 'title',
+                                value       = theme_object.title,
+                                size  = 20, maxlength = 50) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label_key = 'base_theme.info.label.description',
+                                    name  = 'description',
+                                    value = theme_object.description,
+                                    cols = 35, rows = 3, wrap = 'virtual' ) -%]
+
+[%- count = count + 1 -%]
+   <tr align="top" [% PROCESS row_color %]>
+    <td align="right"><b>[% MSG( 'base_theme.info.label.parent' ) %]</b></td>
+    <td>
+     [% IF theme_object.id == 1 %]
+[% MSG( 'base_theme.form.no_edit_parent' ) %]
+     [% PROCESS form_hidden( name = 'parent', value = '0' ) %]
+     [% ELSE %]
+     <select name="parent">
+       [% FOREACH parent_theme = parent_list %]
+         [% IF parent_theme.id != theme_object.id %]
+          <option value="[% parent_theme.id %]">[% parent_theme.title %]</option>
+         [% END %]
+       [% END %]
+     </select>
+     [% END %]
+    </td>
+   </tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_theme.info.label.credit',
+                                name  = 'credit',
+                                size  = 35,
+                                value = theme_object.credit ) -%]
+
+[%- count = count + 1 -%]
+   <tr [% PROCESS row_color %]>
+    <td colspan="2" align="center">
+      <b>[% MSG( 'base_theme.form.assign_props' ) %]</b>
+    </td>
+   </tr>
+
+   <tr [% PROCESS row_color %]>
+    <td colspan="2" align="center">
+
+     <table border="0" width="100%" cellpadding="3" cellspacing="0">
+      <tr valign="top">
+       <td align="right">
+         [% PROCESS form_button( name = "btn_new_prop", value = 'New',
+                                 onclick = 'new_property()' ) %]<br>
+         [% PROCESS form_button( name = "btn_rmv_prop", value = 'Remove',
+                                 onclick = 'remove_property()' ) %]<br>
+       </td>
+       <td align="left">
+         <select name="property_list" size="6" onChange="view_property()">
+[% FOREACH item = property_list %]
+          <option value="[% item.themeprop_id %];[% item.prop %]">[% item.prop %][%- '**' IF item.tmp_different_theme %]</option>
+[% END %]
+         </select><br>
+[% MSG( 'base_theme.form.inherited_property' ) -%]
+       </td>
+       <td align="right">
+
+         <table border="0" cellpadding="2" cellspacing="0" width="100%">
+           <tr valign="top">
+             <td align="right"><b>[% MSG( 'base_theme.form.label.value' ) -%]</b></td>
+             <td align="left">
+               <textarea name="property_value" cols="30" rows="3" wrap="virtual"></textarea>
+             </td>
+           </tr>
+           <tr valign="top">
+             <td align="right">[% MSG( 'base_theme.form.label.description' ) -%]</td>
+             <td align="left">
+              <textarea name="property_desc" cols="30" rows="2" wrap="virtual"></textarea>
+             </td>
+           </tr>
+           <tr align="right">
+             <td colspan="2">
+               [%- PROCESS form_button( value="ok" onclick="modify_property()" ) -%]
+             </td>
+           </tr>
+          </table>
+
+       </td>
+      </tr>
+     </table>
+
+    </td>
+   </tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = MSG( 'global.button.modify' ) ) -%]
+
+[% PROCESS table_bordered_end -%]
+[% INCLUDE form_hidden( name = 'theme_id', value = theme_object.id ) -%]
+
+[%- FOREACH item = property_list;
+    tp_id = item.themeprop_id; %]
+[% INCLUDE form_hidden( name = "status_$tp_id", value = 'unchanged' );
+   INCLUDE form_hidden( name = "value_$tp_id", value = OI.html_encode( item.value ) );
+   INCLUDE form_hidden( name = "desc_$tp_id", value = item.description ); %]
+[% END -%]
+
+[%- FOREACH temp_num = [ 1 .. max_temp ] %]
+[% INCLUDE form_hidden( name = "status_temp$temp_num", value = "unchanged" );
+   INCLUDE form_hidden( name = "prop_temp$temp_num",   value = "" );
+   INCLUDE form_hidden( name = "value_temp$temp_num",  value = "" );
+   INCLUDE form_hidden( name = "desc_temp$temp_num",   value = "" ); %]
+[% END -%]
+[% PROCESS form_end %]
+
+</div>
+
+<script lanaguage="Javascript">
+
+// Take care of simple data validation first
+var default_value_fields   = new Array( 'title' );
+var field_titles = new Object;
+field_titles[ 'title' ] = 'Theme Title';
+
+function data_check ( form ) {
+ var i; 
+ // Check to see that all .value fields have info
+ for ( i = 0; i < default_value_fields.length; i++ ) {
+    var field = default_value_fields[ i ];
+    var value = form[ field ].value;
+    if ( value == '' || value == null ) {
+        alert( 'Please enter information in ' + field_titles[ field ] + '. Form not submitted.' );
+        return false;
+    }
+ }
+ return true;
+}
+
+
+var temp_increment = 1;
+var max_temp       = [% max_temp %];
+var edit_form_name = 'theme';
+
+// Now onto the more complicated stuff
+
+function new_property () {
+  var form = document[ edit_form_name ];
+  var prop = prompt( 'Name of property' );
+  if ( prop == '' || prop == null ) {
+    alert( 'Please enter a property name! Try again.' );
+  }
+  else {
+    if ( temp_increment > max_temp ) {
+      alert( 'Cannot add more properties -- form buffer full. Please post this ' +
+             'round of changes and add more properties in the next round.' );
+    }
+    else {
+      form[ 'status_temp' + temp_increment ].value = 'added';
+      form[ 'prop_temp' + temp_increment ].value   = prop;
+      var prop_meta = 'temp' + temp_increment + ';' + prop;
+      add_option( 'property_list', prop, prop_meta );
+//   alert( 'Added option with property ' + prop + ' and value ' + prop_meta );
+      temp_increment++;
+      form.property_list.selectedIndex = form.property_list.length - 1;
+      view_property();
+    }
+  }
+}
+
+function remove_property () {
+  var form = document[ edit_form_name ];
+  var idx = form.property_list.selectedIndex;
+  if ( idx == -1 || idx == null ) {
+    alert( 'Please select a property name to remove!' );
+  }
+  else {
+    var prop_meta = form.property_list.options[ idx ].value;
+    var info  = prop_meta.split( ';' );
+
+//    alert( 'Trying to remove property ID: ' + info[0] );
+
+    // Set the status for this item as removed
+    form[ 'status_' + info[0] ].value = 'removed';
+
+    // Reset the display
+    form.property_value.value   = '';
+    form.property_desc.value    = '';
+    form.property_list.selectedIndex = -1;
+
+    // Now remove the option OI.from the list
+    form.property_list.options[ idx ] = null;
+  }
+}
+
+function view_property () {
+  var form = document[ edit_form_name ];
+  var idx = form.property_list.selectedIndex;
+  if ( idx == -1 ) {
+    form.property_value.value = '';
+  }
+  else {
+    var prop_meta = form.property_list.options[ idx ].value;
+//   alert( 'Trying to view information with: ' + prop_meta );
+    var info  = prop_meta.split( ';' );     
+    form.property_value.value = form[ 'value_' + info[0] ].value;
+    form.property_desc.value  = form[ 'desc_' + info[0] ].value;
+  }
+}
+
+function modify_property () {
+  var form = document[ edit_form_name ];
+  var idx = form.property_list.selectedIndex;
+  if ( idx == -1 || idx == null ) {
+    alert( 'No property is currently being edited! No action taken.' );
+  }
+  else {
+    var prop_meta = form.property_list.options[ idx ].value;
+//   alert( 'Trying to modify item with info: ' + prop_meta );
+    var info = prop_meta.split( ';' );
+    form[ 'status_' + info[0] ].value = 'changed';
+    form[ 'desc_' + info[0] ].value   = form.property_desc.value;
+    form[ 'value_' + info[0] ].value  = form.property_value.value;
+
+    // Reset display
+    form.property_value.value         = '';
+    form.property_desc.value          = '';
+    form.property_list.selectedIndex  = -1;
+//   alert( 'Value of status: ' + form[ 'status_' + info[0] ].value );
+//   alert( 'Value of description: ' + form[ 'desc_' + info[0] ].value );
+//   alert( 'Value of value: ' + form[ 'value_' + info[0] ].value );
+ }
+}
+
+function add_option ( Element, Text, Value ) {
+  var form = document[ edit_form_name ];
+  var members = form[ Element ];
+  var newopt = new Option( Text , Value );
+  for ( opt = 0; opt < members.options.length; opt++ ) {
+      if ( members.options[opt].value == Value )
+          return false;
+  }
+  members.options[ members.options.length ] = newopt;
+  return true;
+}
+
+</script>

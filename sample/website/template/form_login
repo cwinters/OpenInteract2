@@ -1,0 +1,4 @@
+[% INCLUDE form_select( iterator    = OI.get_users(),
+                        first_label = MSG( 'form.default.user_list_first' ),
+                        value_field = 'id',
+                        label_field = 'login_name' ) -%]

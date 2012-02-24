@@ -1,0 +1,2 @@
+$ mysqladmin --user=$ADMINUSER --password=$ADMINPASSWORD reload
+

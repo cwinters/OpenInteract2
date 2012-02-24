@@ -1,0 +1,100 @@
+[%- DEFAULT theme = OI.theme_properties;
+    is_saved = user.id;
+    title = ( is_saved ) 
+              ? MSG( 'base_user.form.title_update', user.login_name )
+              : MSG( 'base_user.form.title_new' );
+    OI.page_title( title ); -%]
+
+<div align="center">
+
+[%- PROCESS error_message;
+    PROCESS status_message -%]
+
+[% IF is_saved %]
+[%- remove_url = OI.make_url( ACTION = 'user',
+                              TASK   = 'remove',
+                              user_id = user.id ) -%]
+<p align="right">
+[% MSG( 'base_user.form.remove_link', remove_url ) %]
+</p>
+[% END %]
+
+<h2>[% title %]</h2>
+
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+[% PROCESS form_begin( ACTION = 'user',
+                       TASK   = task,
+                       method = 'POST',
+                       name   = 'user' ) -%]
+
+[% INCLUDE table_bordered_begin -%]
+[%- count  = 0;
+    valign = 'top'; -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_row_begin( label_key   = 'base_user.info.name',
+                            is_required = 1 ) -%]
+<td>[% INCLUDE form_text( name  = 'first_name', 
+                          value = user.first_name,
+                          size  = 12 ) -%] 
+    [% INCLUDE form_text( name  = 'last_name',
+                          value = user.last_name,
+                          size  = 12, ) -%] 
+</td></tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'base_user.info.email',
+                                is_required = 1,
+                                name        = 'email',
+                                value       = user.email,
+                                size        = 30 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'base_user.info.login',
+                                is_required = 1,
+                                name        = 'login_name',
+                                value       = user.login_name,
+                                size        = 30 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_row_begin( label_key    = 'base_user.info.password',
+                             is_required = NOT is_new ) -%]
+<td>[% INCLUDE form_password( name  = 'password', size = 15 ) -%] <br>
+    [% INCLUDE form_password( name  = 'password_conf', size = 15 ) -%] 
+[%- UNLESS is_saved -%]
+    <br><font color="#ff0000">
+[% MSG( 'base_user.form.password_change' ) %]
+    </font>
+[%- END -%]
+</td></tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_select_row( label_key   = 'base_user.info.language',
+                                  name        = 'language',
+                                  picked      = user.language,
+                                  list        = language_list,
+                                  value_field = 'language',
+                                  first_label = '---Languages---' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_user.info.title',
+                                name      = 'title',
+                                value     = user.title,
+                                size      = 30, ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label_key = 'base_user.info.notes',
+                                    name      = 'notes',
+                                    value     = user.notes,
+                                    rows = 3, cols = 30, wrap = 'virtual' ) -%]
+
+[%- count = count + 1 -%]
+[%- INCLUDE form_submit_row( value = MSG( 'global.button.modify' ) ) -%]
+
+[% INCLUDE table_bordered_end -%]
+
+[% INCLUDE form_hidden( name = 'user_id', value = user.id ) -%]
+
+[% PROCESS form_end %]
+
+</div>

@@ -1,0 +1,39 @@
+[%- DEFAULT theme = OI.theme_properties;
+    OI.page_title( MSG( 'base_group.list.title' ) ); -%]
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2 align="center">[% MSG( 'base_group.list.title' ) %]</h2>
+
+<p>[% MSG( 'base_group.list.summary' ) %]</p>
+
+[% IF iterator and iterator.has_next -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row(
+       label_keys = [ 'base_group.info.label.name', 'base_group.info.label.notes' ] ) -%]
+
+[%- count = 1 -%]
+[% WHILE ( group = iterator.get_next ) -%]
+  [%- show_url = OI.make_url( ACTION   = 'group',
+                              TASK     = 'display',
+                              group_id = group.id ) -%]
+  <tr valign="top" [% PROCESS row_color %]>
+    <td><a href="[% show_url %]">[% group.name %]</a></td>
+    <td>[% group.notes %]&nbsp;</td>
+  </tr>
+  [%- count = count + 1 -%]
+[% END %]
+
+[% INCLUDE table_bordered_end -%]
+
+[% ELSE -%]
+
+<p>[% MSG( 'base_group.list.no_groups' ) %]</p>
+
+[% END %]
+
+</div>

@@ -1,0 +1,2031 @@
+[%- TAGS star -%]
+=head1 NAME
+
+OpenInteract2::Manual::Tutorial - Learn how to create and modify a package
+
+=head1 SYNOPSIS
+
+This tutorial will show you the different methods for creating a
+package and how to maintain them.
+
+=head1 PREREQUISITES
+
+=head2 What's a package?
+
+Before you start developing one you should really know what a package
+is. Go read
+L<OpenInteract2::Manual::Packages|OpenInteract2::Manual::Packages> and
+come back when you're done.
+
+=head2 Create a website
+
+If you haven't created a website yet do so now. Check out
+L<OpenInteract2::Manual::QuickStart|OpenInteract2::Manual::QuickStart>
+for a guide to getting a site up and running in just a few minutes.
+
+Once it's created, go ahead and set the C<OPENINTERACT2> environment
+variable to the B<full path> to the site. For instance, in C<bash> you
+would use:
+
+  $ export OPENINTERACT2=/path/to/mysite
+
+=head1 CREATING THE PACKAGE
+
+=head2 A word on the example
+
+For our example we're going to create a 'book' package. This will keep
+track of all our books and allow us to search our library, add new
+books, update existing ones and remove old ones. It won't be the
+backbone for a massive e-commerce website to make you lots of
+money. It does not attempt to best model the relationships for all the
+data about a book.
+
+=head2 Looking for shortcuts?
+
+If you want to get something running in the fastest manner possible we
+can generate a simple CRUDS application for you. (CRUDS: CReate Update
+Delete Search) Just run something like the following:
+
+ $ oi2_manage easy_app --package=book --table=book \
+       --dsn=DBI:Pg:dbname=mylibrary --username=foo --password=bar
+
+This will create a simple application built off a table 'book' with
+templates and objects for searching, creating, updating and removing
+objects. (More at
+L<OpenInteract2::Manage::Package::CreatePackageFromTable>.)
+
+Since this is a tutorial we'll assume you want to read to learn, so on
+we go.
+
+=head2 Generating the skeleton
+
+OpenInteract comes with tools to create a skeleton package -- we don't
+want to do all this from scratch! The skeleton package has the
+directory structure, metadata and a number of files to get you going
+on your new package. Here's how to create one -- be sure to first go
+to the directory under which the package will be created:
+
+  $ oi2_manage create_package --package=book
+
+And here's what you'll see:
+
+  PROGRESS: Starting task
+  PROGRESS: Task complete
+  ACTION: Create package book
+      OK:     Package book created ok in /path/to/my/book
+
+And now let's see what it created:
+
+  $ find book/
+  book/
+  book/conf
+  book/conf/spops.ini
+  book/conf/action.ini
+  book/data
+  book/doc
+  book/doc/book.pod
+  book/struct
+  book/template
+  book/template/sample.tmpl
+  book/script
+  book/html
+  book/html/images
+  book/OpenInteract2
+  book/OpenInteract2/Action
+  book/OpenInteract2/Action/Book.pm
+  book/OpenInteract2/SQLInstall
+  book/OpenInteract2/SQLInstall/Book.pm
+  book/package.ini
+  book/MANIFEST.SKIP
+  book/Changes
+  book/MANIFEST
+
+These files and directories are explained in
+L<OpenInteract2::Manual::Packages|OpenInteract2::Manual::Packages>.
+
+You will normally need to edit/add the following:
+
+  book/package.ini               # Add name, version, author information
+  book/MANIFEST                  # Add names of distribution files
+  book/conf/spops.ini            # Describe the objects your package uses
+  book/conf/action.ini           # Map URLs to handlers in your package
+  book/data                      # Specify the initial data and security
+  book/struct                    # Describe the tables used to store your objects
+  book/template                  # HTML to display and manipulate your objects
+  book/OpenInteract2             # Optional Perl modules defining object behavior
+  book/OpenInteract2/Action      # Manipulate objects for desired functionality
+  book/OpenInteract2/SQLInstall  # Tell the installer about your tables, data, security
+  book/doc/book.pod              # Last but not least, tell the world about it
+
+=head2 Short sidebar: Creating a MANIFEST
+
+Notice that we create a C<MANIFEST> file for you when the package is
+created. As you add more files to your package you'll need to add them
+to your C<book/MANIFEST>. Fortunately, it can be created
+automatically:
+
+  $ cd /path/to/mypackage
+  $ perl -MExtUtils::Manifest -e 'ExtUtils::Manifest::mkmanifest()'
+
+That's it! If you have an old 'MANIFEST' file in the directory it will
+be copied to 'MANIFEST.bak'. Also note that files matching patterns in
+the C<book/MANIFEST.SKIP> file will not be included.
+
+=head1 DEFINE STRUCTURES
+
+I don't know about you but I feel more grounded in reality when I
+start with data structures. Some people like to work the other way
+around and start with the views of the data. If you're like that you
+can read that part first.
+
+=head2 Our table
+
+We'll just make this very easy to start out with. Unlike the venerable
+intro database shipped with Sybase products, we're not defining
+separate tables for authors, publishers, book artists, etc. (See
+L<OpenInteract2::Manual::TutorialAdvanced> for some of that...) We'll
+just define a single table and make some assumptions. Here's the table
+that we'll save to C<book/struct/book.sql>:
+
+  CREATE TABLE book (
+     book_id          %%INCREMENT%%,
+     author_last      varchar(30) not null,
+     author_first     varchar(30) null,
+     title            varchar(100) not null,
+     publisher        varchar(50) null,
+     publish_year     varchar(4) not null,
+     isbn             varchar(25) null,
+     primary key( book_id )
+  )
+
+Note that funny C<%%INCREMENT%%> key. That's a sign for OpenInteract
+to rewrite the SQL before passing it to the database. In this case
+we'll substitute what's appropriate for this database to create an
+auto-incrementing key. For sequence-based schemes we just use the
+sequence datatype and rely on someone else to create the sequence for
+us. In fact, we'll go ahead and create a sequence so we can run on
+PostgreSQL. Save the following to C<book/struct/book_sequence.sql>:
+
+  CREATE SEQUENCE book_seq
+
+=head2 Letting the installer know
+
+Now that we've defined the table and sequence, how do we let OI2 know
+what to install with our package? Every package that installs data
+structures (tables, sequences, indexes, etc.), security information
+and/or initial data will have a C<SQL installer> class. In our case
+it's found in C<book/OpenInteract2/SQLInstall/Book.pm>. Here's what
+it looks like when it's first generated:
+
+   1: package OpenInteract2::SQLInstall::Book;
+   2: 
+   3: # This is a simple example of a SQL installer you might write. It uses
+   4: # your package name as the base and assumes you want to create a
+   5: # separate table for Oracle users and include a sequence for Oracle
+   6: # and PostgreSQL users.
+   7: 
+   8: # It also assumes that you're installing security of some type, either
+   9: # default handler or default object.
+  10: 
+  11: use strict;
+  12: use base qw( OpenInteract2::SQLInstall );
+  13: 
+  14: my %FILES = (
+  15:    oracle  => [ 'book_oracle.sql',
+  16:                 'book_sequence.sql' ],
+  17:    pg      => [ 'book.sql',
+  18:                 'book_sequence.sql' ],
+  19:    default => [ 'book.sql' ],
+  20: );
+  21: 
+  22: sub get_structure_set {
+  23:     return 'book';
+  24: }
+  25: 
+  26: sub get_structure_file {
+  27:     my ( $self, $set, $type ) = @_;
+  28:     return $FILES{oracle} if ( $type eq 'oracle' );
+  29:     return $FILES{pg}     if ( $type eq 'Pg' );
+  30:     return $FILES{default};
+  31: }
+  32: 
+  33: # Uncomment this if you're passing along initial data
+  34: 
+  35: #sub get_data_file {
+  36: #    return 'initial_data.dat';
+  37: #}
+  38: 
+  39: # Uncomment this if you're using security
+  40: 
+  41: #sub get_security_file {
+  42: #    return 'install_security.dat';
+  43: #}
+  44: 
+  45: 1;
+
+Cool, it's pretty much already done for us! Since we're lazy we should
+probably change the name of the Oracle table:
+
+  14: my %FILES = (
+  15:    oracle  => [ 'book.sql',
+  16:                 'book_sequence.sql' ],
+  17:    pg      => [ 'book.sql',
+  18:                 'book_sequence.sql' ],
+  19:    default => [ 'book.sql' ],
+  20: );
+
+We'll return to this file in
+L<OpenInteract2::Manual::TutorialAdvanced|OpenInteract2::Manual::TutorialAdvanced>
+when we deal with initial data and again with action security.
+
+=head2 Installer Process
+
+What happens is that the main installer process will create an
+instance of our class. It will ask that object to perform certain
+actions: create structures, install data, install security. The
+defaults for these actions are no-ops and are defined in
+L<OpenInteract2::SQLInstall|OpenInteract2::SQLInstall>.
+
+So when we defined C<get_structure_file()> the main installer process
+knows what type of datasource our 'book' object will be and will pass
+that type (e.g., 'Oracle', 'Pg', 'MySQL') to our object's method. We
+can then decide which structure(s) to pass back.
+
+In our case we have the main table and, for a couple databases, a
+separate sequence.
+
+=head2 Let the configuration know
+
+The class we're using as a SQL installer is held in the
+C<book/package.ini> file. Peek into the file and you should see:
+
+  ...
+  sql_installer = OpenInteract2::SQLInstall::Book
+  ...
+
+Excellent, it's already set for us. Let's move on.
+
+=head1 DECLARE THE OBJECT
+
+=head2 Walkthrough SPOPS configuration
+
+Now it's time to configure our persistent objects. As mentioned above
+we're only going to use a single 'book' object for this example. So
+let's look at C<book/conf/spops.ini> as it's created for us:
+
+  # This is a sample spops.ini file. Its purpose is to define the
+  # objects that will be used in your package. Each of the keys is
+  # commented below.
+  
+  # If you do not plan on defining any objects for your package, then
+  # you can skip this discussion and leave the file as-is.
+  
+  # Note that you must edit this file by hand -- there is no web-based
+  # interface for editing a package's spops.perl (or other)
+  # configuration files.
+  
+  # You can have any number of entries in this file, although they
+  # should all be members of the single hashref (any name is ok) in the
+  # file.
+  #
+  # Finally, you can retrieve this information as a perl data structrure
+  # at anytime by doing:
+  #
+  #   my $hashref = $object_class->CONFIG;
+  # or
+  #   my $hashref = CTX->lookup_object( 'object_alias' )->CONFIG;
+  #
+  # For more information about the SPOPS configuration process, see
+  # 'perldoc SPOPS::Configure' and 'perldoc SPOPS::Configure::DBI'
+  
+  # 'book' - Defines how you can refer to the object class
+  # within OpenInteract2. For portability and a host of other reasons,
+  # OI sets up aliases for the SPOPS object classes so you can refer to
+  # them from the context. For instance, if you are in an application
+  # 'MyApp':
+  #
+  #  my book_class = CTX->lookup_object( 'book' );
+  #  print ">> My Class: [book_class]
+  #
+  #  Output: '>> My Class: [OpenInteract2::Book]'
+  #
+  # This way, your application can do:
+  #
+  #  my $object = CTX->lookup_object( 'book' )->fetch( $object_id );
+  #
+  # and not care about the different implementations of the '' class and such.
+  #
+  # Note that the 'alias' key allows you to setup additional aliases for
+  # this object class.
+  
+  #[book]
+  
+  # class - Defines the class this object will be known by. This is
+  # almost always 'OpenInteract2::Blah'
+  
+  #class           = OpenInteract2::Book
+  
+  # code_class - Perl module from which we read subroutines into the
+  # namespace of this class. This is *entirely optional*, only needed if
+  # you have additional behaviors to program into our object.
+  
+  #code_class      = OpenInteract2::Book
+  
+  # isa - Define the parents of this class, generally used for enhanced
+  # functionality like full-text indexing.
+  #
+  # Note that you DO NOT have to add OpenInteract2::SPOPS::DBI,
+  # SPOPS::DBI, SPOPS::DBI::Pg, or any of the other ones that you
+  # entered in OI 1.x. This is done at runtime for you, so your objects
+  # will always be in sync with what databaes you're
+  # using. Additionally, you specify whether the object is secured using
+  # 'is_secure', below:
+  
+  #isa             = 
+  
+  # field - List of fields/properties of this object. If this is a
+  # DBI-based object and you specify 'yes' for 'field_discover' below,
+  # you can leave this blank
+  
+  #field           = id
+  #field           = name
+  #field           = type
+  
+  # field_discover - Whether to discover the fields for this object at
+  # startup. (Recommended.)
+  
+  #field_discover  = yes
+  
+  # id_field - Name of primary key field -- this only identifies the
+  # object uniquely. You still need to deal with generating new values,
+  # either by an auto-incrementing mechanism (in which case you need to
+  # use the appropriate SPOPS::DBI class) or something else.
+  
+  #id_field        = book_id
+  
+  # increment_field - Whether to use (or be aware of) auto-incrementing
+  # features of your database driver.
+  
+  #increment_field = yes
+  
+  # sequence_name - If we're using a sequence (Oracle, Postgres) this is
+  # the name to use.
+  
+  #sequence_name   = book_seq
+  
+  # is_secure - 'yes' if the object is protected by security, anything
+  # else if not
+  
+  #is_secure       = yes
+  
+  # no_insert - Fields for which we should not try to insert
+  # information, ever. If you're using a SPOPS implementation (e.g.,
+  # 'SPOPS::DBI::MySQL') which generates primary key values for you, be
+  # sure to put your 'id_field' value here.
+  
+  #no_insert       = book_id
+  
+  # no_update - Fields we should never update
+  
+  #no_update       = book_id
+  
+  # skip_undef - Values for these fields will not be inserted/updated at
+  # all if the value within the object is undefined. This, along with
+  # 'sql_defaults', allows you to specify default values. 
+  
+  #skip_undef      =
+  
+  # sql_defaults - List fields for which a default is defined. Note that
+  # SPOPS::DBI will re-fetch the object after first creating it if you
+  # have fields listed here to ensure that the object always reflects
+  # what's in the database.
+  
+  #sql_defaults    =
+  
+  # base_table - Name of the table we store the object information
+  # in. Note that if you have 'db_owner' defined in your application's
+  # 'server.perl' file (in the 'db_info' key), then SPOPS will prepend
+  # that (along with a period) to the table name here. For instance, if
+  # the db_owner is defined to 'dbo', we would use the table name
+  # 'dbo.book'
+  
+  #base_table      = book
+  
+  # alias - Additional aliases to use for referring to this object
+  # class. For instance, if we put 'project_book' here we'd be able to
+  # retrieve this class name by using 'CTX->lookup_object( 'book )'
+  # AND 'CTX->lookup_object( 'project_book' ).
+  
+  #alias           = 
+  
+  # name - Either a field name or some other method name called on your
+  # object to generate a name for a particular object.
+  
+  #name            =
+  
+  # object_name - Name of this class of objects
+  
+  #object_name     = Book
+  
+  # is_searchable = 'yes' if you'd like this object to be indexed by the
+  # full_text package.
+  
+  # is_searchable = no
+  
+  # fulltext_field - if you've set 'is_searchable' to 'yes' you'll need
+  # to list one or more fields of your object from which to pull text to
+  # index
+  
+  # fulltext_field = 
+  # has_a - Define a 'has-a' relationship between objects from this
+  # class and any number of other objects. Each key in the hashref is an
+  # object class (which gets translated to your app's class when you
+  # apply the package to an application) and the value is an arrayref of
+  # field names. The field name determines the name of the routine
+  # created: if the field name matches up with the 'id_field' of that
+  # class, then we create a subroutine named for the object's
+  # 'object-alias' field. If the field name does not match, we append
+  # '_{object_alias}' to the end of the field. (See 'perldoc
+  # SPOPS::Manual::Relationships' for more.)
+  
+  #[book has_a]
+  #OpenInteract2::Theme = theme_id
+  
+  # links_to - Define a 'links-to' relationship between objects from
+  # this class and any number of other objects. This may be modified
+  # soon -- see 'perldoc SPOPS::Configure::DBI' for more.
+  
+  #[book links_to]
+  #OpenInteract2::Foo = foo_book_link
+  
+  # creation_security - Determine the security to apply to newly created
+  # objects from this class. (See 'SPOPS::Secure')
+  
+  #[book creation_security]
+  #user  = WRITE
+  #group = site_admin_group:WRITE
+  #world = READ
+  
+  # track - Which actions should we log? Value of 'yes' does, anything
+  # else does not.
+  
+  #[book track]
+  #create = no
+  #update = yes
+  #remove = yes
+  
+  # display - Allow the object to be able to generate a URL to display
+  # itself. OI2 has hooks so that you can refer to an ACTION and TASK
+  # and have OI2::URL use these to create a local URL, properly
+  # localized to your deployment context:
+  
+  #[book display]
+  #ACTION = book
+  #TASK   = display
+  
+Since we're in a tutorial we don't need the comments. So we'll strip
+those out and work with something more manageable:
+
+   1: [book]
+   2: class           = OpenInteract2::Book
+   3: #code_class      = OpenInteract2::Book
+   4: isa             = 
+   5: field           = 
+   6: field_discover  = yes
+   7: id_field        = book_id
+   8: increment_field = yes
+   9: sequence_name   = book_seq
+  10: is_secure       = no
+  11: no_insert       = book_id
+  12: no_update       = book_id
+  13: skip_undef      =
+  14: sql_defaults    =
+  15: base_table      = book
+  16: alias           = 
+  17: name            = title
+  18: object_name     = Book
+  19: is_searchable   = no
+  20: fulltext_field  = title
+  21: fulltext_field  = author_first
+  22: fulltext_field  = author_last
+  23: 
+  24: [book track]
+  25: create = yes
+  26: update = yes
+  27: remove = yes
+  28: 
+  29: [book display]
+  30: ACTION = book
+  31: TASK   = display
+
+On line 1 we have the declaration for this object and the next line is
+the class we'll create for it. Line 3 is still commented out because
+we don't have any custom behavior to implement yet. (We'll do so
+later)
+
+Lines 4 and 5 are blank because OI fills them in for us at server
+startup. In particular the 'isa' field being empty here is a big
+change from OI 1.x if you've ever developed a package under it. You
+don't need to add the SPOPS implementation classes (e.g.,
+L<SPOPS::DBI::Pg|SPOPS::DBI::Pg> and L<SPOPS::DBI|SPOPS::DBI> if
+you're using PostgreSQL), the OI SPOPS classes or any security classes.
+
+Line 5 is blank because we've declared 'field_discover' to 'yes' on
+the next line. If we hadn't we'd have to list all the fields in the
+object. Not listing them means we don't need to change the
+configuration if we add a field to the table.
+
+Line 7 tells SPOPS what our ID field is, and line 8 says that it's an
+auto-incrementing field. Line 9 tells databases who use sequences
+(like PostgreSQL and Oracle) the name of the sequence to use for our
+ID field values.
+
+Line 10 says that this object is B<not> protected by security. If we
+want to protect it we just need to change this to 'yes'.
+
+Lines 11 and 12 tell SPOPS not to insert or update the ID field. We
+can add more fields to this if we like -- for instance, if we have an
+user and timestamp automatically set by the database we'd add those
+fields here.
+
+Line 13 gives SPOPS a list of fields we should skip insert/update if
+they're undef. This is typically used in conjunction with line 14 to
+have the database fill in default values for us rather than try to
+insert a NULL. We don't have any defaults on our table so we'll leave
+it as-is.
+
+Line 15 just names our table.
+
+Line 16 could hold an alias for our object so we could refer to it as
+another name (e.g., 'libro') as well.
+
+Line 17 tells SPOPS what field or method we should use to identify
+this object. So when we're displaying a list of generic objects (books
+and blog entries, for instance) we'll display what's in the specified
+field or returned by the specified method.
+
+Line 18 is just a generic name for this object. Combined with the
+previous line this allows us to create a listing of generic objects
+like:
+
+  Type           Description
+  ----------------------------------------
+  Blog Entry     Why your language sucks
+  Book           Programming Perl
+  Blog Entry     Why my language sucks
+  Book           Kiln People
+
+Lines 19-22 tell OI whether this object is searchable and if so what
+fields should be searched. For now we'll turn indexing off but we've
+indicated that the object once the object is searchable OI will index
+the 'title', 'author_first' and 'author_last' fields.
+
+Lines 24-27 tell OI what actions we want to track along with the user
+who performed them and the time they were done. You can get a listing
+of these through the browser by clicking the 'Object Activity' link in
+the 'Admin Tools' box.
+
+Lines 29-31 allow us to create a URL that will display a particular
+object. We've added some enhancements to the basic SPOPS behavior with
+the 'ACTION' and 'TASK' keywords. Just as in other URL generation
+methods this allows you to not be tied to a particular URL, especially
+if you're deploying it under a URL space. (See
+L<OpenInteract2::URL|OpenInteract2::URL> for more.)
+
+=head1 CREATE THE ACTION AND TEMPLATES
+
+Now that we've got our persistent object defined we want to do
+something with it. This entails creating an action. We'll create the
+code first and then do the configuration.
+
+=head2 Initial action definition
+
+First, let's check out what the skeleton creator whipped up for us,
+C<book/OpenInteract2/Action/Book.pm>:
+
+   1: package OpenInteract2::Action::Book;
+   2: 
+   3: # This is a sample action. It exists only to provide a template for
+   4: # you and some notes on what these configuration variables mean.
+   5: 
+   6: use strict;
+   7: 
+   8: # All actions subclass OI2::Action or one of its subclasses
+   9: 
+  10: use base qw( OpenInteract2::Action );
+  11: 
+  12: # You almost always use these next three lines -- the first imports
+  13: # the logger, the second logging constants, the third the context
+  14: 
+  15: use Log::Log4perl            qw( get_logger );
+  16: use OpenInteract2::Constants qw( :log );
+  17: use OpenInteract2::Context   qw( CTX );
+  18: 
+  19: # Use whatever standard you like here -- it's always nice to let CVS
+  20: # deal with it :-)
+  21: 
+  22: $OpenInteract2::Action::Book::VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
+  23: 
+  24: # Here's an example of the simplest response...
+  25: 
+  26: sub hello {
+  27:     my ( $self ) = @_;
+  28:     return 'Hello world!';
+  29: }
+  30: 
+  31: # Here's a more complicated example -- this will just display all the
+  32: # content types in the system.
+  33: 
+  34: sub list {
+  35:     my ( $self ) = @_;
+  36: 
+  37:  # This will hold the data you're passing to your template
+  38: 
+  39:     my %params = ();
+  40: 
+  41:  # Retrieve the class corresponding to the 'content_type' SPOPS
+  42:  # object...
+  43: 
+  44:     my $type_class = CTX->lookup_object( 'content_type' );
+  45:     $params{content_types} = eval { $type_class->fetch_group() };
+  46: 
+  47:  # If we've encountered an error in the action, add the error message
+  48:  # to it. The template has a component to find the errors encountered
+  49:  # and display them
+  50: 
+  51:     if ( $@ ) {
+  52:         $self->param_add( error_msg => "Failed to fetch content types: $@" );
+  53:     }
+  54: 
+  55:  # The template also has a component to display a status
+  56:  # message. (This is a silly status message, but it's just an
+  57:  # example...)
+  58: 
+  59:     else {
+  60:         my $num_types = scalar @{ $params{content_types} };
+  61:         $self->param_add( status_msg => "Fetched $num_types types successfully" );
+  62:     }
+  63: 
+  64:  # Every action should return content. It can do this by generating
+  65:  # content itself or calling another action to do so. Here we're doing
+  66:  # it ourselves.
+  67: 
+  68:     return $self->generate_content(
+  69:                     \%params, { name => 'book::sample' } );
+  70: }
+  71: 
+  72: 1;
+  73: ... documentation below here...
+
+Excellent. We'll just leave the 'hello()' method as-is for right now,
+add a 'search_form()' method, and replace 'list()' with
+'search()'.
+
+And since we're deleting 'list()' you might as well delete its
+accompanying template C<book/template/sample.tmpl>. We won't be
+needing it.
+
+=head2 Task: Show search form
+
+Here's our task implementation for displaying the search form:
+
+  31: sub search_form {
+  32:     my ( $self ) = @_;
+  33:     return $self->generate_content( {}, { name => 'book::search_form' } );
+  34: }
+
+You can't get simpler than this: all we're doing is specifying a
+template to process. Note that the template we're specifying doesn't
+have any concrete paths associated with it. Instead we're using a
+'package::template' syntax. This is for a couple reasons:
+
+=over 4
+
+=item *
+
+You never know where in the filesystem your site or package will be,
+so why tie yourself down?
+
+=item *
+
+Templates may be located in the package directory or in the sitewide
+package template directory. Using this syntax to refer to a template
+hides us from this location distinction. It also makes it possible for
+us to have them be loaded from the database or other storage
+mechanism.
+
+=back
+
+=head2 Template: Define the search form
+
+Here's what we'll use for our search form, saved to
+C<book/template/search_form.tmpl>:
+
+   1: [%- OI.page_title( 'Search for books' ) -%]
+   2: 
+   3: <h2>Book Search</h2>
+   4: 
+   5: [% INCLUDE form_begin( ACTION = 'book', TASK = 'search' ) %]
+   6: 
+   7: [% INCLUDE table_bordered_begin( table_width = '50%' ) %]
+   8: 
+   9: [% INCLUDE label_form_text_row( label = 'Title',
+  10:                                 name  = 'title',
+  11:                                 size  = 30 ) %]
+  12: 
+  13: [% INCLUDE form_submit_row( value = 'Search' ) %]
+  14: 
+  15: [% INCLUDE table_bordered_end %]
+  16: 
+  17: [% INCLUDE form_end %]
+
+That doesn't look much like HTML, does it? You can use HTML with the
+same effects, but using these HTML template widgets makes it easy to
+customize the display. For instance, by adding a variable 'count' and
+incrementing it for every row we can get the typical alternating-color
+look for our table. In theory we can also change the implementation
+behind the scenes to use stylesheets instead of tables.
+
+Line 1 invokes the OI plugin (see
+L<OpenInteract2::TT2::Plugin|OpenInteract2::TT2::Plugin>) to set the
+title of the page. Line 5 outputs the HTML to start the form, using
+the 'ACTION' and 'TASK' keywords to construct a URL for the 'action'
+attribute rather than specifying the URL ourselves. Line 7 starts the
+table with a border around it for the form.
+
+Lines 9-11 define the row and input for the title the user will search
+for, and line 13 defines the row with the 'submit' button, here
+labeled 'Search'. Line 15 closes the table, and line 17 closes the
+form. Easy!
+
+=head2 Task: Run a search
+
+Now here's the slightly more complicated implementation for searching
+our books. Note that we're restricting it to a LIKE search on the
+title for right now.
+
+  36: sub search {
+  37:     my ( $self ) = @_;
+  38:     my %params = ();
+  39:     my $request = CTX->request;
+  40:     my $title = $request->param( 'title' );
+  41:     unless ( $title ) {
+  42:         $self->param_add( error_msg => 'No search parameters given' );
+  43:         return $self->execute({ task => 'search_form' });
+  44:     }
+  45:     my $book_class = eval { CTX->lookup_object( 'book' ) };
+  46:     if ( $@ ) {
+  47:         $self->param_add( error_msg => "Cannot find book class: $@" );
+  48:         return $self->execute({ task => 'search_form' });
+  49:     }
+  50:     my $results = eval {
+  51:         $book_class->fetch_group({ where => 'title LIKE ?',
+  52:                                    value => [ "%$title%" ] })
+  53:     };
+  54:     if ( $@ ) {
+  55:         $self->param_add( error_msg => "Search failed: $@" );
+  56:         return $self->execute({ task => 'search_form' });
+  57:     }
+  58:     $params{title}     = $title;
+  59:     $params{book_list} = $results;
+  60:     return $self->generate_content(
+  61:                     \%params, { name => 'book::search_results' } );
+  62: }
+
+Here's what we do:
+
+On lines 38 we initialize our template parameters hash for the process
+to fill up. This what we'll pass on to the content generator.
+
+On line 39 we ask the context (which we've imported up on line 17) for
+the current request, and then on 40 ask the request for the 'title'
+parameter.
+
+If the user didn't pass in a title we'll set an error message and
+redirect to the 'search_form' task on lines 41-44. We'll repeat this
+same pattern for other errors found during this process. It may be
+smart to refactor this by having one method exit point for all errors,
+but we'll worry about that later.
+
+On line 45 we'll ask the context for the class corresponding to the
+'book' key. This key is what we used in our SPOPS definition
+above. Lines 46 through 49 are error handling in case that method
+fails.
+
+Finally, on lines 50-53 we execute the search, passing in the title
+given to us by the user between two wildcards. We collect the search
+results in the arrayref C<$results>.
+
+Line 54-57 are error handling for the search in case it fails.
+
+On lines 58 and 59 we set the title searched for and results arrayref
+to the template parameter hashref, and on lines 60 and 61 we call the
+content generation method, passing along the parameters to the
+template C<book::search_results>.
+
+=head2 Template: Show search results
+
+Now we'll define a template to display the search results. Save the
+following to C<book/template/search_results.tmpl>:
+
+   1: [%- OI.page_title( 'Book search results' ) -%]
+   2: 
+   3: <h2>Book Search Results</h2>
+   4: 
+   5: <p><b>Search</b>: [% title %]</p>
+   6: 
+   7: <p>Number of results: [% book_list.size %]</p>
+   8: 
+   9: [% IF book_list.size > 0 %]
+  10: 
+  11: [% INCLUDE table_bordered_begin %]
+  12: 
+  13: [% INCLUDE header_row(
+  14:      labels = [ 'Title', 'Author', 'Published', 'Link' ] ) %]
+  15: 
+  16: [% FOREACH book = book_list %]
+  17: <tr valign="middle" align="left">
+  18:   <td>[% book.title %]</td>
+  19:   <td>[% book.author_last %], [% book.author_first %]</td>
+  20:   <td>[% book.publisher %] ([% book.publish_year %])</td>
+  21:   <td><a href="http://www.amazon.com/exec/obidos/ASIN/[% book.isbn %]/">Amazon</a></td>
+  22: </tr>
+  23: [% END %]
+  24: 
+  25: [% INCLUDE table_bordered_end %]
+  26: 
+  27: [% END %]
+
+This is still fairly simple. It looks more like HTML than the previous
+example, but there's still lots of templating going on.
+
+Line 1 defines the page title, just like before. Line 5 shows how you
+can inline one of the parameters (a simple scalar) passed from the
+action. Similarly line 7 demonstrates getting a property (size) from
+another of the parameters passed from the action. In this case the
+property is provided to us by the Template Toolkit -- all array
+references have a number of properties we can query and actions we can
+perform; scalars and hashes do too, of course. (See
+L<Template::Manual::VMethods|Template::Manual::VMethods> for a
+discussion.)
+
+Line 9 is the beginning of a conditional: we only want to display the
+table if there are actually results to see. Otherwise you just see the
+table header with no content in the table, and that's ugly. (The
+conditional ends on line 27.)
+
+Line 11 is just like the table beginning from the previous example
+except this time we're not setting an arbitrary width
+restriction. (Titles could get long.)
+
+Lines 13-14 show us something new -- a template widget that will
+output a row of column labels given the labels themselves. This way
+all of our headers will look the same and if we change the one
+template, all our headers change.
+
+Lines 16-23 comprise our loop for iterating through the book
+results. For each book we'll output the title, author name, publishing
+information and create a link to Amazon with more information about
+the book.
+
+Line 25 closes the table, and line 27 closes the conditional started
+on line 9.
+
+=head2 Configuring your action
+
+Now that we've got the code and the templates, the only thing left for
+our action is to tell OpenInteract about it. We do that through the
+action configuration: C<book/conf/action.ini>. Here's what's generated
+for you:
+
+  # This is a sample action.ini file. Its purpose is to define the
+  # actions that OpenInteract2 can take based on the URL requested or
+  # other means. The keys are commented below. (You can of course change
+  # anything you like. I've only used your package name as a base from
+  # which to start.)
+  
+  # 'book' - This is the published tag for this particular action
+  # -- the tag specifies how the various pieces of OpenInteract will be
+  # able to execute the action. See OpenInteract documentation under
+  # 'Action Table'. Note that whatever your key is, it should *ALWAYS*
+  # be lower-cased.
+  
+  [book]
+  
+  # class - The class that will execute the action. Can be blank if it's
+  # a template-only action.
+  
+  class   = OpenInteract2::Action::Book
+  
+  # task_default - This is the task to assign when none specified in the
+  # URL.
+  
+  task_default = list
+  
+  # is_secure - Check security for this action or not (normally used
+  # only with components). Default is 'no', so if you do not specify
+  # 'yes' your action will be unsecured.
+  
+  is_secure = no
+  
+  # method - The method in 'class' (above) that will execute the
+  # action. If not specified we use the method defined in your
+  # application's 'server.perl' file (normally 'handler').
+  
+  #method  = 
+  
+  # redir - Instead of specifying information for a particular action,
+  # you can tell OI to lookup the information from another action. For
+  # instance, if you wanted both the '/Person/' and '/People/' URLs to
+  # run the same action, you could define the information in 'person'
+  # and then put for '/People/' something like:
+  #
+  # [people]
+  # redir = person
+  
+  #redir   = 
+  
+  # template - You can also specify just a template for an action. It
+  # must be in the format 'package::template'.
+  #template = 
+  
+  # Box parameters: if you are specifying a box with this action, you 
+  # can also list the following, which should be intuitive:
+  
+  #weight = 5
+  #title  = 
+  
+  # Use this if the action is defined only by a template, like a box
+  #action_type = template_only
+  
+  # Use this if you'd like the 'lookups' action to handle editing the
+  # data it defines (see 'lookup' package docs for more info)
+  #action_type = lookup
+
+After removing the comments, getting rid of all the extra stuff and
+changing the task default, here's what we're left with:
+
+   1: [book]
+   2: class        = OpenInteract2::Action::Book
+   3: task_default = search_form
+   4: is_secure    = no
+
+That's quite a reduction! Line 1 defines the name of our action. The
+context uses this as an index so we can lookup the action information
+from anywhere in the system and create an action object from it. We
+also use it to create the URLs to which the action will respond. For
+instance, this action will respond to:
+
+  /book
+  /BOOK
+  /Book
+
+You can also use the C<url>, C<url_none> and C<url_alt> properties to
+control this. See C<MAPPING URL TO ACTION> under
+L<OpenInteract2::Action|OpenInteract2::Action> for more.
+
+=head1 CREATE INITIAL DATA
+
+We need something to search, and since we didn't define any tasks yet
+for inputting data we'll create a file with initial data that will get
+installed with the table structure we defined above.
+
+=head2 Defining initial data
+
+The most common way to define initial data is using the format from
+L<SPOPS::Import::Object|SPOPS::Import::Object>. This is a serialized
+Perl data structure but don't worry, it's easy to type in.
+
+Enter the following data into the file C<book/data/initial_books.dat>:
+
+ [
+   { import_type => 'object',
+     spops_class => 'OpenInteract2::Book',
+     field_order => [ qw/ author_last author_first title
+                          publisher publish_year isbn / ],
+   },
+   [ 'Brin', 'David', 'Kiln People',
+     'TOR', '2002', '0765342618' ],
+   [ 'Remnick', 'David', 'King of the World',
+     'Vintage', '1999', '0375702296' ],
+   [ 'Udell', 'Jon', 'Practical Internet Groupware',
+     "O'Reilly", '1999', '1565925378' ],
+ ];
+
+Let's walk through this:
+
+On line 1 is the data structure initializer, an arrayref. The first
+element of the arrayref is a hashref of metadata and every successive
+element is data.
+
+Line 2 opens up the metadata hashref. As required by
+L<SPOPS::Import::Object|SPOPS::Import::Object> we declare the import
+type as 'object'. On the next line we specify the class as
+'OpenInteract2::Book' -- this is the same value you listed in your
+SPOPS configuration above:
+
+   1: [book]
+   2: class           = OpenInteract2::Book
+   3: ...
+
+Lines 4 and 5 tell the import process in what order the field data
+will be given. You can use any order you like but the order of the
+columns must match the data or you'll have some funkily populated
+objects. Line 6 closes out the metadata hashref.
+
+Line 7-8 define the first data element, an arrayref. As mentioned
+above the order of the data must match the order of the columns from
+'field_order'. Lines 9-10 and 11-12 define the second and third data
+elements, respectively, and line 13 closes out the entire data
+structure.
+
+=head2 Notify the installer
+
+Now we need to let our installer class know that we've got some
+initial data to install. Change the C<get_data_file()> subroutine in
+C<book/OpenInteract2/SQLInstall/Book.pm> like this:
+
+  33: # Uncomment this if you're passing along initial data
+  34: 
+  35: sub get_data_file {
+  36:     return 'initial_books.dat';
+  37: }
+
+Easy enough. Now when we run the full installation process that data
+file will be processed and our 'book' table seeded with some data.
+
+=head1 GET IT RUNNING
+
+Now let's get it installed to a website, first however...
+
+=head2 Take pride in your work
+
+Before you go any further put your info in the relevant areas of
+C<book/package.ini> (next to 'author' and 'url').
+
+=head2 Check your package
+
+We need to check our package to ensure the modules are at least
+syntactically correct and all the necessary files are around:
+
+  $ cd book/
+  $ oi2_manage check_package
+
+And you should see something like:
+
+  PROGRESS: Starting task
+  PROGRESS: Task complete
+  ACTION: Changelog check
+      OK:     Changes
+   
+  ACTION: Files missing from MANIFEST
+      FAILED: Files not found from MANIFEST: template/sample.tmpl
+   
+  ACTION: Extra files not in MANIFEST
+      FAILED: Files not in MANIFEST found: data/initial_books.dat, struct/book.sql, \
+  struct/book_sequence.sql, template/search_form.tmpl, template/search_results.tmpl
+   
+  ACTION: Config required fields
+      OK:     package.ini
+   
+  ACTION: Config defined modules
+      OK:     No modules defined, test skipped
+   
+  ACTION: Check ini file
+      OK:     conf/action.ini
+      OK:     conf/spops.ini
+   
+  ACTION: Check module
+      OK:     OpenInteract2/Action/Book.pm
+      OK:     OpenInteract2/SQLInstall/Book.pm
+   
+  ACTION: Template check
+      FAILED: template/sample.tmpl
+              File does not exist
+
+Looks like we have a few things to deal with. Most of them we can fix
+with the MANIFEST generation scheme mentioned earlier (see L<CREATING
+A PACKAGE>). Once you run that, run the C<oi2_manage check_package>
+command again and you should see:
+
+  PROGRESS: Starting task
+  PROGRESS: Task complete
+  ACTION: Changelog check
+      OK:     Changes
+   
+  ACTION: Files missing from MANIFEST
+      FAILED: Files not found from MANIFEST: template/sample.tmpl
+   
+  ACTION: Extra files not in MANIFEST
+      OK:     No files not in MANIFEST found in package
+   
+  ACTION: Config required fields
+      OK:     package.ini
+   
+  ACTION: Config defined modules
+      OK:     No modules defined, test skipped
+   
+  ACTION: Check ini file
+      OK:     conf/action.ini
+      OK:     conf/spops.ini
+   
+  ACTION: Check module
+      OK:     OpenInteract2/Action/Book.pm
+      OK:     OpenInteract2/SQLInstall/Book.pm
+   
+  ACTION: Check data file
+      OK:     data/initial_books.dat
+   
+  ACTION: Template check
+      FAILED: template/sample.tmpl
+              File does not exist
+      OK:     template/search_form.tmpl
+      OK:     template/search_results.tmpl
+
+
+Too bad our manifest trick didn't remove the old entry. (It's not
+sentient!) Delete it manually and run the command again. You should
+have 'OK' all the way down.
+
+=head2 Export your package
+
+Now we need to get our package into a distributable format. It's
+C<oi2_manage> to the rescue again:
+
+  $ oi2_manage export_package
+
+and you should see:
+
+  PROGRESS: Starting task
+  PROGRESS: Task complete
+  ACTION: Export package book
+      OK:     /home/cwinters/work/tmp/book/book-0.01.zip
+
+This creates a new file C<book-0.01.zip> in the current
+directory. Neat.
+
+=head2 Install your package
+
+Now you want to install the package to your website. If you haven't
+set the C<OPENINTERACT2> environment variable to your site's full path
+go ahead and do so, then run:
+
+  $ oi2_manage install_package --package_file=book-0.01.zip
+
+And you'll see something like:
+
+  PROGRESS: Starting task
+  PROGRESS: Finished with installation of book-0.01.zip
+  PROGRESS: Task complete
+  ACTION: install package
+      OK:     book-0.01.zip
+
+Now our website has a new directory, C<$WEBSITE_DIR/pkg/book-0.01>
+with all the files in our package. And the repository in
+C<$WEBSITE_DIR/conf/repository.ini> has a new entry that looks like
+this:
+
+  [book]
+  version = 0.01
+  installed = Thu Jul 10 02:24:39 2003
+  directory = /path/to/mysite/pkg/book-0.01
+
+=head2 Install the data structures and initial data
+
+Yes, C<oi2_manage> handles this too. When you run:
+
+  $ oi2_manage install_sql --package=book
+
+you'll see:
+
+  PROGRESS: Starting task
+  PROGRESS: Task complete
+  ACTION: install SQL structure: book
+      OK:     SQL installation successful
+      OK:     book.sql
+   
+  ACTION: install object data: book
+      OK:     initial_books.dat
+
+Now the database has a 'book' table (customized for the type of
+database) and it's seeded with three objects.
+
+=head2 Test it out!
+
+Fire up your OI server and go to the C</book/> URL. you should see a
+simple search form. Try to search for title 'world' and you should get
+a single result. Search for 'p' and you should get two. Hooray!
+
+=head1 SMALL CHANGES
+
+You may have noticed that if you search for an empty title you'll be
+brought silently back to the search form. What happened to our error
+message? Also, there's no way to get back to the search screen except
+for hitting 'back' in our browser. It would be nice to have a link in
+there.
+
+=head2 Handling errors
+
+The reason our error message didn't display is that we didn't tell it
+to. Let's make a small change to our C<book/template/search_form.tmpl>
+file:
+
+   1: [%- OI.page_title( "Search for books" ) -%]
+   2: 
+   3: [% PROCESS error_message %]
+   4: 
+   5: <h2>Book Search</h2>
+
+You'll see we've added a 'PROCESS' line in there. This refers to the
+'error_message' global template (a.k.a, 'widget' -- see
+L<OpenInteract2::Manual::Widgets> for more.). It will look into our
+action parameters and display all of the values found for
+'error_msg'. It could be one, it could be many. The template should
+display them all.
+
+=head2 Adding a link
+
+Next let's see about that link in the search results. Change the
+C<book/template/search_results.tmpl> like so:
+
+   1: [%- OI.page_title( 'Book search results' ) -%]
+   2: 
+   3: [%- search_form_url = OI.make_url( ACTION = 'book',
+   4:                                    TASK   = 'search_form' ) -%]
+   5: <p align="center"><a href="[% search_form_url %]">Run another search</a></p>
+   6: 
+   7: <h2>Book Search Results</h2>
+
+This 'ACTION' and 'TASK' syntax for defining a link should look
+familiar. We used it when defining the form action (in the
+C<form_begin> global template) and in our SPOPS configuration. This
+ensures that the link is relative to whatever context we're deployed
+under, which means you're no longer forced to use OI under the root
+directory. (See L<OpenInteract2::URL|OpenInteract2::URL> for more
+about this.)
+
+=head2 Installing the modified package
+
+Now that we've modified the templates let's install the new
+package. First edit the C<book/package.ini> file to reflect the new
+version number and add an entry to the top of the 'Changes'
+file. Next, export it and install the distribution to your website
+with a single command:
+
+  $ oi2_manage package_all
+
+Restart the server and try to run an empty search again. There's the
+message!
+
+=head1 ADDING MORE TASKS
+
+Searching is all well and good but we'd like to be able to add, update
+and remove objects too. We could do this by creating separate
+methods for each of these in our action and they'd work fine. But we'd
+find ourselves writing the same code again and again. There's a better
+way.
+
+=head2 Common Actions
+
+There are a number of L<OpenInteract2::Action|OpenInteract2::Action>
+subclasses known as 'Common' actions. This is because they implement
+very common functionality with little to no code. In the common action
+family are:
+
+=over 4
+
+=item *
+
+L<OpenInteract2::Action::CommonSearch|OpenInteract2::Action::CommonSearch>
+- Provides 'search_form' and 'search' tasks. (Sound familiar?)
+
+=item *
+
+L<OpenInteract2::Action::CommonAdd|OpenInteract2::Action::CommonAdd> -
+Provides the 'display_add' and 'add' tasks so you can add new objects.
+
+=item *
+
+L<OpenInteract2::Action::CommonDisplay|OpenInteract2::Action::CommonDisplay>
+- Provides the 'display' task so you can display an object in a
+non-editable format.
+
+=item *
+
+L<OpenInteract2::Action::CommonUpdate|OpenInteract2::Action::CommonUpdate>
+- Provides the 'display_form' and 'update' tasks so you can modify an
+existing object.
+
+=item *
+
+L<OpenInteract2::Action::CommonRemove|OpenInteract2::Action::CommonRemove>
+- Provides the 'remove' task to permanently delete an existing object.
+
+=back
+
+=head2 Using a common action
+
+Using one or more of these is a three-step process:
+
+=over 4
+
+=item 1.
+
+Subclass the right class.
+
+=item 2.
+
+Add the right configuration keys and values
+
+=item 3.
+
+Add custom functionality through callbacks, as needed.
+
+=back
+
+The first part is just putting the right class in your action's
+C<@ISA>, simple. The second part depends on the action: different
+common actions have different configuration needs. (We'll walk through
+a couple below.)
+
+The third part really depends on what you want to do. The interface
+for customizing the common actions is fairly simple and flexible
+enough to take care of many needs. It's also important to recognize
+when you should B<not> use the common actions. A good rule of thumb:
+whenever you're asking the customization to do tasks that the common
+action is designed for (like reading parameters or inserting records
+by hand) It's probably a good bet that it would be easier to code
+yourself.
+
+=head2 Translate searching tasks to common
+
+So we'll first translate our 'search' and 'search_form' tasks to use
+the L<OpenInteract2::Action::CommonSearch|OpenInteract2::Action::CommonSearch>
+class.
+
+First, get rid of the 'search_form' and 'search' methods. Next, add
+the common action to the C<@ISA> (or use C<base> if you prefer). What
+you wind up with should look like this (we've taken out the comments
+but left the 'hello' method):
+
+C<book/OpenInteract2/Action/Book.pm>: will end up looking like this:
+
+  package OpenInteract2::Action::Book;
+  
+  use strict;
+  use base qw( OpenInteract2::Action::CommonSearch );
+  
+  use Log::Log4perl            qw( get_logger );
+  use OpenInteract2::Constants qw( :log );
+  use OpenInteract2::Context   qw( CTX );
+  
+  $OpenInteract2::Action::Book::VERSION = sprintf("%d.%02d", q$Revision: 1.29 $ =~ /(\d+)\.(\d+)/);
+  
+  sub hello {
+      my ( $self ) = @_;
+      return 'Hello world!';
+  }
+  
+  1;
+
+That's pretty short. Now we need to add some entries to your action
+configuration -- it'll bulk up quite a bit. After our additions
+C<book/conf/action.ini> will look like this:
+
+   1: [book]
+   2: class        = OpenInteract2::Action::Book
+   3: task_default = search_form
+   4: is_secure    = no
+   5: c_object_type             = book
+   6: c_search_form_template    = book::search_form
+   7: c_search_results_template = book::search_results
+   8: c_search_fields_like      = title
+   9: c_search_results_order    = title
+
+We've added only five lines to our previous configuration. You'll note
+in this and other examples that all common configuration keys begin
+with 'c_' to distinguish them from others.
+
+Line 5 is the type of object the common action(s) work with. The value
+is the same that you'd pass to the C<lookup_object()> method of the
+context object.
+
+Line 6 is the name of the template to use for our search form. Note
+that we use the full 'package::template' syntax.
+
+Line 7 is the name of the template to use for our search results. Line
+8 defines the single field we want to search for, and line 9 orders
+the results for us.
+
+That's pretty simple. Let's package it up and install it to the
+site. (Remember to first edit C<book/Changes> and
+C<book/package.ini>.)
+
+  $ oi2_manage package_all
+
+Restart the server and type in the '/book' URL again. Looks the same,
+doesn't it? Now run a search. Oops, no go. What's up?
+
+Previously we'd placed our search results in an arrayref named
+'book_list'. The
+L<OpenInteract2::Action::CommonSearch|OpenInteract2::Action::CommonSearch>
+class instead puts the results in an iterator named 'iterator'. So
+we'll have to change our C<search_results> template. However, instead
+of modifying our package we'll first modify the template in the
+website itself so we can do tight iterations of template design, then
+we'll copy the template back into our package. Here's what the new
+template looks like; (full copy since it's got changes throughout):
+
+   1: [%- OI.page_title( 'Book search results' ) -%]
+   2: 
+   3: [%- search_form_url = OI.make_url( ACTION = 'book',
+   4:                                    TASK   = 'search_form' ) -%]
+   5: <p align="center"><a href="[% search_form_url %]">Run another search</a></p>
+   6: 
+   7: <h2>Book Search Results</h2>
+   8: 
+   9: <p><b>Search</b>:<br>
+  10: [% FOREACH search_field = search_criteria.keys %]
+  11:    [% search_field %]: [% search_criteria.$search_field %]<br>
+  12: [% END %]
+  13: </p>
+  14: 
+  15: <p>Number of results: [% total_hits %]</p>
+  16: 
+  17: [% IF total_hits > 0 %]
+  18: 
+  19: [% INCLUDE table_bordered_begin %]
+  20: 
+  21: [% INCLUDE header_row(
+  22:      labels = [ 'Title', 'Author', 'Published', 'Link' ] ) %]
+  23: 
+  24: [% WHILE ( book = iterator.get_next ) %]
+  25: <tr valign="middle" align="left">
+  26:   <td>[% book.title %]</td>
+  27:   <td>[% book.author_last %], [% book.author_first %]</td>
+  28:   <td>[% book.publisher %] ([% book.publish_year %])</td>
+  29:   <td><a href="http://www.amazon.com/exec/obidos/ASIN/[% book.isbn %]/">Amazon</a></td>
+  30: </tr>
+  31: [% END %]
+  32: 
+  33: [% INCLUDE table_bordered_end %]
+  34: 
+  35: [% END %]
+
+The first 10 lines are the same, but on lines 11-13 we see the first
+change. Instead of just outputting the title we now cycle through the
+search criteria given to us, displaying each with the value
+searched. You'll probably notice when you see the results that they're
+not exactly user-friendly. The
+L<OpenInteract2::Action::CommonSearch|OpenInteract2::Action::CommonSearch>
+class doesn't have the means to map human-readable names to
+fieldnames, but you can do so either in C<_search_customize()> or in
+the template itself.
+
+On line 16 there's another change: since we're using an iterator we
+can't ask it how many members it has. It could have ten or a thousand,
+it doesn't care and will keep unwinding as long as there are more
+entries. So
+L<OpenInteract2::Action::CommonSearch|OpenInteract2::Action::CommonSearch>
+provides another parameter to the template, 'total_hits', which we can
+use to display how many entries we found.
+
+Finally, on line 25 we had to modify our 'FOREACH' loop into a 'WHILE'
+loop. Fortunately that's the only line of the loop we had to change:
+since we assign to a variable of the same name for every cycle of the
+loop the rest of it doesn't care what type of loop we're in as long as
+that 'book' variable is defined.
+
+So after you've seen that you can run a search with it, just copy the
+file back to your working package directory.
+
+=head2 Add search fields
+
+Now, let's say we wanted to add a search by author's last name and
+publisher. But instead of having the user type in a publisher's name
+we're going to present her with a list.
+
+First, we'll modify the configuration file with the new fields:
+
+   9: c_search_fields_like      = author_last
+  10: c_search_fields_exact     = publisher
+
+Next, we'll modify the template:
+
+  15: [% INCLUDE label_form_text_row( label = "Author's Last Name",
+  16:                                 name  = 'author_last',
+  17:                                 size  = 30 ) %]
+  18: 
+  19: [% INCLUDE label_form_select_row( label       = 'Publisher',
+  20:                                   name        = 'publisher',
+  21:                                   first_label = 'Publishers...',
+  22:                                   value_list  = publisher_list,
+  23:                                   plain       = 'yes', ) %]
+
+You have not seen any use of 'label_form_select_row' yet. It creates a
+'SELECT' input widget for you and displays it on the right-hand side
+of a two-celled table row. This template widget actually uses
+'form_select' behind the scenes to create the HTML code for the
+drop-down box. You can pass 'form_select' lists of plain values and
+labels, or a list of objects and specify the object property to use
+for the value and label. For this use we're saying that we'll expect a
+plain list of publisher names in the variable 'publisher_list'.
+
+Finally, we have to be able to step in during the presentation of the
+search form to give it our list of publishers. We do so with the
+C<_search_form_customize()> callback method. This method is passed a
+hashref of the parameters that get passed to the template, so all we
+need to do is add our list of publishers to it:
+
+  17: sub _search_form_customize {
+  18:     my ( $self, $params ) = @_;
+  19:     my $log = get_logger( LOG_APP );
+  20: 
+  21:     my $book_class = eval { CTX->lookup_object( 'book' ) };
+  22:     return unless ( $book_class );
+  23:     my $publishers = eval {
+  24:         $book_class->db_select({ select_modifier => 'DISTINCT',
+  25:                                  select          => [ 'publisher' ],
+  26:                                  from            => $book_class->table_name,
+  27:                                  order           => 'publisher',
+  28:                                  return          => 'single-list' });
+  29:     };
+  30:     if ( $@ ) {
+  31:         $log->error( "Caught error trying to fetch publishers: $@" );
+  32:     }
+  33:     else {
+  34:         $log->is_debug &&
+  35:             $log->debug( "Found publishers: ", join( ', ', @{ $publishers } ) );
+  36:     }
+  37:     $publishers ||= [];
+  38:     $params->{publisher_list} = $publishers;
+  39: }
+
+You know the drill: edit C<book/Changes> and C<book/package.ini>,
+bundle up the package and install it, then restart the server.
+
+Now when you open the '/book' URL the search form should be slightly
+different. And if you click on the drop-down list next the 'Publisher'
+you should see all the publishers in the system so far. Now search for
+one of them and you should get the correct results. Searching for
+multiple fields produces an 'AND' query, where every record must match
+all the criteria.
+
+=head2 Static display
+
+Now let's create a page to display the information for a book on a
+page by itself. We do this using the
+L<OpenInteract2::Action::CommonDisplay|OpenInteract2::Action::CommonDisplay>
+class which provides only one task, 'display'.
+
+Looking at the class docs it looks like the only additional parameter
+we need is C<c_display_template> so the class knows which template to
+feed our object. Let the configuration know that we'll be using a
+template called 'book::detail':
+
+  12: c_display_template        = book::detail
+
+Then create the template in C<book/template/detail.tmpl>:
+
+  [%- OI.page_title( "Book Details: $book.title" ) -%]
+  
+  <h2>Details: [% book.title %]</h2>
+  
+  [% INCLUDE table_bordered_begin %]
+  [%- count = 0 -%]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_text_row( label = 'Title',
+                             text  = book.title ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_text_row( label = 'Author',
+                             text  = "$book.author_first $book.author_last" ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_text_row( label = 'Publisher',
+                             text  = book.publisher ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_text_row( label = 'Year Published',
+                             text  = book.publish_year ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_text_row( label = 'ISBN',
+                             text  = book.isbn ) %]
+  
+  [% INCLUDE table_bordered_end %]
+
+This is a pretty simple template. We're just setting up a table and
+passing in a label and text value for each field of the book
+object. We know we can use 'book' as the template parameter name from
+the documentation in
+L<OpenInteract2::Action::CommonDisplay|OpenInteract2::Action::CommonDisplay>.
+
+Since this is a new file you'll need to add it to your C<book/MANIFEST>, so
+do it now before you forget.
+
+Next, add the class to the C<@ISA> of our action:
+
+   1: package OpenInteract2::Action::Book;
+   2: 
+   3: use strict;
+   4: use base qw( OpenInteract2::Action::CommonSearch
+   5:              OpenInteract2::Action::CommonDisplay );
+
+That's it! But we need to be able to have a link somewhere so the user
+can actually see the object's details. The best place so far is in the
+search results where we can create a link around the book title, so
+modify the C<book/template/search_results.tmpl> file like this:
+
+  25: [% book_url = OI.make_url( ACTION = 'book', TASK = 'display',
+  26:                            book_id = book.id ) -%]
+  27: <tr valign="middle" align="left">
+  28:   <td><a href="[% book_url %]">[% book.title %]</a></td>
+
+This introduces a new method of the plugin, C<make_url>. Again, it
+uses the familiar 'ACTION' and 'TASK' parameters to create the URL for
+us. We also pass it a key/value pair for 'book_id'; this will be
+appended to the URL as a GET query string. If we deploy our OI server
+under a new context (e.g., '/MyApp' ) this plugin method will Do The
+Right Thing.
+
+Now edit your C<book/package.ini> and C<book/Changes> files to
+reflect the updates, bundle the package up and install it:
+
+  $ oi2_manage package_all
+
+Restart your server and run a search, then click on a title. There's
+your detailed record! There aren't many details to speak of, but we
+can add more later without modifying the code, or even configuration,
+at all.
+
+=head2 Update existing objects
+
+Now let's setup a common action for editing your book objects. For
+this we use the
+L<OpenInteract2::Action::CommonUpdate|OpenInteract2::Action::CommonUpdate>
+class, which provides two tasks: 'display_form' and 'update'.
+
+We need a few more parameters in our action configuration this
+time. For 'display_form' it looks like we just need
+C<c_display_form_template>. For 'update' we'll need to list the fields
+we're updating in our object under C<c_update_fields>. We don't have
+any toggled or date fields so we won't have to define any
+C<c_update_fields_toggled> or C<c_update_fields_date>. And instead of
+returning to the 'display_form' task after our update is complete
+we'll just return to the 'display' task so we'll set the parameter
+C<c_update_task> accordingly. These are the parameters we'll add to
+our action configuration in C<book/conf/action.ini>:
+
+  13: c_display_form_template   = book::form
+  14: c_update_fields           = title
+  15: c_update_fields           = author_first
+  16: c_update_fields           = author_last
+  17: c_update_fields           = publisher
+  18: c_update_fields           = publish_year
+  19: c_update_fields           = isbn
+  20: c_update_task             = display
+
+We'll also need to create a template with our form. Add the following
+content to C<book/template/form.tmpl>:
+
+  [%- OI.page_title( "Edit a Book" ) -%]
+  
+  [% PROCESS error_message %]
+  
+  <h2>Edit a Book</h2>
+  
+  [% INCLUDE form_begin( ACTION = 'book', TASK = 'update' ) %]
+  
+  [% INCLUDE table_bordered_begin %]
+  [%- count = 0 -%]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Title',
+                                  name  = 'title',
+                                  value = book.title ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Author First Name',
+                                  name  = 'author_first',
+                                  value = book.author_first ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Author Last Name',
+                                  name  = 'author_last',
+                                  value = book.author_last ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Publisher',
+                                  name  = 'publisher',
+                                  value = book.publisher ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Year Published',
+                                  name  = 'publish_year',
+                                  value = book.publish_year,
+                                  size  = 5 ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'ISBN',
+                                  name  = 'isbn',
+                                  value = book.isbn,
+                                  size  = 15 ) %]
+  
+  [%- count = count + 1 -%]
+  [% INCLUDE form_submit_row( value = 'Modify' ) %]
+  
+  [% INCLUDE table_bordered_end %]
+  
+  [% INCLUDE form_hidden( name = 'book_id', value = book.id ) %]
+  
+  [% INCLUDE form_end %]
+
+This looks a lot like our 'detail' form above. The only differences
+are:
+
+=over 4
+
+=item *
+
+We're displaying an error message if it occurs. This is useful because
+the 'update' task will redisplay our editing form if it encounters any
+errors.
+
+=item *
+
+We have set of 'form_begin' and 'form_end' around our table.
+
+=item *
+
+We're using 'label_form_text_row' instead of 'label_text_row' for our
+field displays.
+
+=item *
+
+We're passing the text in a 'value' attribute rather than a 'text'
+attribute. (TODO: change form_text_row to use 'value'?)
+
+=item *
+
+We added a submit button using the widget 'form_submit_row'
+
+=item *
+
+We have a new widget, 'form_hidden', to let the server know which
+object we're editing.
+
+=back
+
+Since this is a new template go ahead and add it to C<book/MANIFEST>
+right now.
+
+Since we're showing the results of the 'display' task after our update
+and the C<CommonUpdate> class populates the action parameters
+'status_msg' with the status of our update, it would be a good idea to
+be able to display it on our 'detail' template.
+
+Additionally we'll need to make our 'display_form' task available to
+the user. A link on the 'detail' template makes the most sense to do
+this, so modify the C<book/template/detail.tmpl> file with both
+changes like this:
+
+   1: [%- OI.page_title( "Book Details: $book.title" ) -%]
+   2: 
+   3: [% PROCESS status_message %]
+   4: 
+   5: [% IF OI.can_write( book ) %]
+   6:    [% edit_url = OI.make_url( ACTION = 'book', TASK = 'display_form',
+   7:                               book_id = book.id ) %]
+   8: <p align="right"><a href="[% edit_url %]">Edit</a> this record.</p>
+   9: [% END %]
+  10: 
+  11: <h2>Details: [% book.title %]</h2>
+
+This introduces a new plugin method, 'can_write'. This method returns
+true if the current user has permission to edit the given object. We
+haven't discussed object security yet and you could easily skip the
+conditional. But it does no harm for when objects aren't secured
+(everything is writable) and if you decide to add security later on
+you'll be thankful.
+
+Finally, we need to activate the C<CommonUpdate> class in our action:
+
+   1: package OpenInteract2::Action::Book;
+   2: 
+   3: use strict;
+   4: use base qw( OpenInteract2::Action::CommonSearch
+   5:              OpenInteract2::Action::CommonDisplay
+   6:              OpenInteract2::Action::CommonUpdate );
+
+Now edit your C<book/package.ini> and C<book/Changes> files to
+reflect the updates, bundle the package up and install it:
+
+  $ oi2_manage package_all
+
+Restart your server, run a search, and drill down to an object. You
+should see a 'Edit this record' above the detail form with 'Edit' as a
+link. Click the link and you should get an editable form with that
+object's information. Make any changes you like and save the
+object. You should see the detail form after a successful save.
+
+=head2 Create new objects
+
+Now you should be getting the drill. Adding a common action to your
+class means:
+
+=over 4
+
+=item 1.
+
+Adding entries to your action configuration.
+
+=item 2.
+
+Adding templates, if necessary.
+
+=item 3.
+
+Subclassing the common action.
+
+=item 4.
+
+Adding custom functionality to your action, if necessary.
+
+=back
+
+So we'll breeze through the
+L<OpenInteract2::Action::CommonAdd|OpenInteract2::Action::CommonAdd>
+class. Add the following to your configuration:
+
+  21: c_display_add_template    = book::form
+  22: c_add_task                = display
+  23: c_add_fields              = title
+  24: c_add_fields              = author_first
+  25: c_add_fields              = author_last
+  26: c_add_fields              = publisher
+  27: c_add_fields              = publish_year
+  28: c_add_fields              = isbn
+
+We don't have to add a new template since we're reusing the
+C<book/template/form.tmpl> template we created when adding update
+functionality. However, we do need to make a few modifications to it
+since we're doing double-duty. We'll modify the page title and, more
+importantly, the task to which the form data will be submitted:
+
+   1: [%- title = ( book.is_saved ) ? 'Edit a Book' : 'Add a Book';
+   2:     OI.page_title( title ) -%]
+   3: 
+   4: [% PROCESS error_message %]
+   5: 
+   6: <h2>[% title %]</h2>
+   7: 
+   8: [% form_task = ( book.is_saved ) ? 'update' : 'add' -%]
+   9: [% INCLUDE form_begin( ACTION = 'book', TASK = form_task ) %]
+
+Now add the class to your action:
+
+   1: package OpenInteract2::Action::Book;
+   2: 
+   3: use strict;
+   4: use base qw( OpenInteract2::Action::CommonSearch
+   5:              OpenInteract2::Action::CommonDisplay
+   6:              OpenInteract2::Action::CommonUpdate
+   7:              OpenInteract2::Action::CommonAdd );
+
+Slightly more tricky is where to add a link to this new
+functionality. It's not object-specific so we can't put it in this
+search results listing or when we're displaying an object. One option
+many OI actions take is to have a toolbox that displays whenever
+you're operating in that action. Since the toolbox displays no matter
+whether or not you're in the context of a specific data object it's
+perfect for this. We'll leave implementing that up to you -- for now
+we'll put a link on the search form page:
+
+   1: [%- OI.page_title( "Search for books" ) -%]
+   2: 
+   3: [% PROCESS error_message %]
+   4: 
+   5: [% add_url = OI.make_url( ACTION = 'book', TASK = 'display_add' ) -%]
+   6: <p align="right"><a href="[% add_url %]">Add</a> a new book</p>
+
+And do your normal C<book/package.ini> and C<book/Changes> editing,
+then put your new package in the website:
+
+  $ oi2_manage package_all
+
+Now try to add a new object then do a search, display and edit on it.
+
+=head2 Remove
+
+This one is really easy. Just add the C<c_remove_task> parameter to
+C<book/conf/action.ini> to tell the C<CommonRemove> class where to go
+after removal:
+
+  29: c_remove_task             = search_form
+
+Inherit from the C<CommonRemove> class in
+C<book/OpenInteract2/Action/Book.pm>:
+
+   1: package OpenInteract2::Action::Book;
+   2: 
+   3: use strict;
+   4: use base qw( OpenInteract2::Action::CommonSearch
+   5:              OpenInteract2::Action::CommonDisplay
+   6:              OpenInteract2::Action::CommonUpdate
+   7:              OpenInteract2::Action::CommonAdd
+   8:              OpenInteract2::Action::CommonRemove );
+
+And we'll go ahead and add a 'remove' link to the edit form in
+C<book/template/form.tmpl>:
+
+   1: [%- title = ( book.is_saved ) ? 'Edit a Book' : 'Add a Book';
+   2:     OI.page_title( title ) -%]
+   3: 
+   4: [% PROCESS error_message %]
+   5: 
+   6: [% IF book.is_saved %]
+   7: [% remove_url = OI.make_url( ACTION = 'book', TASK = 'remove',
+   8:                              book_id = book.id ) -%]
+   9: <p align="right"><a href="[% remove_url %]">Remove</a> this book</p>
+  10: [% END %]
+
+And since we're running the 'search_form' after a successful remove
+and C<CommonRemove> sets the 'status_msg' action parameter, we'll add
+a directive to display the status of the last action to
+C<book/template/search_form.tmpl>:
+
+   1: [%- OI.page_title( "Search for books" ) -%]
+   2: 
+   3: [% PROCESS error_message;
+   4:    PROCESS status_message %]
+
+Now the standard C<book/package.ini> and C<book/Changes> editing,
+and then upgrade the website package:
+
+  $ oi2_manage export_package
+
+See how it works!
+
+=head1 CLOSING THOUGHTS
+
+That'll do it for this initial tutorial. We've gone from nothing and
+created a small but useful application to track our books. Each
+application bundle (the C<zip> file you create) can be sent to someone
+else and installed on their OpenInteract server as easily it it was
+yours. In fact the last version of the package we've developed here is
+available on the OpenInteract wiki site. (See L<SEE ALSO>.)
+
+Hopefully you've caught hold of the OpenInteract approach to
+development and are ready to set your sights on larger
+applications. If you'd like to learn more there's another tutorial,
+L<OpenInteract2::Manual::TutorialAdvanced|OpenInteract2::Manual::TutorialAdvanced>. It
+is more of a hodgepodge, adding discrete parts to what we've covered
+here. It covers:
+
+=over 4
+
+=item *
+
+Enabling and using action security
+
+=item *
+
+Enabling and using security for individual SPOPS objects
+
+=item *
+
+Adding functionality to your SPOPS objects
+
+=item *
+
+Setting up 'lookup' actions
+
+=item *
+
+Setting up 'template_only' actions
+
+=item *
+
+Using multiple datasources
+
+=back
+
+=head1 SEE ALSO
+
+Distribution of the 'book' package, version 0.08.
+
+L<http://www.openinteract.org/cgi-bin/twiki/view/OI/OpenInteract2Tutorial>
+
+Presentation slides from a long tutorial given at YAPC 2004:
+
+L<http://www.openinteract.org/yapc_2004/>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

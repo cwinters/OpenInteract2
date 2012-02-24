@@ -1,0 +1,16 @@
+[%########################################
+  label_form_login_row( label, name, picked )
+     SELECT box of all users in the system, with the ID of the one
+     picked highlighted.
+  ########################################-%]
+
+[%- DEFAULT label   = 'Users';
+    DEFAULT colspan = 2;
+    IF action_messages.$name;
+       color = '#ffffe0';
+    END;  -%]  
+[%- INCLUDE label_row_begin( colspan = 1 ) -%]
+[%- INCLUDE data_cell_begin -%]
+[%- INCLUDE form_login() -%]
+[% field_label -%]
+</td></tr>

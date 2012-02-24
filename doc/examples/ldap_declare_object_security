@@ -1,0 +1,4 @@
+[object creation_security]
+user  =
+group = site_admin_group:WRITE
+world = READ

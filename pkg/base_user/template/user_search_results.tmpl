@@ -1,0 +1,22 @@
+[%- OI.page_title( MSG( 'base_user.search_results.title' ) );
+    DEFAULT theme = OI.theme_properties -%]
+
+<div align="center">
+
+[%- PROCESS error_message;
+    PROCESS status_message -%]
+
+<h2>[% MSG( 'base_user.search_results.title' ) %]</h2>
+
+[% IF user_iterator.has_next -%]
+
+[%- INCLUDE base_user::user_list( iterator = user_iterator ) -%]
+
+[% ELSE -%]
+
+<p><b>[% MSG( 'base_user.search_results.no_match' ) %]</b></p>
+
+[% END -%]
+
+</div>
+

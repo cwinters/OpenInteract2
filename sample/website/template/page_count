@@ -1,0 +1,33 @@
+[%#########################################
+  page_count( total_pages, current_pagenum, url, break_count )
+     Component to display the total number of pages and for each of
+     the pages not current link it to a URL to display that page.
+
+  Parameters:
+    total_pages     - Total number of pages in result set
+    current_pagenum - Page you are currently on
+    url             - URL to which we append ';pagenum=x'
+    break_count     - number of pages to display on a line
+
+  Defaults:
+    break_count = 20
+  ########################################-%]
+<!-- Given: total: [% total_pages %]; current: [% current_pagenum %]; url: [% url %]; break: [% break_count %] -->
+[%- DEFAULT break_count = 20 -%]
+[%- MSG( 'page_count.page_label' ) %]&nbsp;[&nbsp;
+[%- IF current_pagenum != 1 -%]
+<a href="[% url %];page=1">&lt;&lt;</a>&nbsp;
+<a href="[% url %];page=[% current_pagenum - 1 %]">&lt;</a>&nbsp;
+[%- END -%]
+[%- FOREACH page_count = [ 1 .. total_pages ] -%]
+  [%- IF page_count == current_pagenum %][% page_count %]
+  [%- ELSE %]<a href="[% url %];page=[% page_count %]">[% page_count %]</a>
+  [%- END -%]
+  [%- IF page_count mod break_count == 0 -%]<br>[% ELSE %]&nbsp;[% END -%]
+[%- END -%]
+[%- IF current_pagenum != total_pages -%]
+<a href="[% url %];page=[% current_pagenum + 1 %]">&gt;</a>
+<a href="[% url %];page=[% total_pages%]">&gt;&gt;</a>
+&nbsp;
+[%- END -%]
+]

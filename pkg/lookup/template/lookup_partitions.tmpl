@@ -1,0 +1,27 @@
+[%- title = MSG( 'lookup.partition.title', lookup_type );
+    OI.page_title( title );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message -%]
+
+<h1>[% title %]</h1>
+
+<p>[% MSG( 'lookup.partition.summary', partition_field ) %]</p>
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'lookups',
+                       TASK   = 'listing',
+                       name   = 'partitioned' ) -%]
+
+<p>[% MSG( 'lookup.partition.values' ) %]:
+
+[% PROCESS form_select( name       = 'partition_value',
+                        value_list = value_list,
+                        plain      = 1 ) -%]
+[% PROCESS form_submit() -%]
+[% PROCESS form_hidden( name  = 'lookup_type',
+                        value = lookup_type ) -%]
+
+[% PROCESS form_end %]
+
+</div>

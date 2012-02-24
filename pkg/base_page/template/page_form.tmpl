@@ -1,0 +1,168 @@
+[%- DEFAULT theme = OI.theme_properties;
+    count = 0;
+    is_saved = page.is_saved;
+    title = ( is_saved ) ? "Edit Page $page.location" : "Create a New Page";
+    OI.page_title( title ); -%]
+[%- IF is_saved;
+    OI.box_add( 'edit_document_box', page = page );
+   END -%]
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center">
+
+<h2>[% title %]</h2>
+
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+[% PROCESS form_begin( ACTION = 'page',
+                       TASK   = task,
+                       method = 'POST',
+                       name   = 'page',
+                       upload = 'yes' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '90%' ) -%]
+
+[% IF is_saved -%]
+  [%- remove_url = OI.make_url( ACTION  = 'page',
+                                TASK    = 'remove',
+                                 page_id  = page.id );
+      display_url = OI.make_url( ACTION   = 'page',
+                                 TASK     = 'display',
+                                 location = page.location ); -%]
+  <tr align="right"><td colspan="2">
+     <a href="[% remove_url %]">Remove</a> or
+     <a href="[% display_url %]">Display</a> this location
+  </td></tr>
+[% END -%]
+
+[%- count = count + 1 -%]
+[%- location_plabel = '<br>Must be unique; use only letters and numbers, no spaces or other characters' -%]
+[% INCLUDE label_form_text_row( label            = 'Location',
+                                is_required      = 1,
+                                required_display = theme.required,
+                                post_label       = location_plabel,
+                                name             = 'location',
+                                value            = page.location,
+                                size = 50, maxlength = 100 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Title', 
+                                name  = 'title',
+                                value = page.title,
+                                size  = 30, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Author',
+                                name  = 'author',
+                                value = page.author,
+                                size  = 30, maxlength = 200 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Keywords',
+                                name  = 'keywords',
+                                value = page.keywords,
+                                size  = 30, maxlength = 75 ) -%]
+
+[%- count = count + 1 -%]
+[%- box_plabel = '<br>Separate each box by whitespace; order is not important' -%]
+[% INCLUDE label_form_text_row( label      = 'Boxes',
+                                post_label = box_plabel,
+                                name       = 'boxes',
+                                value      = page.boxes,
+                                size = 30, maxlength = 75 ) -%]
+
+[%- count = count + 1 -%]
+[%- template_plabel = '<br>main template to use; blank uses the default' -%]
+[% INCLUDE label_form_text_row( label      = 'Main Template',
+                                post_label = template.plabel,
+                                name       = 'main_template',
+                                value      = page.main_template,
+                                size = 30, maxlength = 40 ) -%]
+
+[%- count = count + 1 -%]
+[% IF non_editable %]
+[% INCLUDE label_text_row( label = 'Document',
+                            text = 'This is a non-editable document. To modify the content, upload a new version.' ) -%]
+[% ELSE -%]
+[% INCLUDE label_form_textarea_row( label = 'Document',
+                                    name  = 'content',
+                                    value = OI.html_encode( page.content ),
+                                    cols = 70, rows = 18,
+                                    colspan = 2, wrap = 'virtual' ) -%]
+[% END -%]
+
+[%- count = count + 1 -%]
+[%- INCLUDE label_row_begin( label = 'Upload' ) -%]
+  <td>[% INCLUDE form_checkbox( name = 'use_upload', value = 'yes' ) %] 
+      Check if you want to upload the content (will replace existing content)<br>
+      [% INCLUDE form_upload( name = 'content_upload' ) -%]
+  </td>
+</tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_date_row( label    = 'Active On Date',
+                                name     = 'active_on',
+                                is_blank = 1,
+                                value    = page.active_on ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_date_row( label    = 'Expires On Date',
+                                name     = 'expires_on',
+                                is_blank = 1,
+                                value    = page.expires_on ) -%]
+
+[%- count = count + 1 -%]
+<tr [% PROCESS row_color %]><td align="center" colspan="2">
+
+  <table border="0" cellpadding="1">
+  <tr align="center" valign="bottom">
+    <td>[% PROCESS show_label( label = 'Active?') %]</td>
+    <td>[% PROCESS show_label( label = 'Parse as template?') %]</td>
+  </tr>
+  <tr align="center" valign="middle">
+    <td>[% INCLUDE form_checkbox( name   = 'is_active',
+                                  value  = 'yes',
+                                  picked = page.is_active ) %]</td>
+    <td>[% INCLUDE form_checkbox( name   = 'template_parse',
+                                  value  = 'yes',
+                                  picked = page.template_parse ) %]</td>
+  </tr>
+  </table>
+
+</tr>
+
+[%- count = count + 1 -%]
+[%- source_value = [ 'file', 'database', 'http', 'alias' ];
+    source_label = [ 'Filesystem', 'Database', 'URL', 'Local Alias' ]; -%]
+[% INCLUDE label_form_select_row( label       = 'Source',
+                                  name        = 'storage', plain = 1,
+                                  first_label = 'Sources...',
+                                  value_list  = source_value,
+                                  label_list  = source_label,
+                                  picked      = page.storage ) -%]
+
+[%- count = count + 1 -%]
+[%- cl_label = '<br>Use if you selected "URL" or "Local Alias"' -%]
+[% INCLUDE label_form_text_row( label      = 'Content Location',
+                                post_label = cl_label,
+                                size       = 40,
+                                name       = 'content_location',
+                                value      = page.content_location ) -%]
+
+[%- count = count + 1 -%]
+<tr [% PROCESS row_color %]><td align="center" colspan="2">
+[% PROCESS show_label( label = 'Updates' ) %]<br>
+[%- PROCESS object_updates -%]
+</td></tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = 'Modify', reset = 1 ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% INCLUDE form_hidden( name = 'page_id', value = page.id ) -%]
+
+[% PROCESS form_end -%]
+
+</div>

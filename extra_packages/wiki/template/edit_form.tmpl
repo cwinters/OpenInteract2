@@ -1,0 +1,18 @@
+[%- task       = ( wiki_action == 'preview' ) ? 'preview' : 'commit';
+    submit_key = ( wiki_action == 'preview' ) ? 'wiki.preview' : 'wiki.save';
+%]
+[% PROCESS form_begin( ACTION = 'wiki',
+                       TASK   = task,
+                       name   = editform,
+                       method = 'POST' ) %]
+[% PROCESS form_textarea( name  = 'content',
+                          rows  = '10',
+                          cols  = '80',
+                          wrap  = 'virtual',
+                          value = content | html ) %]
+[% PROCESS form_submit( value_key = submit_key ) %]
+   PROCESS form_hidden( name = 'node',        value = node );
+   PROCESS form_hidden( name = 'checksum',    value = checksum );
+   PROCESS form_hidden( name = 'wiki_action', value = wiki_action );
+%]
+[% PROCESS form_end %]

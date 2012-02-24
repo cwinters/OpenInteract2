@@ -1,0 +1,1 @@
+CREATE GENERATOR oi_whats_new_seq

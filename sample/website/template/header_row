@@ -1,0 +1,11 @@
+<tr valign="bottom" align="center">
+[%- IF labels;
+        FOREACH label = labels;
+            INCLUDE header_cell;
+        END;
+    ELSIF label_keys;
+        FOREACH label_key = label_keys;
+            INCLUDE header_cell;
+        END;
+    END -%]
+</tr>

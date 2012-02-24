@@ -1,0 +1,5 @@
+[%- IF url and title -%]
+<a href="[% url %]">[% title %]</a>
+[%- ELSE -%]
+[%- MSG( 'comments.info.unknown_object' ) -%]
+[%- END -%]

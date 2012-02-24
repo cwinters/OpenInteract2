@@ -1,0 +1,242 @@
+Revision history for OpenInteract package comments.
+
+1.25  Sat Sep 24 10:03:01 EDT 2005
+
+      Add field 'remote_host' to comments table, number of small
+      fixes to the 'recent comments' box.
+
+1.24  Tue Sep 20 22:04:33 EDT 2005
+
+      Small modifications to comment templates to better use CSS
+      classes.
+
+1.23  Fri Mar  4 00:27:21 EST 2005
+
+      OIN-119: add new action 'comment_admin' so you can disable
+      comments or entire classes of comments and include 'is_disabled'
+      function so we can check whether we should display a new comment
+      form.
+
+1.22  Wed Mar  2 23:47:36 EST 2005
+
+      OIN-112: change the 'email on new thread?' to a dropdown and modify
+      the language for the labels based on whether you're already
+      subscribed; deciding to unsubscribe from the thread will remove
+      your notification; unchecking the 'Remember me?' will now axe
+      the cookie.
+
+1.21  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+1.20  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-128: Add the ability to add preformatted text to comments
+      via <ecode> tags (like use.perl)
+
+      OIN-137: change package.conf -> package.ini
+
+1.19  Tue Dec  7 17:43:25 EST 2004
+
+      OIN-110: Fix bug with status message
+
+1.18  Sat Dec  4 01:28:53 EST 2004
+
+      Use status/error shortcuts
+
+1.17  Sun Nov 28 21:55:05 EST 2004
+
+      Fix OI2::Comment->count_comments
+
+1.16  Sun Nov 28 01:44:08 EST 2004
+
+      Rename 'show()' -> 'display()' in OI2::Action::Comments
+
+1.15  Sun Nov 28 00:14:24 EST 2004
+
+      - Update template/comment_list.tmpl to lookup the object info for
+      the description.
+
+      - Ensure the cookie is added properly when the user asks to be
+      remembered..
+
+      - Move all user-viewable strings (mostly errors) from
+      OI2::Action::Comments to resource file.
+
+      - Ensure comments are created with correct timezone in date.
+
+      - Fix notification email template name; also ensure object URL
+      is contextualized and remove the poster's email due to privacy
+      concerns.
+
+1.14  Tue Jun 15 21:02:22 EDT 2004
+
+      Change the ordering for the operations that list comments for a
+      particular object -- since they're associated with a particular
+      item we should see them in the posted order.
+
+1.13  Tue Jun 15 12:24:43 EDT 2004
+
+      Don't put security on comment objects -- we don't have the
+      facility to update/remove them anyway...
+
+1.12  Mon Jun  7 00:57:24 EDT 2004
+
+      Small message fix
+
+1.11  Mon May 24 19:40:58 EDT 2004
+
+      Message key fix in template/comments_list_page.tmpl; thanks to
+      Salve Nilsen for the patch.
+
+1.10  Fri May 21 10:59:21 EDT 2004
+
+      Fix SQL installer to refer to old table for migrating 'comment'
+      objects; also modify the 'class' property of the comment and
+      comment_summary objects to refer to 'OpenInteract2', and modify
+      the comment_summary object's 'object_url' from '.../show/' to
+      '.../display/' to reflect the OI2 change. 
+
+1.09  Mon May 17 08:37:14 EDT 2004
+
+      Fix calls to _show_editable() to set parameters in action object
+      rather than pass them as arguments; also modify add() to set the
+      'posted_on' field as a DateTime rather than date string.b
+
+1.08  Mon May 17 08:23:47 EDT 2004
+
+      Fix text surrounding calls to 'PROCESS row_color' 
+
+1.07  Thu Feb 19 10:04:37 EST 2004
+
+      Change table name from 'comment' to 'oi_comment' ('comment'
+      seems to be a reserved word in t-sql)
+
+1.06  Mon Feb 16 11:16:47 EST 2004
+
+      Move text from templates into message file.
+
+1.05  Sun Dec 14 23:04:17 EST 2003
+
+      Simple config change
+
+1.04  Mon Nov 24 17:33:32 EST 2003
+
+      Fix security import type.
+
+1.03  Mon Nov 24 16:56:52 EST 2003
+
+      Fix SQL install declaration.
+
+1.02  Wed Nov 19 23:37:56 EST 2003
+
+      OI2::Comment now subclasses persistence implementation generated
+      by SPOPS.
+
+1.01  Sat Oct 18 13:36:17 EDT 2003
+
+      Add migration information to OI2::SQLInstall::Comments
+
+1.00  Tue Sep 30 16:39:20 EDT 2003
+
+      Update to OpenInteract2.
+
+0.29  Tue Aug 26 22:55:04 EDT 2003
+
+      Small change to handler -- do URL-finding better (NOTE -- find a
+      module to do this!)
+
+0.28  Sun Apr  6 22:54:57 EDT 2003
+
+      Force ->id call into scalar context.
+
+0.27  Thu Mar  6 13:30:02 EST 2003
+
+      Small change to OI/Handler/Comments.pm (handle \r\n\r\n and
+      \n\n); add note about upgrading to the latest HTML::Entities to
+      docs.
+
+0.26  Sat Mar  1 16:34:07 EST 2003
+
+      Add check for an existing notification on a thread before we
+      attempt to add a new one.
+
+0.25  Sat Mar  1 16:23:43 EST 2003
+
+      Fix typo in struct/comment_notify.sql and
+      struct/comment_notify_oracle.sql; modify slightly the content of
+      the email sent out on notifications; ensure the values of
+      'Remember me?' and 'Notify me?' are populated on message preview.
+
+0.24  Sat Mar  1 16:00:47 EST 2003
+
+      Add 'comment_notify' object and the ability for people to get
+      notified whenever new items are posted to a thread. This works
+      but isn't fully complete yet -- OpenInteract needs the ability
+      to ability to queue messages to be sent so we don't delay on a
+      comment post.
+
+0.23  Wed Feb 26 23:01:08 EST 2003
+
+      Fix silly error in templates/comment_object.tmpl
+
+0.22  Wed Feb 26 22:55:40 EST 2003
+
+      Fix limit calculation (it's 0-based, so we're always skipping
+      the latest entry) and grab the summaries for the listing
+      properly. Also: don't display the 'previous|next' thingy unless
+      we need to...
+
+0.21  Wed Feb 26 08:01:25 EST 2003
+
+      Update package docs a little bit.
+
+0.20  Tue Feb 25 08:03:31 EST 2003
+
+      Finalize most templates, adding stylesheet tags/attributes.
+
+0.19  Mon Feb 24 22:59:35 EST 2003
+
+0.18  Mon Feb 24 22:50:37 EST 2003
+
+0.17  Mon Feb 24 22:03:57 EST 2003
+
+0.16  Mon Feb 24 21:36:58 EST 2003
+
+0.15  Mon Feb 24 21:33:20 EST 2003
+
+0.14  Mon Feb 24 21:30:02 EST 2003
+
+0.13  Mon Feb 24 21:25:52 EST 2003
+
+0.12  Mon Feb 24 21:22:16 EST 2003
+
+0.11  Mon Feb 24 21:11:10 EST 2003
+
+0.10  Mon Feb 24 08:53:59 EST 2003
+
+0.09  Mon Feb 24 08:48:38 EST 2003
+
+0.08  Mon Feb 24 08:47:06 EST 2003
+
+0.07  Mon Feb 24 08:43:49 EST 2003
+
+0.06  Mon Feb 24 08:28:58 EST 2003
+
+0.05  Mon Feb 24 08:18:22 EST 2003
+
+0.04  Mon Feb 24 08:14:28 EST 2003
+
+0.03  Mon Feb 24 08:02:37 EST 2003
+
+      Template changes...
+
+0.02  Mon Feb 24 07:44:33 EST 2003
+
+      Add 'show_summary' to handler (hey, it's specified in the action!)
+
+0.01  Sun Feb 23 21:47:39 EST 2003
+
+      Package skeleton created by oi_manage. Created initial version
+      of templates, handler, data structures, etc.
+

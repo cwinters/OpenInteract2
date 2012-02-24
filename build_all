@@ -1,0 +1,6 @@
+cd pkg
+rm -f *.zip
+./export_all
+cd ..
+perl build_bricks
+perl build_docs

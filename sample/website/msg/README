@@ -1,0 +1,7 @@
+sample/website/msg:
+
+This directory holds localized messages for the global templates
+shipped with OI2.
+
+NOTE: If you add a file here be sure to add an entry in FILES so we
+know it should be copied over to the website on install.

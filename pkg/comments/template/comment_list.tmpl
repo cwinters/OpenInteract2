@@ -1,0 +1,23 @@
+[% PROCESS error_message;
+   PROCESS status_message %]
+
+[% IF standalone and summary;
+    DEFAULT obj_info = OI.object_description( object ) -%]
+<p class="commentObject">
+    [%- object_desc = PROCESS comments::comment_object( url   = obj_info.url,
+                                                        title = obj_info.title );
+        MSG( 'comments.info.object', object_desc ) -%]
+</p>
+[% END -%]
+
+[% IF comments.size > 0 %]
+
+[% FOREACH comment = comments -%]
+[% PROCESS comments::comment %]
+[% END -%]
+
+[% ELSE %]
+<p>[% MSG( 'comments.no_comments' ) %]</p>
+[% END %]
+
+[% OI.action_execute( 'new_comment_form', object = object ) %]

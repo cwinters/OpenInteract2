@@ -1,0 +1,70 @@
+[% TAGS star %]
+[%# This OpenInteract2 file was generated
+      by:    [* invocation *]
+      on:    [* date *]
+      from:  [* source_template *]
+      using: OpenInteract2 version [* oi2_version *] %]
+[%-
+   title           = MSG( '[* package_name *].title_display' );
+   OI.page_title( title );
+   date_format     = '%Y-%m-%d';
+   datetime_format = '%Y-%m-%d %l:%M %p';
+   DEFAULT theme   = OI.theme_properties;
+-%]
+
+[%-
+   PROCESS error_message;
+   PROCESS status_message;
+-%]
+
+<div align="center">
+
+[%-
+    edit_url   = OI.make_url( ACTION = '[* package_name *]',
+                              TASK   = 'display_form',
+                              [* key_field *] = object.id );
+    remove_url = OI.make_url( ACTION = '[* package_name *]',
+                              TASK   = 'remove',
+                              [* key_field *] = object.id );
+-%]
+<p align="right">
+   <a href="[% edit_url %]">[% MSG( 'global.label.edit' ) %]</a> |
+   <a href="[% remove_url %]">[% MSG( 'global.button.remove' ) %]</a>
+</p>
+
+<h2>[% title %]</h2>
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0; valign = 'top' -%]
+
+[* FOREACH field = fields;
+     IF field.is_key; NEXT; END -*]
+[%-
+   count = count + 1;
+-%]
+[*-
+   label_key   = "${package_name}.${field.name}_title";
+-*]
+
+[* IF field.is_date -*]
+[% INCLUDE label_text_row( label_key = '[* label_key *]',
+                           name      = '[* field.name *]',
+                           text      = OI.date_format( object.[* field.name *], date_format ), ) -%]
+[* ELSIF field.is_datetime -*]
+[% INCLUDE label_text_row( label_key = '[* label_key *]',
+                           name      = '[* field.name *]',
+                           text      = OI.date_format( object.[* field.name *], datetime_format ), ) -%]
+[* ELSIF field.is_boolean -*]
+[% INCLUDE label_text_row( label_key = '[* label_key *]',
+                           name      = '[* field.name *]',
+                           text      = OI.as_boolean_label( object.[* field.name *] ) ) -%]
+[* ELSE -*]
+[% INCLUDE label_text_row( label_key = '[* label_key *]',
+                           name      = '[* field.name *]',
+                           text      = object.[* field.name *], ) -%]
+[* END -*]
+[* END -*]
+
+[% INCLUDE table_bordered_end %]
+
+</div>

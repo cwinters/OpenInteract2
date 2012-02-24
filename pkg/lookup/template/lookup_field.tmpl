@@ -1,0 +1,11 @@
+[%- IF related.$name -%]
+[% INCLUDE form_select( name        = "$name-$id",
+                        first_label = MSG( 'lookup.field.select_first' ),
+                        picked      = value,
+                        list        = related.$name.list, 
+                        label_field = related.$name.label_field,
+                        value_field = 'id' ) -%]
+[%- ELSE -%]
+[% DEFAULT size  = 40; -%]
+[% INCLUDE form_text( name = "$name-$id" ) -%]
+[%- END -%]

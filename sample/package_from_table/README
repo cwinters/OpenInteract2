@@ -1,0 +1,7 @@
+sample/package_from_table:
+
+The files here are used as templates for creating a new package based
+on a table.
+
+NOTE: If you add a file here be sure to add an entry in FILES so we
+know it should be copied over to the new package when it's created.

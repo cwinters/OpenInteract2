@@ -1,0 +1,16 @@
+[%- OI.box_add( 'news_archive_monthly' );
+    OI.box_add( 'all_tags_box' );
+    DEFAULT num_latest = 10 -%]
+
+[%- PROCESS error_message;
+    PROCESS status_message; -%]
+
+<div class="demarcatePage">
+
+<h2>[% MSG( 'news.home.title' ) %]</h2>
+
+<p>[% MSG( 'news.home.summary', num_latest ) %]</p>
+
+</div> <!-- demarcatePage -->
+
+[% OI.action_execute( 'latest_news', num_items = num_latest ) %]

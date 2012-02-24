@@ -1,0 +1,23 @@
+[%- IF object;
+        obj_info = object.object_description;
+    END -%]
+<div class="demarcatePage">
+
+<h2>[% MSG( 'comments.form_page.title' ) %]</h2>
+
+[% IF obj_info -%]
+<p class="commentObject">
+[%- object_desc = PROCESS comments::comment_object( url   = obj_info.url,
+                                                    title = obj_info.title );
+    MSG( 'comments.info.object', object_desc ) -%]
+</p>
+[% END -%]
+
+[% IF preview_text %]
+<h2>[% MSG( 'comments.form_page.title_preview' ) %]</h2>
+[% PROCESS comments::comment( override_content = preview_text ) %]
+[% END %]
+
+[% PROCESS comments::comment_form %]
+
+</div>

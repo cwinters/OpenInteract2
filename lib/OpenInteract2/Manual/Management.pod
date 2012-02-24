@@ -1,0 +1,486 @@
+=head1 NAME
+
+OpenInteract2::Manual::Management - Creating tasks to manage OpenInteract2
+
+=head1 SYNOPSIS
+
+This part of the manual describes how create your own tasks using the
+L<OpenInteract2::Manage|OpenInteract2::Manage> framework.
+
+=head1 PREREQUISITES
+
+Before you read this you should have at least a passing familiarity
+with how L<OpenInteract2::Manage|OpenInteract2::Manage> works. You can
+see its use in C<oi2_manage>, but since that script uses tasks in a
+generic fashion it may be a little tougher to follow.
+
+=head1 MOTIVATION
+
+=head2 Previous environment
+
+In OI 1.x most of the logic to run the management tasks was in the
+C<oi_manage> script which had multiple problems:
+
+=over 4
+
+=item *
+
+You could not call it from anywhere but the command line. For most
+tasks this was fine, but it prevented B<any> sort of web-based
+management without simply cobbling together strings to run using
+C<system>. Yuck.
+
+=item *
+
+Its size (4100+ lines) also meant that it was difficult to
+refactor. And it was fairly difficult to add new tasks without doing
+lots of copy-and-paste and knowing where certain tasks (parameter
+parsing, etc.) were performed.
+
+=item *
+
+Documentation always got out of sync. Sometimes the docs didn't list
+the task at all, sometimes it had the wrong or too few parameters for
+the task or it, and at other times the description didn't really say
+what the task was doing.
+
+=back
+
+=head2 Turn weaknesses into strengths
+
+The architecture of the management framework in OI2 is exactly the
+opposite of this. The command-line tool (C<oi2_manage>) is just a
+shell taking advantage of individual tasks with a facade interface to
+them all. 
+
+Every task is a L<OpenInteract2::Manage|OpenInteract2::Manage>
+subclass and is responsible for:
+
+=over 4
+
+=item *
+
+B<Naming itself>. The C<get_name()> method returns the task name
+associated with the class -- so
+L<OpenInteract2::Manage::Website::Create|OpenInteract2::Manage::Website::Create>
+has a name of 'create_website', and this is what you'd lookup the task
+by.
+
+=item *
+
+B<Describing itself>. A call to C<get_brief_description()> returns a one-
+or two-sentence description of what the task accomplishes. Additional
+documentation is in the POD, and you can view that POD separate from
+that of all other tasks. (It's a normal class after all!)
+
+=item *
+
+B<Listing its parameters>. The C<get_parameters()> method returns a
+hashref with parameter names and metadata that describe how to change
+the task's behavior.
+
+=item *
+
+B<Validating its parameters>. Any parameter value passed in can be
+validated. If it is invalid execution is stopped, all transparently to
+the individual task.
+
+=item *
+
+B<Tracking its own status>. As the task runs it can generate one or
+more status messages. These are in a standard format (hashref with
+specified keys) and the task caller has a single way to retrieve them
+(call to C<get_status()>).
+
+=item *
+
+B<Cleaning up after itself>. Tasks should ensure they don't leave any
+stray database connections open or files scattered around the
+filesystem.
+
+=item *
+
+And finally, B<Running the task>!
+
+=back
+
+=head1 SUBCLASSING
+
+Now we'll discuss how to create a subclass. When we task about method
+names below we're always talking about
+L<OpenInteract2::Manage|OpenInteract2::Manage> unless otherwise
+indicated.
+
+=head2 Mandatory methods
+
+Management tasks must implement:
+
+B<run_task()>
+
+This is where you actually perform the work of your task. You can
+indicate the status of your task with status hashrefs passed to
+C<_add_status()> or C<_add_status_head()>. (See C<STATUS MESSAGES> in
+L<OpenInteract2::Manage|OpenInteract2::Manage>.)
+
+Errors are indicated by throwing an exception -- generally an
+L<OpenInteract2::Exception|OpenInteract2::Exception> object, but if you
+want to create your own there is nothing stopping you.
+
+The task manager will set the parameter C<task_failed> to 'yes' if it
+catches an error from C<run_task>. This allows you to do conditional
+cleanup in C<tear_down_task()>, discussed below. (For example, if the
+main task died you probably don't need that directory tree you just
+created...)
+
+Note that the caller ensures that the current working directory
+remains the same for the caller, so you can C<chdir> to your heart's
+content.
+
+B<get_parameters()>
+
+Well, technically you don't B<have> to implement this yourself, you
+could inherit it. But you really, really should do it yourself, if
+only to help to poor sap who has to maintain your task.
+
+This method should return a hashref with the keys as parameter names
+and hashrefs of parameter metadata as the values. The parameter
+metadata may consist of the following. (Note: 'bool' means that 'yes'
+equals true while everything else is false.)
+
+=over 4
+
+=item B<description>
+
+What this parameter is used for. Strongly advised.
+
+=item B<is_required> (bool)
+
+Indicates this is a required parameter. Note that all required
+parameters are automatically submitted for validation. (That doesn't
+mean you have to validate them, just that they're available for it.)
+
+=item B<do_validate> (bool)
+
+Tells the managment dispatcher to validate this parameter. You don't
+need this if 'is_required' is set.
+
+=item B<is_boolean> (bool)
+
+Indicates this parameter is boolean, or a toggled value.
+
+=item B<is_multivalued> (bool)
+
+Indicates this parameter B<may> hold multiple values.
+
+=item B<default>
+
+A default value to use for the parameter, used if the task caller
+doesn't provide one.
+
+=back
+
+Note that most users of your task will probably call
+C<task_parameters()> instead of C<get_parameters()> as it provides
+some additional information. This is also what you will find in the
+L<OpenInteract2::Manage> documentation.
+
+The parent management task provides C<_get_source_dir_param()> which
+can be used as necessary:
+
+ sub get_parameters {
+     my ( $self ) = @_;
+     return {
+         source_dir => $self->_get_source_dir_param(),
+         ...
+     };
+}
+
+It specifies that the parameter is required and gives a generic
+description, plus a default value of the current directory.
+
+=head2 Optional methods
+
+B<init( @extra )>
+
+This is called within the C<new()> method. All extra parameters sent
+to C<new()> are passed to this method, since the main parameters have
+already been set in the object.
+
+B<get_name()>
+
+Return the task name with which your class is associated. This is how
+people lookup your task: they don't use the class name, they use the
+normal name for us humans.. For instance,
+L<OpenInteract2::Manage::Website::InstallPackage|OpenInteract2::Manage::Website::InstallPackage>
+is associated with 'install_package'.
+
+B<get_brief_description()>
+
+Return a string a sentence or two long describing what the task does.
+
+B<setup_task()>
+
+Sets up the environment required for this task. This might require
+creating an L<OpenInteract2::Context|OpenInteract2::Context>, a database
+connection, or some other action. (Some of these have shortcuts -- see
+below.)
+
+Note that there may be an abstract subclass of
+L<OpenInteract2::Manage|OpenInteract2::Manage> that implements common
+functionality for you here. For instance,
+L<OpenInteract2::Manage::Website|OpenInteract2::Manage::Website>
+automatically creates a context here so you don't have to.
+
+If you cannot setup your required environment you should throw an
+exception with an appropriate message.
+
+B<tear_down_task()>
+
+If your task needs to do any cleanup actions -- closing a database
+connection, etc. -- it should perform them here.
+
+The task manager will set the parameter C<task_failed> to 'yes' if the
+main task threw an error. This allows you to do conditional cleanup --
+for instance,
+L<OpenInteract2::Manage::Website::Create|OpenInteract2::Manage::Website::Create>
+checks this field and if it is set will remove the directories created
+and all the files copied in the halted process of creating a new
+website.
+
+B<validate_param( $param_name, $param_value )>
+
+Implement if you'd like to validate one or more paramter values. Note
+that you should call C<SUPER> as the last command, just in case it has
+its own validation routines. (More below.)
+
+=head2 Parameter Validation
+
+Here's an example where we depend on the validation routine for
+C<website_dir> from L<OpenInteract2::Manage|OpenInteract2::Manage>:
+
+ sub get_parameters {
+     my ( $self ) = @_;
+     return {
+         website_dir => {
+             description => 'a directory',
+             is_required => 'yes',
+         },
+     };
+ }
+ 
+ # we're not validating anything ourselves -- no 'validate_param'
+ # subroutine defined
+
+Easy enough. Now, say we want to validate a different parameter
+ourselves:
+
+ sub get_parameters {
+     my ( $self ) = @_;
+     return {
+         game_choice => {
+             description => 'Your choice in the game',
+             is_required => 'yes',
+         },
+         ...
+     };
+ }
+  
+ sub validate_param {
+     my ( $self, $param_name, $param_value ) = @_;
+     if ( $param_name eq 'game_choice' ) {
+         unless ( $param_value =~ /^(rock|scissors|paper)$/i ) {
+             return "Value must be 'rock', 'scissors' or 'paper'";
+         }
+     }
+     return $self->SUPER::validate_param( $param_name, $param_value );
+ }
+
+
+This ensures that the parameter value for 'game_choice' (a) exists and
+(b) is either 'rock', 'scissors' or 'paper' (case-insensitive). Your
+C<run_task()> method will never be run unless all the parameter
+requirements and validation checks are successful.
+
+=head2 Status helper methods
+
+These methods should only be used by management tasks themselves, not
+by the users of those tasks.
+
+Note: All status messages are sent to the observers as a 'status'
+observation. These are sent in the order received, so the user may be
+a little confused if you use C<_add_status_head()>.
+
+B<_add_status( \%status, \%status, ... )>
+
+Adds status message C<\%status> to those tracked by the object.
+
+B<_add_status_head( \%status, \%status, ... )>
+
+Adds status messages to the head of the list of status messages. This
+is useful for when your management task comprises several others. You
+can collect their status messages as your own, then insert an overall
+status as the initial one seen by the user.
+
+=head2 Status helper shortcuts
+
+There are also two shortcuts that you will probably use most often:
+
+B<_ok( $action, $message, %extra )>
+
+Create a passing status message for C<$action> and C<$message>. Any data
+in C<%extra> will be added to the status message and passed along to
+the user.
+
+B<_fail( $action, $message, %extra )>
+
+Create a failing status message for C<$action> and C<$message>. Any
+data in C<%extra> will be added to the status message and passed along
+to the user.
+
+=head2 Notifying Observers
+
+All management tasks are observable. This means anyone can add any
+number of classes, objects or subroutines that receive observations
+you post. Notifying observers is simple:
+
+ $self->notify_observers( $type, @extra_info )
+
+What goes into C<@extra_info> depends on the C<$type>. The two types
+of observations supported right now are 'status' and 'progress'. The
+'status' observations are generated automatically when you use
+C<_add_status()> or C<_add_status_head()> (see above).
+
+Generally 'progress' notifications are accompanied by a simple text
+message. You may also pass as a third argument a hashref. This hashref
+gives us room to grow and the observers the ability to differentiate
+among progress messages. For now, the hashref only supports one key:
+C<long>. If you're posting a progress notification of a process that
+will take a long time, set this to 'yes' so the observer can
+differentiate -- let the user know it will take a while, etc.
+
+ sub run_task {
+     my ( $self ) = @_;
+     $self->_do_some_simple( 'thing' );
+     $self->notify_observers( progress => 'Simple thing complete' );
+     $self->_do_some_other( @stuff );
+     $self->notify_observers( progress => 'Other stuff complete' );
+     $self->notify_observers( progress => 'Preparing complex task',
+                              { long => 'yes' } );
+     $self->_do_complex_task;
+     $self->notify_observers( progress => 'Complex task complete' );
+ 
+     # This fires an implicit observation of type 'status'
+     $self->_add_status({ is_ok   => 'yes',
+                          message => 'Foobar task ok' });
+ }
+
+This is a contrived example -- if your task is very simple (like this)
+you probably don't need to bother with observations. The notifications
+generated by the status messages will be more than adequate.
+
+However, if you're looping through a set of packages, or performing a
+complicated set of operations, it can be very helpful for your users
+to let them know things are actually happening.
+
+=head2 Example
+
+Here is an example of a direct subclass that just creates a file
+'hello_world' in the website directory:
+
+ package Openinteract2::Manage::MyTask
+ 
+ use strict;
+ use base qw( OpenInteract2::Manage::Website );
+ 
+ sub get_name {
+     return 'hello_world';
+ }
+ 
+ sub get_brief_description {
+     return "Creates a 'hello_world' file in your website directory.";
+ }
+ 
+ sub get_parameters {
+     my ( $self ) = @_;
+     return { website_dir => $self->_get_website_dir_param,
+              hello_message => {
+                  description => 'Message to write to file',
+                  is_required => 'yes',
+              },
+     };
+ }
+ 
+ sub run_task {
+     my ( $self ) = @_;
+     my $website_dir = $self->param( 'website_dir' );
+     $website_dir =~ s|/$||;
+     my $filename = File::Spec->catfile( $website_dir, 'hello_world' );
+     my %status = ();
+     if ( -f $filename ) {
+         $status{message} = "Could not create [$filename]: already exists";
+         $status{is_ok}   = 'no';
+         $self->_add_status( \%status );
+         return;
+     }
+     eval { open( HW, '>', $filename ) || die $! };
+     if ( $@ ) {
+         $status{message} = "Cannot write to [$filename]: $@";
+         $status{is_ok}   = 'no';
+     }
+     else {
+         print HW $self->param( 'hello_message' );
+         close( HW );
+         $status{is_ok}   = 'yes';
+         $status{message} = "File [$filename] created ok";
+     }
+     $self->_add_status( \%status );
+ }
+ 
+ OpenInteract2::Manage->register_factory_type( get_name() => __PACKAGE__ );
+
+ 1;
+
+And here is how you would run your task:
+
+ #!/usr/bin/perl
+ 
+ use strict;
+ use OpenInteract2::Manage;
+
+ my $task = OpenInteract2::Manage->new( 'hello_world', {
+    website_dir => $ENV{OPENINTERACT2}
+ });
+ my @status = eval { $task->execute };
+ if ( $@ ) {
+     print "Task failed to run: $@";
+ }
+ else {
+     foreach my $s ( @status ) {
+         print "Task OK? $s->{is_ok}\n",
+               "$s->{message}\n";
+     }
+ }
+
+Since all management tasks are auto-discovered by
+L<OpenInteract2::Manage|OpenInteract2::Manage> at startup, you can
+also run:
+
+ $ oi2_manage hello_world
+
+And it'll work!
+
+=head2 Other subclass helper methods 
+
+B<_setup_context( @params )>
+
+Sets up a context given the website directory named in the parameter
+C<website_dir>. If the 'debug' parameter is true it sets the level of
+the root log4perl logger to be 'debug'.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003-2004 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

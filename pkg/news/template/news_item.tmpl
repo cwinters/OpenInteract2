@@ -1,0 +1,51 @@
+[%-
+  detail_url = OI.make_url( ACTION = 'news', TASK = 'display', 
+                            URL_PARAMS = news.id );
+  edit_url   = OI.make_url( ACTION = 'news', TASK = 'display_form',
+                            URL_PARAMS = news.id );
+  post_date  = OI.date_format( news.posted_on, '%Y-%b-%d %I:%M %p' );
+  poster     = news.posted_by_user;
+-%]
+<div class="newsItem">
+
+<h3 class="newsTitle">[% news.title %]</h3>
+
+
+[% IF ACTION.task_security_allowed( 'edit' ) -%]
+<div class="newsAdmin">
+<p><a href="[% edit_url %]">[% MSG( 'news.item.edit' ) %]</a></p>
+</div>
+[%- END %]
+
+<p class="newsPostInfo">
+[%- IF poster -%]
+  [% user_url = OI.make_url( ACTION = 'user', TASK = 'display',
+                             user_id = poster.id ) %]
+  [% MSG( 'news.item.posted_user_and_date',
+          user_url, poster.login_name, post_date ) %]
+[%- ELSE -%]
+[% MSG( 'news.item.posted_on_date', post_date ) %]
+[%- END -%]
+</p>
+
+<div class="newsContent">
+
+[% IF news.image_src %]
+   [%- IF news.image_url %]<a href="[% news.image_url %]">
+   [%- END -%]<img src="[% news.image_src %]" border="0" align="[% news.image_align %]">
+   [%- IF news.image_url %]</a>[% END -%]
+[% END %]
+[% news.news_item %]
+
+<div class="newsLinks">
+<p>
+   [ [% OI.action_execute( 'my_tags', object = news ) %] ] 
+   [ [% OI.action_execute( 'show_comment_summary', object = news ) %] ]
+   [ <a rel="bookmark"
+        href="[% detail_url %]">[% MSG( 'news.item.permalink' ) %]</a> ]
+</p>
+</div>
+
+</div> <!-- newsContent -->
+
+</div> <!--news -->

@@ -1,0 +1,1 @@
+CREATE GENERATOR oi_sys_user_seq

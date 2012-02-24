@@ -1,0 +1,23 @@
+OI::Package:
+
+ - Make each package an actual object with some simple accessor
+ methods matching the information we get from the config object
+ plus filename-saved-to/read-from info
+
+ - See about standardizing input to various main routines and
+ creating a common init for all of them (e.g., if 'directory' but
+ not 'config' exists, create the OI::Config::Package object
+
+ - Create a OI::Status object (?) or at least make consistent the
+ status information returned by check, export, install
+
+OI::Config::Package:
+
+ - Should some of these fields be put into OI::Package when we make it
+ an object?
+
+
+OI::Setup:
+
+ - When reading server config, set the 'name' key of every datasource
+ to its name

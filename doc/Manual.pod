@@ -1,0 +1,246 @@
+=head1 NAME
+
+OpenInteract2::Manual - User Guide and Reference Manual for OpenInteract
+
+=head1 DESCRIPTION
+
+This is the manual for OpenInteract2. It includes information about
+how to setup OpenInteract2 (including databases, web servers, etc.),
+how to develop modules in OpenInteract and how to extend it for your
+own purposes. It is also a reference for the features OpenInteract2
+has with pointers to the relevant module documentation for details.
+
+This manual provides an overview of the framework along with examples,
+directions, etc. If you need implementation-specific information,
+please see the documentation for the appropriate module. (All modules
+are listed below.)
+
+The manual is broken down into:
+
+=over 4
+
+=item *
+
+L<OpenInteract2::Manual::Intro>
+
+An introduction to the capabilities and architecture of OpenInteract2
+-- a good starting point.
+
+=item *
+
+L<OpenInteract2::Manual::QuickStart>
+
+A quick start guide for setting up a website.
+
+=item *
+
+L<OpenInteract2::Manual::Tutorial>
+
+Create a new package and modify an existing one. Developers should
+read this first.
+
+=item *
+
+L<OpenInteract2::Manual::TutorialAdvanced>
+
+Add advanced features to an application.
+
+=item *
+
+L<OpenInteract2::Manual::Architecture>
+
+More in-depth discussion of the major areas of OpenInteract and a
+walk-through for a request.
+
+=item *
+
+L<OpenInteract2::Manual::Conversion>
+
+Read this if you're upgrading an existing OpenInteract 1.x site to
+OpenInteract 2, particularly if you're going to be migrating custom
+packages you've developed.
+
+=item * 
+
+L<OpenInteract2::Manual::Changes>
+
+Listing of the changes between OI versions. The major architectural
+changes between 1.x and 2.x are also listed here.
+
+=item *
+
+L<OpenInteract2::Manual::Templates>
+
+Using templates, focusing on the Template Toolkit.
+
+=item *
+
+L<OpenInteract2::Manual::Widgets>
+
+Using template widgets in the Template Toolkit.
+
+=item * 
+
+L<OpenInteract2::Manual::Packages>
+
+Learn about a package: how we create distributable OpenInteract2
+applications.
+
+=item *
+
+L<OpenInteract2::Manual::I18N>
+
+Internationalization and localization issues in OpenInteract2.
+
+=item *
+
+L<OpenInteract2::Manual::Caching>
+
+How to setup and use content caching.
+
+=item *
+
+L<OpenInteract2::Manual::Logging>
+
+How to use and configure logging.
+
+=item *
+
+L<OpenInteract2::Manual::Authentication>
+
+How to setup authentication and related actions.
+
+=item *
+
+L<OpenInteract2::Manual::Security>
+
+How task and object security works and how you can change it.
+
+=item *
+
+L<OpenInteract2::Manual::Management>
+
+Managing OpenInteract2 using C<oi2_manage> and the
+L<OpenInteract2::Manage|OpenInteract2::Manage> framework.
+
+=item *
+
+L<OpenInteract2::Manual::AdminDatabase>
+
+Setup databases.
+
+=item *
+
+L<OpenInteract2::Manual::AdminApache>
+
+Setup Apache/mod_perl.
+
+=item *
+
+L<OpenInteract2::Manual::Datasource>
+
+How to setup and use datasources.
+
+=item *
+
+L<OpenInteract2::Manual::DataImport>
+
+Importing data into OpenInteract datasources.
+
+=item *
+
+L<OpenInteract2::Manual::SPOPS>
+
+How OpenInteract2 enhances SPOPS objects and makes them easier for you
+to configure.
+
+=item *
+
+L<OpenInteract2::Manual::SearchResults>
+
+Serializing and retrieving search results.
+
+=item *
+
+L<OpenInteract2::Manual::LDAP>
+
+How to setup and use LDAP support.
+
+=back
+
+=head1 MODULES
+
+=over 4
+
+[% local_module_info = get_local_modules(); -%]
+[% FOREACH info = local_module_info -%]
+=item *
+
+L<[% info.name %]|[% info.name %]>: [% info.description -%]
+[% END -%]
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2001-2004 Chris Winters. All rights reserved.
+
+Permission is granted to copy, distribute and/or modify this document
+under the terms of the GNU Free Documentation License, Version 1.1 or
+any later version published by the Free Software Foundation; with no
+Invariant Sections, with no Front-Cover Texts, and with no Back-Cover
+Texts. A copy of the license is included in the file titled
+"COPYING-DOCS".
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>
+
+The following people have offered patches, advice, development funds,
+etc. to OpenInteract and OpenInteract2:
+
+=over 4
+
+=item *
+
+Salve Nilsen and his team at the Norwegian Meteorological Institute
+(http://met.no/) have provided ideas, use cases, bug reports and
+invaluable advice throughout the OpenInteract2 beta process.
+
+=item *
+
+Teemu Arina and his team at Dicole (http://www.dicole.com/) have
+created a substantial and innovative groupware product called
+MimerDesk. They've also been very active in submitting patches, bug
+reports and ideas for development, particularly i18n support, based on
+their day-to-day usage.
+
+=item *
+
+John Sequeira and HappyCool (running the National Auto Sport
+Association) donated money toward the OpenInteract server which runs
+the website, wiki site, demo sites and JIRA issue tracking.
+
+=item *
+
+Greg Fenton and the folks at iAnywhere contributed a fully-licensed
+version of SQL Anywhere Studio version 9 at YAPC 2004.
+
+=item *
+
+intes.net (http://www.intes.net/) funded and supported OpenInteract
+development through its 1.x versions.
+
+=item *
+
+Andreas Nolte E<lt>andreas.nolte@bertelsmann.deE<gt> and his team have
+contributed lots of great ideas and have been super for bouncing ideas
+around.
+
+=item *
+
+Christian Lemburg E<lt>lemburg@aixonix.deE<gt>, Rusty Foster
+E<lt>rusty@kuro5hin.orgE<gt>, Christopher Proto, and many other folks
+have helped out. (Please email me if I've forgotten you!)
+
+=back

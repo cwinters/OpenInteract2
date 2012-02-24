@@ -1,0 +1,29 @@
+[% BLOCK page_row -%]
+  [%- SET edit_url  = OI.make_url( ACTION   = 'page',
+                                   TASK     = 'display_form',
+                                   location = page.id );
+ -%]
+<tr valign="top" align="left" [% PROCESS row_color %]>
+  <td align="left"><a href="[% OI.make_url( BASE = page.location ) %]">[% page.location %]</a></td>
+  <td align="left">[% page.title %]&nbsp;</td>
+  <td>[% page.author %]&nbsp;</td>
+  <td align="center">[% page.is_active %]</td>
+  <td>[%- IF page.tmp_security_level == OI.security_level.write -%]
+         <a href="[% edit_url %]">Edit</a>
+      [%- END -%]&nbsp;
+  </td>
+</tr>
+[% END -%]
+
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row( labels = [ 'Location', 'Title', 'Author', 'Active?', '&nbsp;' ] ) -%]
+
+[% count = 1 -%]
+[% WHILE ( page = iterator.get_next ) -%]
+   [% PROCESS page_row -%]
+   [%- count = count + 1 -%]
+[% END -%]
+
+[% PROCESS table_bordered_end -%]

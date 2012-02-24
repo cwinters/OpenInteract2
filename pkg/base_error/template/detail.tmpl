@@ -1,0 +1,52 @@
+[%-
+  title = MSG( 'base_error.detail.title' );
+  OI.page_title( title );
+-%]
+[%- PROCESS error_message -%]
+
+<h2>[% title %]</h2>
+
+[%- INCLUDE table_bordered_begin -%]
+[%- count  = 0; valign = 'top' -%]
+
+[%- count  = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.time',
+                           text      = OI.date_format( an_error.time ) ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.message',
+                           text      = an_error.message ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.category',
+                           text      = an_error.category ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.location',
+                           text      = "$an_error.class ($an_error.line)" ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.host',
+                           text      =  an_error.host || 'n/a' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.user',
+                           text      =  an_error.username || 'n/a' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.session',
+                           text      = an_error.session || '(no session tracked)' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.url',
+                           text      = an_error.url ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.browser',
+                           text      = an_error.browser ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_error.referer',
+                           text      = an_error.referer ) -%]
+
+[% PROCESS table_bordered_end -%]

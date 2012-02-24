@@ -1,0 +1,11 @@
+\bCVS\b
+~$
+\.old$
+\.bak$
+\.backup$
+\.err$
+^tmp
+^notes
+^_
+^MYMETA\.yml$
+^MYMETA\.json$

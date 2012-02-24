@@ -1,0 +1,24 @@
+[% OI.page_title( 'Renaming Help' );
+   OI.main_template( 'base_page::page_base_help' ); %]
+
+    <p><b>Renaming a file:</b></p>
+    
+    <ol>
+
+        <li>You should see a simple form with the non-editable old
+        name of the file and a text field for you to create a new name.</li>
+
+        <li>Enter the new name in the text field. To get you started
+        the old name should already be filled in the text field. Note
+        that you do not need to add the protocol (e.g., <tt>http://</tt>) or the
+        server name (e.g., <tt>www.mysite.com</tt>) to rename the file properly.</li>
+
+        <li>I will create directories on-the-fly as
+        necessary. For instance, assume you want to rename
+        <tt>/reports/q1/main.html</tt> to
+        <tt>/reports/archived/2003/q1/main.html</tt>. If the directory
+        <tt>/reports/archived/2003/q1</tt> doesn't yet
+        exist I'll create it for you, even if I need to create
+        multiple directories to do so.</li>
+
+   </ol>

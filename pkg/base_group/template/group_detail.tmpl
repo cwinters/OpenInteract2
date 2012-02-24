@@ -1,0 +1,47 @@
+[%- DEFAULT theme = OI.theme_properties;
+    OI.page_title( MSG( 'base_group.detail.page_title', group.name ) ); -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+[% IF group.id AND group.tmp_security_level >= OI.security_level.write %]
+[%- edit_url = OI.make_url( ACTION   = 'group',
+                            TASK     = 'display_form',
+                            group_id = group.id ) -%]
+<p align="right">[% MSG( 'base_group.detail.edit_record', edit_url ) %]</p>
+[% END -%]
+
+<h2>[% MSG( 'base_group.detail.title' ) %] </h2>
+
+[% INCLUDE table_bordered_begin -%]
+[%- count  = 0;
+    valign = 'top' -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = base_group.info.label.name,
+                           text  = group.name ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = base_group.info.label.notes,
+                           text  = group.notes ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_row_begin( label_key = base_group.detail.info.members ) -%]
+ <td>
+[%- IF member_user_list.size > 0 -%]
+     [% FOREACH user = member_user_list -%]
+        [%- user_show_url = OI.make_url( ACTION  = 'user',
+                                         TASK    = 'display',
+                                         user_id = user.id ) -%]
+        [%- theme.bullet %] <a href="[% user_show_url %]">[% user.name %]</a><br>
+     [% END -%]
+[%- ELSE -%]
+  [% MSG( 'base_group.detail.no_members' ) %]
+[%- END -%]
+ </td></tr>
+
+[% INCLUDE table_bordered_end -%]
+
+</div>

@@ -1,0 +1,67 @@
+[% OI.page_title( MSG( 'comments.list_page.title' ) );
+   PROCESS status_message;
+   PROCESS error_message %]
+
+<h1>[% MSG( 'comments.list_page.title' ) %]</h1>
+
+<p>[% MSG( 'comments.list_page.overview',
+           lower_bound, upper_bound, num_comments ) %]</p>
+
+[% IF comments.size > 0 -%]
+
+[% INCLUDE table_bordered_begin -%]
+[%- count = lower_bound -%]
+
+[% INCLUDE header_row( label_keys = [ 
+   'comments.info.count', 'comments.info.subject',
+   'comments.info.date', 'comments.info.poster',
+   'comments.info.thread',
+] ) -%]
+
+[% FOREACH comment = comments -%]
+[%- comment_url = OI.make_url( ACTION = 'comment', TASK = 'display',
+                               comment_id = comment.id );
+    object_url  = comment.get_summary.object_url -%]
+<tr [% PROCESS row_color %] valign="top" align="center">
+   <td>[% count %]</td>
+   <td><a href="[% comment_url %]">[% comment.subject %]</a></td>
+   <td>[% OI.date_format( comment.posted_on ) %]</td>
+   <td>[% PROCESS comments::comment_poster %]</td>
+   <td><a href="[% object_url %]">[% comment.get_summary.object_title %]</a></td>
+</tr>
+[%- count = count + 1 -%]
+[% END -%]
+
+[% INCLUDE table_bordered_end -%]
+
+[% IF page_num != 1 OR upper_bound < num_comments -%]
+
+<p align="right">
+  [% IF page_num == 1 -%]
+Previous
+  [% ELSE -%]
+[%- previous_num = page_num - 1;
+    previous_url = OI.make_url( ACTION = 'comment', TASK = 'list',
+                                page_num = previous_num,
+                                page_size = page_size );  -%]
+<a href="[% previous_url %]">[% MSG( 'comments.list_page.previous_link' ) %]</a>
+  [% END -%]
+ |
+  [% IF upper_bound >= num_comments -%]
+[% MSG( 'comments.list_page.next_link' ) %]
+  [% ELSE -%]
+[%- next_num = page_num + 1;
+    next_url = OI.make_url( ACTION = 'comment', TASK = 'list',
+                            page_num = next_num,
+                            page_size = page_size )-%]
+
+<a href="[% next_url %]">Next</a>
+  [% END -%]
+</p>
+[% END -%]
+
+[% ELSE -%]
+
+<p>[% MSG( 'comments.list_page.no_comments' ) %]</p>
+
+[% END -%]

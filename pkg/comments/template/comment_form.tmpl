@@ -1,0 +1,119 @@
+[%- DEFAULT theme = OI.theme_properties;
+    PROCESS error_message -%]
+[% IF is_disabled %]
+
+<p align="center"><b>[% MSG( 'comments.disabled' ) %]</b></p>
+
+[% ELSE %]
+
+<h2>[% MSG( 'comments.form.title' ) %]</h2>
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'comment' TASK = 'add',
+                       name = 'news', method = 'POST' ) %]
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0; valign = 'top' -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'comments.info.name',
+                                is_required = 1,
+                                name      = 'poster_name',
+                                value     = comment.poster_name,
+                                size      = 30,
+                                maxlength = 30 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'comments.info.email',
+                                name      = 'poster_email',
+                                value     = comment.poster_email,
+                                size      = 50,
+                                maxlength = 50 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'comments.info.url',
+                                name      = 'poster_url',
+                                value     = comment.poster_url,
+                                size      = 50,
+                                maxlength = 75 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'comments.info.subject',
+                                is_required = 1,
+                                name      = 'subject',
+                                value     = comment.subject,
+                                size      = 50,
+                                maxlength = 75 ); %]
+
+[%- count = count + 1 -%]
+<tr [% PROCESS row_color %] align="left">
+  <td colspan="2">
+    [%- PROCESS show_label( label_key = 'comments.info.comments', is_required = 1 ) -%]
+  </td>
+</tr>
+
+<tr [% PROCESS row_color %] align="center">
+  <td colspan="2">
+[% INCLUDE form_textarea( name  = 'content',
+                          value = comment.content,
+                          rows  = 8,
+                          cols  = 50,
+                          wrap  = 'virtual' ) -%]
+  </td>
+</tr>
+
+<tr [% PROCESS row_color %]>
+ <td colspan="2" align="center">
+    <font size="-1">[% MSG( 'comments.form.no_html' ) %]</font>
+ </td>
+</tr>
+
+[%- count = count + 1 -%]
+<tr [% PROCESS row_color %]>
+  <td colspan="2">[% MSG( 'comments.form.remember' ) %]
+                  [% INCLUDE form_checkbox( name   = 'remember_poster',
+                                            value  = 'yes',
+                                            picked = remember_poster ) %]
+  </td>
+</tr>
+
+[%- count = count + 1;
+    notify_list = [ { value = 'yes', label = MSG( 'comments.form.notify_no_sub' ) },
+                    { value = 'no',  label = MSG( 'comments.form.notify_no_unsub' ) } ]
+-%]
+[% IF is_subscribed == 'yes';
+       notify_list = [ { value = 'yes', label = MSG( 'comments.form.notify_yes_sub' ) },
+                       { value = 'no',  label = MSG( 'comments.form.notify_yes_unsub' ) } ];
+   END -%]
+<tr [% PROCESS row_color %]>
+  <td colspan="2">[% MSG( 'comments.form.notify' ) %]
+                  [% INCLUDE form_select( name        = 'is_subscribed',
+                                          list        = notify_list,
+                                          value_field = 'value',
+                                          label_field = 'label',
+                                          picked      = is_subscribed ) %]
+  </td>
+</tr>
+
+
+[%- count = count + 1 -%]
+<tr [% PROCESS row_color %]>
+  <td colspan="2">
+[% INCLUDE form_submit( name      = 'action',
+                        value_key = 'comments.form.preview' ) %]
+[% INCLUDE form_submit( name      = 'action',
+                        value_key = 'comments.form.post' ) %]
+  </td>
+</tr>
+
+[% INCLUDE table_bordered_end -%]
+
+[% INCLUDE form_hidden( name = 'class',     value = comment.class ) %]
+[% INCLUDE form_hidden( name = 'object_id', value = comment.object_id ) %]
+
+</form>
+
+</div>
+
+[% END %]

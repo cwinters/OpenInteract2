@@ -1,0 +1,5 @@
+[% FOREACH info = counts;
+     archive_url = OI.make_url( ACTION = 'news', TASK = 'archive',
+                                URL_PARAMS = [ info.year, info.month ] ); -%]
+<a href="[% archive_url %]">[% info.month %]/[% info.year %]</a>&nbsp;([% info.count %]) 
+[% END -%]

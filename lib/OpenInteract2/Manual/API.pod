@@ -1,0 +1,188 @@
+=head1 NAME
+
+OpenInteract2::Manual::API - API guidelines for OpenInteract2
+
+=head1 SYNOPSIS
+
+This document will provide an overview of the different APIs in
+OpenInteract2 -- configuration, templating and interfaces, logging,
+coding, etc. -- and provide recommended uses.
+
+=head1 CONFIGURATION
+
+=head2 INI files everywhere
+
+Where possible OpenInteract2 uses configuration in a slightly
+customized INI format. You can learn details of this format in the
+module that does the parsing (L<OpenInteract2::Config::Ini>) but it's
+useful to put a few usage guidelines here.
+
+=head2 Defining lists
+
+Our custom INI format has different ways to define lists. You can just
+use the key multiple times:
+
+ [mysection]
+ key = value
+ key = value2
+ key = value3
+
+But since some configuration keys take a lot of values this can make
+for a very long configuration file. As an alternative you can use this
+syntax:
+
+ [mysection]
+ @,key = value, value2, value3
+
+The leading '@,' means:
+
+B<@>: This is a list
+
+B<,>: ...and I'm using a ',' to delimit the values.
+
+This might be weird to some people so if people who are only vaguely
+familar with configuration files will be editing your data you might
+want to either add a note about what the leading '@' sequence means or
+just use the longer form.
+
+=head1 TEMPLATES: TEMPLATE TOOLKIT
+
+=head2 Pointers
+
+The Template Toolkit is a great piece of software and is quite well
+documented. But there's a lot of documentation so it might be
+confusing on a starting point. A good one is the
+L<Template::Manual::Intro> document -- it gives you a good idea about
+using templates, templates as components, the different types of data
+you can pass into a template and more.
+
+Some other good documents are: L<Template::Manual::Syntax> and
+L<Template::Manual::Directives> to give you an idea of how to 'speak'
+and your available vocabulary.
+
+One more thing: you have a number of OI2-specific functions available
+in the OI2 plugin -- read L<OpenInteract2::TT2::Plugin> for what you
+can do with lots of examples.
+
+=head2 Including other templates
+
+The Template Toolkit is very flexible about bringing in other
+templates. You can use either C<INCLUDE> or C<PROCESS> to bring in
+another template and evaluate it, and those templates can bring in
+other templates too, and so on down the line. If you're not careful
+you can get a fairly complicated sequence of includes that makes
+debugging difficult -- for example, the templates to create a SELECT
+form element include:
+
+  form_select
+  form_select_intro
+  form_select_option
+  form_select_options_iterator
+  form_select_options_list
+  form_select_options_plain_list
+
+So a simple 'INCLUDE form_select' will bring in 'form_select_intro',
+and assuming you pass in an 'iterator' argument will call
+'form_select_options_iterator' which will call 'form_select_option'
+multiple times to create the individual OPTION elements. Probably a
+little too complicated for a little-old dropdown box...
+
+=head2 General guidelines
+
+=over 4
+
+=item *
+
+All template files must have the *.tmpl suffix
+
+=item *
+
+Templates that are used for displaying data in a browser, should
+strive to adhere to the following W3C recommondations: XHTML 1.0, CSS1
+and CSS2, WAI WCAG 1.0, Conformance level 2 (AA). This is just being a
+good web citizen.
+
+=back
+
+=head1 LOGGING
+
+=head2 Meaning of logging levels
+
+Our logging package (L<Log::Log4perl>) supports five levels. While
+each level has a name to provide some guidance about how to use it
+there are plenty of grey areas. Here are the levels and a few
+pointers:
+
+B<FATAL>
+
+Situations where the system/application cannot continue safely and
+must abort. Manual intervention is necessary to get things running
+again.
+
+Examples: database connection fails or cannot connect to other network
+resource (LDAP)
+
+B<ERROR>
+
+Actual errors that need to be looked into. The application should be
+able to continue running (albeit hobbled) despite having these errors
+-- otherwise they'd be fatal -- but they're serious enough to look
+into and diagnose later.
+
+Note that by default messages logged at this level get stored
+separately in the filesystem and displayed in the error browser.
+
+Examples: cannot store session, missing configuration data that's
+required for your application.
+
+B<WARN>
+
+Other problems you may encounter might not need to be later
+investigated but are still important to note.
+
+For situations that at some point later may lead to
+errors.
+
+Examples: cannot fetch or store data from a database but not due to
+application validation errors (foreign key violations, constraint
+violations); using default values in a configuration (e.g., the
+default mail server is 'localhost' but that's probably wrong).
+
+B<INFO>
+
+Coarse status messages. This is useful to see what path a request
+takes through an application but you don't necessarily want to see all
+the data, or even all the individual subroutines called. 
+
+Examples: entry points into main subroutines; certain types of
+application-level errors: security violation, data constraint issues
+(user enters incorrect data into a form).
+
+B<DEBUG>
+
+Detailed status messages. Turning this on means the user wants to see
+everything.
+
+=head2 An efficiency note
+
+Leaving logging enabled can be an expensive proposition. But you can
+make it much less expensive by putting a check on your logging
+calls. So instead of:
+
+ $log->debug( "Data structure so far: ", Data::Dumper::Dumper( \%big_hash ) );
+
+you can use:
+
+ $log->is_debug &&
+     $log->debug( "Data structure so far: ", Data::Dumper::Dumper( \%big_hash ) );
+
+and the expensive-to-generate string will never get generated unless
+it has to.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

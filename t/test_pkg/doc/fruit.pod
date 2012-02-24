@@ -1,0 +1,37 @@
+=head1 NAME
+
+fruit - Simple example package
+
+=head1 SYNOPSIS
+
+ # Installation:
+
+ $ export OPENINTERACT=/path/to/website
+ $ oi2_manage install_package --package_file=fruit-0.09.tar.gz
+ $ oi2_manage install_sql --package=fruit
+
+ # Restart your web server, then request:
+
+ http://.../Fruit/
+
+=head1 DESCRIPTION
+
+This is a simple package for demonstration purposes. If you have any
+difficulties with it, please contact the openinteract-help mailing
+list (openinteract-help@lists.sourceforge.net).
+
+=head1 BUGS 
+
+None yet!
+
+=head1 TO DO
+
+Nothing
+
+=head1 SEE ALSO
+
+L<OpenInteract2::Manual|OpenInteract2::Manual>
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

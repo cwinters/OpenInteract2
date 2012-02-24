@@ -1,0 +1,36 @@
+[%- IF NOT status_msg;
+    status_msg = OI.action_param( 'status_msg' ) || OI.request.message( 'status_msg' );
+    END -%]
+
+[%- IF status_msg -%]
+
+[%- DEFAULT theme         = OI.theme_properties;
+    SET status_width      = width || '50%';
+    SET status_font_color = font_color || '#000000';
+    SET status_border     = border_color || theme.border_color;
+    SET status_bgcolor    = bgcolor ||theme.even_bgcolor; -%]
+
+<!-- BEGIN status display -->
+
+<div align="center">
+
+[%- INCLUDE table_bordered_begin( table_width  = status_width, 
+                                  bgcolor      = status_bgcolor,
+                                  border_color = status_border ) -%]
+
+  <tr><td align="center">
+    <font color="[% status_font_color %]" size="+1"><b>Status</b></font>
+  </td></tr>
+  <tr><td>
+    [% FOREACH status = status_msg -%]
+    <p>[% theme.bullet %] <font color="[% status_font_color %]">[% status %]</font></p>
+    [% END -%]
+  </td></tr>
+
+[%- PROCESS table_bordered_end -%]
+
+</div>
+
+<!-- END status display -->
+
+[%- END -%]

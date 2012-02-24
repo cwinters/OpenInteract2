@@ -1,0 +1,3 @@
+Makefile.PL      --> Makefile.PL
+Brick.pm         --> lib OpenInteract2 Brick [% subclass %].pm
+module_include.t --> t 00_basic_include.t 

@@ -1,0 +1,7 @@
+[%- DEFAULT submit_label = MSG( 'global.button.go' );
+    INCLUDE form_begin( ACTION = 'search',
+                        method = 'GET',
+                        name   = 'search' );
+    INCLUDE form_text( name = 'keywords', size = 10 );
+    INCLUDE form_submit( value = submit_label, name = 'search_button' );
+    PROCESS form_end %]

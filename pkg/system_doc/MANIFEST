@@ -1,0 +1,14 @@
+Changes
+MANIFEST
+MANIFEST.SKIP
+package.ini
+conf/action.ini
+data/install_security.dat
+msg/system_doc-messages-en.msg
+OpenInteract2/PodView.pm
+OpenInteract2/Action/SystemDoc.pm
+OpenInteract2/App/SystemDoc.pm
+OpenInteract2/SQLInstall/SystemDoc.pm
+template/doc_display.tmpl
+template/module_listing.tmpl
+template/system_doc_menu.tmpl

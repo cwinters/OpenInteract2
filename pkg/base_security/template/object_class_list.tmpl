@@ -1,0 +1,60 @@
+[%- OI.page_title( MSG( 'base_security.list.page_title' ) );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message;
+    PROCESS status_message; -%]
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'security',
+                       TASK   = 'display',
+                       method = 'GET',
+                       name   = 'class_listing' ) -%]
+
+<h2 align="center">[% MSG( 'base_security.list.title' ) %]</h2>
+
+<p>[% MSG( 'base_security.list.summary' ) %]</p>
+
+[% INCLUDE table_bordered_begin -%]
+
+  <tr><td bgcolor="#ffffe0">
+[% MSG( 'base_security.list.class_option.header' ) %]
+  </td></tr>
+  <tr><td bgcolor="[% theme.even_color %]">
+      <select name="spops_name">
+        <option value="">[% MSG( 'base_security.list.class_option.first' ) %]</option>
+[% FOREACH object_info = object_list -%]
+   [%- IF object_info.secure -%]
+        <option value="[% object_info.name %]">
+                [%- object_info.class -%] ([% object_info.name %])
+                [%- ': hierarchical security' IF object_info.hierarchy_secure %]</option>
+   [%- END -%]
+[% END -%]
+      </select><br>
+      ID: [% PROCESS form_text( name = 'object_id', size = '40' ) %]
+  </td></tr>
+
+  <tr><td colspan="5" bgcolor="#ffffe0">
+[% MSG( 'base_security.list.action_option.header' ) %]
+  </td></tr>  
+  <tr><td bgcolor="[% theme.even_color %]">
+      <select name="action_name">
+        <option value="">[% MSG( 'base_security.list.action_option.first' ) %]</option>
+[% FOREACH action_info = action_list -%]
+   [%- IF action_info.secure -%]
+        <option value="[% action_info.name %]">
+                [%- action_info.class -%] ([% action_info.name %])</option>
+   [%- END -%]
+[% END -%]
+      </select>
+  </td></tr>
+
+  <tr bgcolor="[% theme.odd_color %]"><td align="right">
+    [% PROCESS form_submit( name  = 'submit',
+                            value = MSG( 'base_security.list.button' ) ) %]
+  </td></tr>
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+</div>

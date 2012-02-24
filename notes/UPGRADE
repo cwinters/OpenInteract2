@@ -1,0 +1,31 @@
+Notes on upgrading from 1.x to 2.0
+========================================
+
+ - The 'get_dir()' method from the server config object has been
+ removed. The macro references are all resolved at server startup so
+ the need for them is gone. Instead of:
+
+   my $dir = $config->get_dir( 'html' );
+
+ You would simply do:
+
+   my $dir = $config->{dir}{html};
+
+ - The 'base' directory in the server configuration is now 'website':
+
+ my $website_dir = CTX->server_config->{dir}{website};
+
+
+ - Upgrading data files (found in data/):
+
+   transform_default_to_id    --> transform_default
+   transform_to_now           --> transform_now
+   transform_class_to_website --> NO LONGER NEEDED
+
+ - OI.make_url now takes 'BASE' instead of 'base', and can also take
+ 'ACTION' and (optionally) 'TASK' to specify the URL.
+
+ - Not that anyone was using it, but the template blocks per package
+ 'feature' has been eliminated.
+
+ - server config: action_info -> default -> 'conductor' = 'controller'

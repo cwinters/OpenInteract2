@@ -1,0 +1,1 @@
+$ mysqladmin --user=$ADMINUSER --password=$ADMINPASSWORD create $DBNAME

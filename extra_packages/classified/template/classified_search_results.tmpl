@@ -1,0 +1,28 @@
+[%- OI.page_title( "Classified Search Results" );
+    DEFAULT theme = OI.theme_properties;
+    OI.box_add( 'classified_tools_box' ) -%]
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center">
+
+<h2 align="left">Classified Listings</h2>
+
+<div align="center">
+
+[% IF iterator AND iterator.has_next -%]
+
+<p>Following are the classifieds that match your criteria.</p>
+
+[% PROCESS classified::classified_list -%]
+
+[% ELSE -%]
+
+<p align="left">No classifieds matching your criteria are currently in
+the database.</p>
+
+[% END -%]
+
+</div>
+

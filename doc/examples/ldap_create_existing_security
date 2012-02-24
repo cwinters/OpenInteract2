@@ -1,0 +1,20 @@
+$ export OPENINTERACT2=/path/to/mysite
+$ cd pkg/base_security-2.xx/script
+$ perl create_object_security.pl \
+    --class=OpenInteract2::User \
+    --scope=world \
+    --level=read
+$ perl create_object_security.pl \
+    --class=OpenInteract2::User \
+    --scope=group \
+    --scope_id='site admin' \
+    --level=write
+$ perl create_object_security.pl \
+    --class=OpenInteract2::Group \
+    --scope=world \
+    --level=read
+$ perl create_object_security.pl \
+    --class=OpenInteract2::Group \
+    --scope=group \
+    --scope_id='site admin' \
+    --level=write

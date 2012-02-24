@@ -1,0 +1,16 @@
+Changes
+MANIFEST
+MANIFEST.SKIP
+package.ini
+conf/action.ini
+msg/base_box-messages-en.msg
+msg/base_box-messages-no.msg
+OpenInteract2/Action/Box.pm
+OpenInteract2/Action/SystemBoxes.pm
+OpenInteract2/App/BaseBox.pm
+template/admin_tools_box.tmpl
+template/login_box.tmpl
+template/main_box_shell.tmpl
+template/object_modify_box.tmpl
+template/powered_by_box.tmpl
+template/user_info_box.tmpl

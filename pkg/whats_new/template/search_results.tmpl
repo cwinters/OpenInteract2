@@ -1,0 +1,21 @@
+[%- OI.page_title( MSG( 'whats_new.results.title' ) ) -%]
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center" class="demarcatePage">
+
+<h2>[% MSG( 'whats_new.results.title' ) %]</h2>
+
+[% IF iterator AND iterator.has_next -%]
+
+[% PROCESS whats_new::list -%]
+
+[% ELSE -%]
+
+<p>[% MSG( 'whats_new.results.none' ) %]</p>
+
+[% END -%]
+
+</div>
+

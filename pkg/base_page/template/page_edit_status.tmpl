@@ -1,0 +1,15 @@
+[%- OI.page_title( "Status of page edit" );
+    DEFAULT theme = OI.theme_properties -%]
+
+[% PROCESS error_message %]
+[% PROCESS status_message %]
+
+[% UNLESS error_msg -%]
+<p>
+View:<br>
+ [% theme.bullet %]
+    <a href="[% OI.make_url( BASE = directory ) %]">[% directory %]</a> (directory)<br>
+ [% theme.bullet %]
+    <a href="[% OI.make_url( BASE = location ) %]">[% location %]</a> (page)
+</p>
+[% END -%]

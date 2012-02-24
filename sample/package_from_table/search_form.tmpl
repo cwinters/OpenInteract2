@@ -1,0 +1,55 @@
+[% TAGS star %]
+[%# This OpenInteract2 file was generated
+      by:    [* invocation *]
+      on:    [* date *]
+      from:  [* source_template *]
+      using: OpenInteract2 version [* oi2_version *] %]
+[%-
+   title         = MSG( '[* package_name *].title_search_form' );
+   OI.page_title( title );
+   DEFAULT theme = OI.theme_properties;
+-%]
+
+[%-
+   PROCESS error_message;
+   PROCESS status_message;
+-%]
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = '[* package_name *]',
+                       TASK   = 'search',
+                       method = 'GET',
+                       name   = 'search_form' ) -%]
+
+<h2>[% title %]</h2>
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0; valign = 'top' -%]
+
+[* FOREACH field = fields -*]
+[*-
+   label_key   = "${package_name}.${field.name}_title";
+-*]
+[* IF field.is_boolean -*]
+[%- count = count + 1 -%]
+[% INCLUDE label_form_checkbox_row( label_key   = '[* label_key *]',
+                                    name        = '[* field.name *]',
+                                    value       = 'TRUE',
+                                    is_picked   = OI.as_boolean( object.[* field.name *] ) ) -%]
+[* ELSIF field.is_text -*]
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = '[* label_key *]',
+                                name      = '[* field.name *]',
+                                size      = 20, ) -%]
+[* END -*]
+[* END -*]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value_key = 'global.button.search' ) %]
+  
+[% INCLUDE table_bordered_end %]
+
+[% PROCESS form_end %]
+
+</div>

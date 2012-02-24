@@ -1,0 +1,24 @@
+[%- DEFAULT theme = OI.theme_properties;
+    search_url = OI.make_url( ACTION = 'classified',
+                              TASK   = 'search_form' );
+    new_url    = OI.make_url( ACTION = 'classified',
+                              TASK   = 'search_form',
+                              edit = 1 ); -%]
+[% theme.bullet %] <a href="[% search_url %]">Search classified ads</a><br>
+[% theme.bullet %] <a href="[% new_url %]">Create a new classified ad</a>
+
+[%- IF object and object.id and object.tmp_security_level == OI.security_level.write -%]
+   [%- remove_url = OI.make_url( ACTION = 'classified',
+                                 TASK   = 'remove',
+                                 classified_id = classified.id );
+       view_url   = OI.make_url( ACTION = 'classified',
+                                 TASK   = 'show',
+                                 classified_id = classified.id );
+       edit_url   = OI.make_url( ACTION = 'classified',
+                                 TASK   = 'show',
+                                 edit = 1, classified_id = classified.id ); -%]
+   <br>
+   [%- theme.bullet %] <a href="[% remove_url %]">Remove this classified ad</a><br>
+   [%- theme.bullet %] <a href="[% edit_url %]">Edit this classified ad</a><br>    
+   [%- theme.bullet %] <a href="[% view_url %]">View this classified ad</a>
+[%- END -%]

@@ -1,0 +1,90 @@
+[%- OI.page_title( MSG( 'lookup.listing.page_title' ) );
+    DEFAULT theme = OI.theme_properties;
+    DEFAULT blank_count = 5;
+    SET full_colspan    = field_list.size + 2; -%]
+
+[%########################################
+  MACROS
+  ########################################-%]
+
+[% MACRO lookup_header BLOCK -%]
+  <tr valign="bottom" align="center">
+    <td><b>[% MSG( 'lookup.listing.id' ) %]</b></td>
+  [% FOREACH label = label_list -%]
+    <td><b>[% label %]</b></td>
+  [% END -%]
+    <td><b>[% MSG( 'lookup.listing.remove' ) %]</b></td>
+  </tr>
+[% END -%]
+
+
+[% MACRO lookup_entry_row BLOCK -%]
+  [% display_id = entry.id || MSG( 'global.label.new' );
+     this_id    = entry.id || id -%]
+      <tr valign="middle" align="center" [% PROCESS row_color %]>
+        <td>[% display_id %]</td>
+  [% FOREACH idx = [ 0 .. field_list.max ] -%]
+      [%- field = field_list.$idx; -%]
+        <td>
+          [%- PROCESS lookup::lookup_field( label = label_list.$idx,
+                                            id    = this_id,
+                                            size  = size_list.$idx,
+                                            value = entry.$field,
+                                            name  = field ) -%]
+        </td>
+  [% END -%]
+        <td>
+  [% IF entry %][% PROCESS form_checkbox( name = "$remove_key-$this_id", value = 'yes' ) -%]
+  [% ELSE %]&nbsp;[% END -%]
+        </td>
+     </tr>
+[% END -%]
+
+[%########################################
+  DISPLAY START
+  ########################################-%]
+
+[%- PROCESS error_message -%]
+
+<h1>[% MSG( 'lookup.listing.title', lookup_type ) %]</h1>
+
+<p>
+[% MSG( 'lookup.listing.summary', lookup_type ) %]
+[% IF partition_field;
+     MSG( 'lookup.listing.summary', partition_label, partition_value );
+   END -%].
+</p>
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'lookups',
+                       TASK   = 'edit',
+                       method = 'POST',
+                       name   = 'lookup_listing' ) -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+[%- lookup_header -%]  
+[% FOREACH item = lookup_list -%]
+  [% lookup_entry_row( entry = item,
+                       count = loop.count ) -%]
+[% END -%]
+  <tr bgcolor="#ffffe0" align="center">
+    <td colspan="[% full_colspan %]"><b>[% MSG( 'lookup.listing.new_entries' ) %]</b></td>
+  </tr>
+[% FOREACH blank_num = [ 1 .. blank_count ] -%]
+  [% lookup_entry_row( id    = "${new_key}${blank_num}",
+                       count = loop.count ) -%]
+[% END -%]
+
+[% PROCESS form_submit_row( value_key = 'global.button.save',
+                            colspan   = full_colspan,
+                            color     = theme.bgcolor ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_hidden( name = "lookup_type", value = lookup_type ) -%]
+
+[% PROCESS form_end %]
+
+</div>

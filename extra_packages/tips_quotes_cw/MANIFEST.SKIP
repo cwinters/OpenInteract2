@@ -1,0 +1,8 @@
+\.log$
+\bCVS\b
+~$
+\.old$
+\.bak$
+\.backup$
+^tmp
+^_

@@ -1,0 +1,81 @@
+[% TAGS star %]
+[%# This OpenInteract2 file was generated
+      by:    [* invocation *]
+      on:    [* date *]
+      from:  [* source_template *]
+      using: OpenInteract2 version [* oi2_version *] %]
+[%-
+   title           = MSG( '[* package_name *].title_search_results' );
+   OI.page_title( title );
+   date_format     = '%Y-%m-%d';
+   datetime_format = '%Y-%m-%d %l:%M %p';
+   DEFAULT theme   = OI.theme_properties;
+-%]
+
+[%-
+   PROCESS error_message;
+   PROCESS status_message;
+-%]
+
+<div align="center">
+
+<h2>[% title %]</h2>
+
+[% IF iterator AND iterator.has_next -%]
+
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 1; valign = 'top' -%]
+
+[% INCLUDE header_row( label_keys = [
+[* FOREACH name = field_names;
+    IF name == key_field; NEXT; END; -*]
+     '[* package_name *].[* name *]_title',
+[* END -*]
+     'global.label.nbsp',
+] ) -%]
+
+[% WHILE ( object = iterator.get_next );
+     row_color  = PROCESS row_color;
+     view_url   = OI.make_url( ACTION = '[* package_name *]',
+                               TASK   = 'display',
+                               [* key_field *] = object.id );
+     edit_url   = OI.make_url( ACTION = '[* package_name *]',
+                               TASK   = 'display_form',
+                               [* key_field *] = object.id );
+     remove_url = OI.make_url( ACTION = '[* package_name *]',
+                               TASK   = 'remove',
+                               [* key_field *] = object.id );
+-%]
+  <tr [% row_color %]>
+[* FOREACH field = fields;
+    IF field.name == key_field; NEXT; END; -*]
+[* IF field.is_date -*]
+    <td>[% OI.date_format( object.[* field.name *], date_format ) %]</td>
+[* ELSIF field.is_datetime -*]
+    <td>[% OI.date_format( object.[* field.name *], datetime_format ) %]</td>
+[* ELSIF field.is_boolean -*]
+    <td>[% object.[* field.name *] ? MSG( 'global.label.yes' ) : MSG ( 'global.label.no' ) %]</td>
+[* ELSE -*]
+    <td>[% object.[* field.name *] %]</td>
+[* END -*]
+[* END -*]
+    <td>
+       <a href="[% view_url %]">[% MSG( 'global.label.view' ) %]</a> |
+       <a href="[% edit_url %]">[% MSG( 'global.label.edit' ) %]</a> |
+       <a href="[% remove_url %]">[% MSG( 'global.button.remove' ) %]</a>
+   </td>
+  </tr>
+  [%- count = count + 1 -%]  
+[% END %]
+
+[% INCLUDE table_bordered_end -%]
+
+[% ELSE -%]
+
+[%- new_url = OI.make_url( ACTION = '[* package_name *]',
+                           TASK   = 'display_add' ); -%]
+<p>[% MSG( '[* package_name *].no_results', new_url ) %]</p>
+
+[% END -%]
+

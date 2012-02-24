@@ -1,0 +1,20 @@
+[%- title = MSG( 'obj_activity.search_results.title' );
+    OI.page_title( title ); -%]
+
+<div align="center">
+
+<h2>[% title %]</h2>
+
+[% IF NOT activity_list.size -%]
+
+<p>[% MSG( 'obj_activity.search_results.none' ) %]</p>
+
+[% ELSE -%]
+
+<p>[% MSG( 'obj_activity.search_results.some' ) %]</p>
+
+[% INCLUDE object_activity::listing %]
+
+[% END -%]
+
+</div>

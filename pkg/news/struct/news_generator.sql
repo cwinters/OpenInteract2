@@ -1,0 +1,1 @@
+CREATE GENERATOR oi_news_seq

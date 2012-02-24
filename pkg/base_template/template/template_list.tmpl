@@ -1,0 +1,50 @@
+[%- OI.page_title( MSG( 'base_template.list.page_title' ) );
+    OI.box_add( 'template_tools_box' );
+    DEFAULT theme = OI.theme_properties; -%]
+
+<div align="center">
+[% PROCESS error_message;
+   PROCESS status_message; -%]
+</div>
+
+<div align="center" class="demarcatePage">
+
+<h2>[% MSG( 'base_template.list.title' ) %]</h2>
+
+[% PROCESS table_bordered_begin( internal_padding = 1 ) -%]
+[%- valign = 'top' -%]
+
+[% PROCESS header_row(
+       label_keys = [ 'base_template.info.name', 'base_template.info.update' ]
+) -%]
+
+[% FOREACH package_name = package_templates.keys.sort %]
+    <tr bgcolor="#ffffe0">
+        <td colspan="2"><b>
+   [%- IF NOT package_name -%][% MSG( 'base_template.list.global' ) %]
+   [%- ELSE %][% package_name %][% END -%]
+        </b></td>
+    </tr>
+   [%- template_list = package_templates.$package_name -%]
+   [% IF template_list.size == 0 -%]
+      <tr bgcolor="[% theme.odd_color %]">
+         <td colspan="2"><em>[% MSG( 'base_template.list.none_in_package' ) %]</em></td>
+      </tr>
+   [% ELSE -%]
+     [% FOREACH tmpl = template_list -%]  
+       [%- tmpl_edit_url = OI.make_url( ACTION  = 'template',
+                                        TASK    = 'display_form',
+                                        package = tmpl.package,
+                                        name    = tmpl.name ) -%]
+      <tr [% PROCESS row_color( count = loop.count ) %]
+          valign="middle" align="left">
+        <td><a href="[% tmpl_edit_url %]">[% tmpl.name %]</a></td>
+        <td>[% OI.date_format( tmpl.modified_on, '%Y-%m-%d %H:%M', fill_nbsp = 'yes' ) %]</td> 
+      </tr>
+     [% END -%]
+   [% END -%]
+[% END -%]
+
+[% PROCESS table_bordered_end -%]
+
+</div>

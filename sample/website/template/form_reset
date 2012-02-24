@@ -1,0 +1,6 @@
+[%- IF value_key;
+        value = MSG( value_key );
+    END;
+    DEFAULT value = MSG( 'global.button.reset' );
+-%]
+<input type="reset" value="[% value %]">

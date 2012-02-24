@@ -1,0 +1,19 @@
+[%########################################
+  label_form_date_row( label, count, name, value, field_label )
+     Display a row to input a date: label on left, date input on right.
+  ########################################-%]
+
+[%- DEFAULT colspan = 2;
+    IF action_messages.$name;
+       color = '#ffffe0';
+    END;  -%]  
+[%- INCLUDE label_row_begin( colspan = 1 ) -%]
+[%- INCLUDE data_cell_begin -%]
+[%- object = ( date_object ) ? date_object : OI.date_into_object( value ) -%]
+[%- PROCESS date_select( field_prefix = name ) -%]
+[% field_label -%]
+</td></tr>
+[% IF action_messages.$name -%]
+[% INCLUDE label_error_row_extra( color   = color,
+                                  message = action_messages.$name ) -%]
+[% END -%]

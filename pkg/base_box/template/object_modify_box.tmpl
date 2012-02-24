@@ -1,0 +1,38 @@
+[%- DEFAULT theme = OI.theme_properties -%]
+
+[%- IF object and object.tmp_security_level >= OI.security_level.write -%]
+
+[% IF object.id -%]
+[%- object_info = OI.object_description( object ) -%]
+
+[%- tagged = 0 -%]
+[% IF object.isa( 'SPOPS::Secure' ) -%]
+  [%- security_url = OI.make_url( ACTION       = 'security',
+                                  TASK         = 'show',
+                                  object_class = object_info.class,
+                                  object_id    = object_info.object_id ) -%]
+  [%- theme.bullet %] <a href="[% security_url %]">
+      [%- MSG( 'object_modify_box.edit_security' ) %]</a><br>
+  [%- tagged = tagged + 1 -%]
+[% END -%]
+
+[%- IF object.isa( 'OpenInteract2::Linked' ) -%]
+  [%- topics_url = OI.make_url( ACTION       = 'linkterm',
+                                TASK         = 'show',
+                                object_class = object_info.class,
+                                object_id    = object_info.object_id ) -%]
+  [%- theme.bullet %] <a href="[% topics_url %]">
+       [%- MSG( 'object_modify_box.edit_security' ) %]</a><br>
+  [%- tagged = tagged + 1 -%]
+[%- END -%]
+
+[%- IF tagged == 0 -%]
+[%- MSG( 'object_modify_box.summary' ) %][%- END -%]
+
+[%- ELSE -%]
+<p>[% MSG( 'object_modify_box.not_entered' ) %]</p>
+[%- END -%]
+
+[%- ELSE -%]
+<p>[% MSG( 'object_modify_box.cannot_view' ) %]</p>
+[%- END -%]

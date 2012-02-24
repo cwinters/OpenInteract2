@@ -1,0 +1,13 @@
+[% OI.page_title( MSG( 'error_security.page_title' ) ) %]
+
+<div align="center">
+
+<h1>[% MSG( 'error_security.title' ) %]</h1>
+
+<table width="50%" border="0" cellpadding="5" cellspacing="0">
+<tr><td align="left">
+[% MSG( 'error_security.summary' ) %]
+</td></tr>
+</table>
+
+</div>

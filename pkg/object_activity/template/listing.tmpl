@@ -1,0 +1,33 @@
+[%- MACRO show_with_url( text, url ) BLOCK -%]
+[%- full_url = OI.make_url( BASE = url ) -%]
+[%- IF url %]<a href="[% full_url %]">[% END %][% text %][% IF url %]</a>[% END -%]
+[%- END -%]
+
+[%- DEFAULT table_width = '90%' -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row( label_keys = [
+    'obj_activity.info.date',
+    'obj_activity.info.action', 
+    'obj_activity.info.type', 
+    'obj_activity.info.title', 
+    'obj_activity.info.user',
+]) -%]
+
+[% FOREACH record = activity_list -%]
+  [%- count = loop.count -%]
+<tr valign="middle" align="center" [% PROCESS row_color %]>
+  <td>[% OI.date_format( record.action_on, '%Y-%m-%d %l:%M %p' ) %]</td>
+  <td>[% record.action %]</td>
+  <td>[% record.object_type %]</td>
+[% IF record.action == 'remove' -%]
+  <td>[% record.title %]</td>
+[% ELSE -%]
+  <td>[% show_with_url( record.title, record.display_url ) %]</td>
+[% END -%]
+  <td>[% show_with_url( record.login_name, record.user_display_url ) %]</td>
+</tr>
+[% END -%]
+
+[% PROCESS table_bordered_end -%]

@@ -1,0 +1,227 @@
+Revision history for OpenInteract package base_group.
+
+2.20  Thu Mar 17 08:05:13 EST 2005
+
+      Minor Norwegian I18N fixes.
+	  Give correct error message when user creation fails.
+
+2.19  Wed Mar  2 22:46:28 EST 2005
+
+      Add 'group_id' as extra URL param.
+
+2.18  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.17  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.16  Sat Dec  4 00:20:35 EST 2004
+
+      Add error messages to l10n english file; use error/status
+      shortcuts.
+
+2.15  Sat Nov 27 13:51:04 EST 2004
+
+      Add Norwegian messages from Salve Nilsen.
+
+2.14  Sun Jun 13 15:32:23 EDT 2004
+
+      Don't migrate data or install data if the group is stored in
+      LDAP.
+
+2.13  Tue Jun  8 21:15:40 EDT 2004
+
+      Fix labels on top of the user assignments (Salve Nilsen)
+
+2.12  Sun Jun  6 02:05:10 EDT 2004
+
+      OIN-16: update status messages
+
+2.11  Thu Mar 18 20:01:38 EST 2004
+
+      Fix initial security declaration
+
+2.10  Wed Feb 25 10:11:50 EST 2004
+
+      Fix OI2::SQLInstall::Group declaration to migrate
+      'sys_group_user' -- used 'fields' instead of 'field'
+
+2.09  Mon Feb 16 19:01:05 EST 2004
+
+      Template fixes...
+
+2.08  Thu Feb 12 21:36:12 EST 2004
+
+      Extract strings from templates and add to msg file.
+
+2.07  ... (unlabeled!)
+
+      - Cosmetic cleanup of config lookupx
+
+2.06  Tue Oct 14 00:24:56 EDT 2003
+
+      Add data migration information to OI2::SQLInterface::Group.
+
+2.05  Fri Sep  5 10:30:40 EDT 2003
+
+      Doc updates, small.
+
+2.04  Thu Sep  4 00:07:53 EDT 2003
+
+      Add 'TASK_EDIT' key to 'display' entry in conf/spops_group.ini 
+
+2.03  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+2.02  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.01  Mon Mar 31 21:35:45 EST 2003
+
+      Update SPOPS config to INI, other changes.
+
+2.00  Sat Mar 22 11:40:09 EST 2003
+
+      Initial changes for OI2.
+
+1.38  Mon Feb 17 11:20:52 EST 2003
+
+      Update package docs.
+
+1.37  Sun Aug 25 11:53:34 EDT 2002
+
+      Remove all template/*.meta files
+
+1.36  Thu May  2 01:44:55 EDT 2002
+
+      Add InterBase-specific tables and generator
+
+1.35  Thu Apr 25 08:24:42 EDT 2002
+
+      Define DEBUG (how was this working before?)
+
+1.34  Sat Apr 13 12:48:27 EDT 2002
+
+      In OI/Handler/Group.pm, use SPOPS::Utility->list_process()
+      directly rather than assume it's in our @ISA.
+
+1.33  Mon Apr  1 21:32:38 EST 2002
+
+      Add Oracle-specific tables; rename structure files to match
+      table names; add explicit sequence creation.
+
+1.32  Tue Jan 15 12:17:31 EST 2002
+
+      Updated OI/Handler/Group.pm to have the relevant display/fail
+      tasks defined, particularly since we're not using a search form.
+
+1.31  Wed Dec 12 20:45:19 EST 2001
+
+      Fixed bug spotted by John Sequeira <jseq@mediaone.net> -- you
+      couldn't create a new group because it wouldn't present a form
+      for you.
+
+1.30  Wed Nov 28 23:19:21 EST 2001
+
+1.29  Wed Nov 28 23:15:38 EST 2001
+
+      Small template, handler updates.
+
+1.28  Wed Nov 28 23:05:28 EST 2001
+
+      Update to use OI::CommonHandler (fairly extensive changes to handler).
+
+1.27  Wed Oct 31 09:35:39 EST 2001
+
+      Updated templates to use widgets.
+
+1.26  Thu Sep 13 23:33:25 EDT 2001
+
+      Updated handler to be able to add/remove user members properly,
+      and to only update the fields needed. Works with LDAP!
+
+1.25  Tue Aug 21 08:38:06 EDT 2001
+
+      Set GROUPID_TYPE and USERID_TYPE in the linking table. (95%
+      certainty you won't need to change anything as a result)
+
+1.24  Tue Aug 21 01:08:43 EDT 2001
+
+      Updated LDAP configuration to reflect the user
+      relationship. Also remove the 'code_class' reference to
+      OpenInteract/Group/LDAP.pm since the only thing it contained was
+      the hand-created relationship code.
+
+1.23  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.22  Mon Aug 13 11:26:12 EDT 2001
+
+      Modified template(s) with <!-- TEMPLATE SCRIPT --> key to have
+      normal <script>...</script> tags.
+
+1.21  Sun Aug 12 23:09:40 EDT 2001
+
+      Add 'object_id' to the transform list in
+      data/install_security.dat
+
+1.20  Sun Aug 12 13:44:16 EDT 2001
+
+      Experimenting with LDAP groups...
+
+1.19  Sun Aug 12 11:17:21 EDT 2001
+
+      Modify data/install_security.dat to use new
+      'transform_default_to_id' action.
+
+1.18  Sun Aug 12 10:09:12 EDT 2001
+
+      Modified OpenInteract/SQLInstall/Group.pm to use the values in
+      the server configuration for the super ('admin'), 'site admin'
+      and 'public' groups. Also for the superuser and supergroup in
+      the group linking table.
+
+1.17  Sat Aug 11 17:36:51 EDT 2001
+
+      Changed conf/spops.conf->isa from OpenInteract::SPOPS to
+      OpenInteract::SPOPS::DBI
+
+1.16  Thu May 31 21:58:12 EDT 2001
+
+      Changed the relevant ID fields from 'int' to
+      '%%INCREMENT_FIELD%%'.
+
+1.15  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.14  Tue Mar 13 07:20:31 EST 2001
+
+      Changed security level data: 'oid' -> 'object_id'
+
+1.13  Wed Mar  7 06:58:05 EST 2001
+
+      Added type information in data/install_group_link.dat file.
+
+1.12  Sun Mar  4 16:04:01 EST 2001
+
+      Changed security level data: 'level' -> 'security_level'
+
+1.11  Tue Feb 20 08:04:18 EST 2001
+
+      Modified conf/spops.perl to reflect SPOPS changes.
+
+1.10  Wed Jan 31 08:31:13 EST 2001
+
+      Cleanup
+
+1.09  Thu Dec 21 00:09:08 EST 2000
+
+      Cleaned up conf/spops.perl and
+      OpenInteract/Handler/Group.pm. Started Changelog.

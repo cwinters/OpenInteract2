@@ -1,0 +1,183 @@
+request attributes
+====================
+
+ - Every request object has attributes that last only for that
+ request. However, you can also tag attributes as persistent and they
+ will be saved in the user's session and reconstituted (as
+ attributes!) when the user comes back.
+
+ - The various weird properties of $R will be created as attributes
+ and prefixed with 'oi_' so there are no namespace collisions. For
+ instance:
+
+   $req->attribute( 'oi_user' );
+   $req->attribute( 'oi_is_logged_in' );
+   $req->attribute( 'oi_group' );
+   $req->attribute( 'oi_theme' );
+   $req->attribute( 'oi_theme_properties' ); (?)
+
+   (maybe make this: $req->attrib() for short; we also might create
+   shortcuts for common items like $req->user, $req->is_logged_in,
+   etc., but the format will be the same)
+
+We will use this serialized attributes pattern to save:
+
+  - user object
+  - group objects
+  - theme object
+
+So we don't need to keep fetching them every time. This means that
+when the user logs out, we need to invalidate the session so all this
+stuff goes away and the user starts clean.
+
+
+scope
+====================
+
+Useful breakdown of scope (to app authors)
+
+  - page/handler
+  - request
+  - session
+  - application   
+
+
+deploying
+====================
+
+Next version will be able to deploy a server (collection of packages +
+configuration) under a URL-space. For instance, we can have:
+
+ /MyOI/User/show/
+ /MyOI/Page/actions/
+
+How to do this: the server configuration has a property:
+
+ [url]
+ deployed_under =
+
+Normally this is blank, which means OI will assume /User/show/ from
+the top level. But if set:
+
+ [url]
+ deployed_under = /MyOI
+   -- ensure at startup that the dir has no trailing '/'
+
+Then calls to:
+
+ my $url = $req->make_url( '/User/show/', foo => 'bar' );
+
+will return:
+
+ /MyOI/User/show/?foo=bar
+
+When creating the request, OI will look to the configuration to see
+where the server is deployed and ensure that the URL isn't included in
+any paths.
+
+The only caveat is that developers must always create URLs using:
+
+ my $url = $req->make_url( $base, \%params );
+
+or
+
+ [% url = OI.make_url( base = '/blah', this = that ) %]
+
+Maybe shorten this to 'url' instead of 'make_url'?
+
+Also:
+
+ [url]
+ include_session_key = 0/1
+    (default false)
+
+Parses the URL for the session key:
+
+ /MyOI/35UFGDDKSLWEO/User/show/
+ /MyOI/User/show/35UFGDDKSLWEO/
+
+And tells 'make_url' to put the session key in the URL.
+
+Request
+====================
+
+ OpenInteract::Request->instance should return a tied hashref that
+ does the right thing for backward compatibility.
+
+ ... Maybe not
+
+Main objects
+====================
+
+The main OI objects:
+
+ - Context
+ - Request
+ - Response
+ - Action
+
+action return
+====================
+
+ $action->execute() should return:
+
+  - two-item list ($content, $status)
+  - ActionResponse object (stringifies to $content, has error code/message)
+  - $content
+
+
+action create
+====================
+
+my $action = OI::Action->new({ name => 'news', task => 'show' });
+             OI::Action->new({ url => '/News/show/' });
+             OI::Action->new({ custom => 'news::show' });
+
+Adding new types of actions:
+
+ OI::Action->add_type( 'custom', 'My::Custom' );
+   |
+   --> performs a check to see if 'custom' is already used, if
+       'My::Custom' is a valid class that we can require
+
+ - When OI starts up, it finds actions from the server configuration
+ exported by packages and installs them to the action class so they're
+ always available
+
+context
+====================
+
+The start object creates (or selects) an appropriate _context_ for the
+URL (?) or just the server (?)
+
+What belongs in the context?
+
+  - Aliases (objects, pieces of the FW)
+  - Config object/hashref
+  - Request (current)
+  - Response (current)
+
+
+initial steps
+====================
+
+ - Create/fetch the context
+ - Set the FULL URL
+ - Find the initial action
+     -- ~Conductor
+     -- Places the content generated in the overall page
+ - Create the request object
+     -- Set reference to context
+     -- Set original URL (sans deployed-under and session key)
+     -- Fetch cookies
+     -- Fetch session key
+     -- Fetch session
+     -- Authenticate
+ - Start the content process
+
+
+package distribution
+====================
+
+Move to using Archive::Zip vs. Archive::Tar. Seems to be better
+supported on Win32.

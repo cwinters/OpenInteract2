@@ -1,0 +1,17 @@
+[%-
+  title = MSG( 'base_error.monthly.title', year, month );
+  OI.page_title( title );
+-%]
+
+<h2>[% title %]</h2>
+
+<p>[% MSG( 'base_error.monthly.by_day', year, month ) %]</p>
+<ul>
+[% FOREACH day = days_sorted -%]
+   [% IF breakdown.$day -%]
+       [% by_day_url = OI.make_url( ACTION    = 'error_browser', TASK = 'by_day',
+                                    date_spec = "$year-$month-$day" ) -%]
+       <li><a href="[% by_day_url %]">[% day %]</a>: [% breakdown.$day %]</li>
+   [% END -%]
+[% END -%]
+</ul>

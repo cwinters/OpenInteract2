@@ -1,0 +1,16 @@
+[%- DEFAULT theme = OI.theme_properties;
+    tmpl_new_url = OI.make_url( ACTION = 'template',
+                                TASK   = 'display_add' ) -%]
+[% theme.bullet %] [% MSG( 'base_template.toolbox.label.create', tmpl_new_url ) %]
+[% IF tmpl -%]
+    [%- tmpl_rmv_url  = OI.make_url( ACTION  = 'template',
+                                     TASK    = 'remove',
+                                     package = tmpl.package,
+                                     name    = tmpl.name );
+        tmpl_edit_url = OI.make_url( ACTION  = 'template',
+                                     TASK    = 'display_form',
+                                     package = tmpl.package,
+                                     name    = tmpl.name ) -%]
+  <br>[% theme.bullet %] [% MSG( 'base_template.toolbox.label.edit', tmpl_edit_url ) %]
+  <br>[% theme.bullet %] [% MSG( 'base_template.toolbox.label.remove', tmpl_rmv_url ) %]
+[% END -%]

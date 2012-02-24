@@ -1,0 +1,8 @@
+import_type = object; spops_class = OpenInteract2::Security; transform_default = object_id, scope_id; delimiter = |
+class                       | object_id  | scope | scope_id          | security_level
+OpenInteract2::Action::User |  0         |  w    |  world            |  4
+OpenInteract2::Action::User |  0         |  g    |  public_group     |  8
+OpenInteract2::Action::User |  0         |  g    |  site_admin_group |  8
+OpenInteract2::User         |  superuser |  u    |  superuser        |  8
+OpenInteract2::User         |  superuser |  w    |  world            |  4
+

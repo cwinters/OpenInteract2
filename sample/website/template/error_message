@@ -1,0 +1,36 @@
+[%- IF NOT error_msg;
+    error_msg = OI.action_param( 'error_msg' ) || OI.request.message( 'error_msg' );
+    END -%]
+
+[%- IF error_msg -%]
+
+[%- DEFAULT theme        = OI.theme_properties;
+    SET error_width      = width || theme.error_width;
+    SET error_font_color = font_color || theme.error_font_color;
+    SET error_border     = border_color || theme.error_border_color;
+    SET error_bgcolor    = bgcolor ||theme.error_bgcolor; -%]
+
+<!-- BEGIN of error display -->
+
+<div align="center">
+
+[%- INCLUDE table_bordered_begin( table_width  = error_width,
+                                  border_color = error_border,
+                                  bgcolor      = error_bgcolor ) -%]
+
+<tr><td align="center">
+   <font color="[% error_font_color %]" size="+1"><b>[% MSG( 'error_msg.title' ) %]</b></font>
+</td></tr>
+<tr><td>
+   [% FOREACH error_item = error_msg -%]
+   <p>[% theme.bullet %] <font color="[% error_font_color %]">[% error_item %]</font></p>
+   [% END %]
+</td></tr>
+
+[% PROCESS table_bordered_end -%]
+
+</div>
+
+<!-- END of error display -->
+
+[%- END -%]

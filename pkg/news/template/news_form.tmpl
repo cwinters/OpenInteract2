@@ -1,0 +1,118 @@
+[%- is_saved = news.id;
+    title = ( is_saved )
+              ? MSG( 'news.form.title_update', news.title )
+              : MSG( 'news.form.title_create' );
+    OI.page_title( title );
+    OI.box_add( 'news_tools_box', news = news );
+    OI.box_add( 'all_tags_box' ); 
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message -%]
+[%- IF is_saved;
+      OI.box_add( 'objectmodbox', object = news );
+    END -%]
+
+<div align="center">
+
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+[% PROCESS form_begin( ACTION = 'news', TASK   = task,
+                       method = 'POST', name   = 'news' ) -%]
+
+<h2>[% title %]</h2>
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0; valign = 'top' -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'news.info.title',
+                                is_required = 'yes',
+                                name      = 'title',
+                                value     = news.title,
+                                size      = 50,
+                                maxlength = 75 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'news.info.img_src',
+                                name      = 'image_src',
+                                value     = news.image_src,
+                                size      = 50,
+                                maxlength = 255 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'news.info.img_url',
+                                name      = 'image_url',
+                                value     = news.image_url,
+                                size      = 50,
+                                maxlength = 255 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_radio_row( label_key= 'news.info.img_align',
+                                 name     = 'image_align',
+                                 picked   = news.image_align,
+                                 list     = [ 'left', 'right' ] ); %]
+
+[%- count = count + 1 -%]
+[%- tag_values = is_saved ? TAGS.lookup_tags( news ).join( ' ' ) : '' -%]
+[% INCLUDE label_form_text_row( label_key = 'object_tags.title.object_tags',
+                                name      = MSG( 'object_tags.tag_field' ),
+                                value     = tag_values,
+                                size      = 40,
+                                maxlength = 255 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label_key  = 'news.info.content',
+                                    is_required = 'yes',
+                                    name      = 'news_item',
+                                    value     = OI.html_encode( news.news_item ),
+                                    rows = 8, cols = 50, wrap = 'virtual' ) -%]
+
+[%- count = count + 1 -%]
+[% IF news.id;
+   INCLUDE label_text_row( label_key = 'news.info.posted_on',
+                           text      = OI.date_format( news.posted_on, '%Y-%m-%d %H:%M' ) );
+   ELSE;
+   INCLUDE label_form_date_row( label_key    = 'news.info.posted_on',
+                                name         = 'posted_on',
+                                is_required  = 'yes',
+                                date_object  = news.posted_on,
+                                is_blank     = 'yes',
+                                field_prefix = 'posted_on' );
+   END -%]
+
+[%- IF news.id -%]
+  [%- poster = news.posted_by_user -%]
+[%- ELSE -%]
+  [%- poster = OI.login -%]
+[%- END -%]
+[%- poster_url = OI.make_url( ACTION = 'user', TASK = 'display',
+                              user_id = poster.id );
+    posted_by_user = "<a href='$poster_url'>$poster.login_name</a>" -%]
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label = 'Posted By',
+                           text  = posted_by_user ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_date_row( label_key    = 'news.info.active_on',
+                                name         = 'active_on',
+                                is_required  = 'yes',
+                                date_object  = news.active_on,
+                                is_blank     = 'yes',
+                                field_prefix = 'active_on' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_date_row( label_key    = 'news.info.expires_on',
+                                name         = 'expires_on',
+                                is_required  = 'yes',
+                                date_object  = news.expires_on,
+                                is_blank     = 'yes',
+                                field_prefix = 'expires_on' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value_key = 'global.button.modify' ) %]
+  
+[% INCLUDE table_bordered_end %]
+
+[% INCLUDE form_hidden( name = 'news_id', value = news.id ) %]
+
+[% PROCESS form_end %]
+
+</div>

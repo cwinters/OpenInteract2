@@ -1,0 +1,74 @@
+[%- DEFAULT theme = OI.theme_properties;
+    is_saved = group.id;
+    title  = ( is_saved ) ? MSG( 'base_group.form.title.update', group.name )
+                          : MSG( 'base_group.form.title.new' );
+    OI.page_title( title );
+-%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2>[% title %]</h2>
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+[% PROCESS form_begin( ACTION   = 'group',
+                       TASK     = task,
+                       onsubmit = 'return tally_added_items()',
+                       method   = 'POST',
+                       name     = 'group' ) -%]
+
+[% INCLUDE table_bordered_begin -%]
+[%- count  = 0;
+    valign = 'top'; -%]
+
+[% IF group.id -%]
+  [%- remove_url = OI.make_url( ACTION   = 'group',
+                                TASK     = 'remove',
+                                group_id = group.id ) -%]
+<tr bgcolor="[% theme.bgcolor %]"><td align="right" colspan="2">
+  [% MSG( 'base_group.form.remove_record', remove_url ) %]
+</td></tr>
+[% END -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_group.info.label.name',
+                                is_required = 1,
+                                size  = 10, maxlength = 20,
+                                name  = 'name', value = group.name ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label_key = 'base_group.info.label.name',
+                                    rows  = 3, cols = 30, wrap = 'virtual',
+                                    name  = 'notes', value = group.notes ) -%]
+
+[%- count = count + 1 -%]
+<tr [% PROCESS row_color %]>
+  <td colspan="2" align="center">
+  [% INCLUDE show_label( label_key = base_group.form.label.assign_users ) %]
+  </td>
+</tr>
+
+<tr [% PROCESS row_color %]>
+<td colspan="2" align="center">
+[% PROCESS to_group( form_name     = 'group',
+                     from_element  = 'population',
+                     to_element    = 'member',
+                     mem_list_hold = member_field,
+                     pop_list      = all_user_list,
+                     mem_list      = member_user_list,
+                     label_from    = MSG( 'base_group.form.label.pop_select', 'All' ),
+                     label_to      = MSG( 'base_group.form.label.pop_select', group.name ) ) -%]
+</td>
+</tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = MSG( 'global.button.modify' ) ) -%]
+
+[%- INCLUDE table_bordered_end -%]
+
+[% INCLUDE form_hidden( name = 'group_id', value = group.id ) -%]
+
+[% PROCESS form_end %]
+
+</div>

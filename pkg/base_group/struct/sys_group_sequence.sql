@@ -1,0 +1,1 @@
+CREATE SEQUENCE oi_sys_group_seq

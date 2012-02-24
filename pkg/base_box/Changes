@@ -1,0 +1,356 @@
+Revision history for OpenInteract package base_box.
+
+2.32  Mon Oct 17 20:58:08 EDT 2005
+
+      Small fix to OI2::Action::Box so that declaring a blank template
+      works properly.
+
+2.31  Sat Sep 24 09:59:13 EDT 2005
+
+      OIN-58: Add more tutorial box docs to OI2::App::BaseBox
+
+2.30  Sun Mar 27 12:05:36 EST 2005
+
+      Clean up OI2::Action::Box; move docs into OI2::App::BaseBox
+      including more tutorials about different types of boxes.
+
+2.21  Thu Mar 17 08:05:13 EST 2005
+
+      Move hardcoded box titles into .msg files.
+	  Update Norwegian I18N messages.
+
+2.20  Sun Mar 13 21:09:20 EST 2005
+
+      Modify url for error browser.
+
+2.19  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.18  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.17  Sat Nov 27 19:09:06 EST 2004
+
+      Add caching parameters for static boxes.
+
+2.16  Sat Nov 27 13:51:04 EST 2004
+
+      From Salve Nilsen:
+       - add Norwegian messages
+       - let site admins see the templates_used_box by default, in
+       addition to the admin_tools_box.
+
+2.15  Sun Oct 24 11:01:44 EDT 2004
+
+      Allow localization keys to be used for 'title',
+      'title_image_src' and 'title_image_alt'.
+
+2.14  Mon Oct  4 21:46:20 EDT 2004
+
+      OIN-90: we were relocating the 'return_url' twice in
+      template/login_box.tmpl; use the just-updated feature in the
+      'form_begin' global template to pass in 'form_url' so it doesn't
+      get relocated again. Thanks to Heiko Klein for the spot.
+
+2.13  Sat Sep 25 14:17:34 EDT 2004
+
+      Cleanup the box handler and fix examples.
+
+2.12  Mon Jun  7 00:28:10 EDT 2004
+
+      Allow calls to 'remove_box()' in the controller to affect the
+      system, custom and added boxes.
+
+2.11  Fri May 21 16:01:56 EDT 2004
+
+      Be able to process box requests given just the template name.
+
+2.10  Fri Mar 19 00:52:15 EST 2004
+
+      Small change to user_info box (change logout url slightly)
+
+2.09  Sun Feb 22 23:52:38 EST 2004
+
+      Add link in login_box for 'forgot password?'
+
+2.08  Mon Feb 16 16:17:43 EST 2004
+
+      Fix some messaging errors...
+
+2.07  Wed Feb 11 01:15:16 EST 2004
+
+      Pull out all text from templates to message file.
+
+2.06  Tue Dec  9 15:35:10 CET 2003
+
+      Fix bug in OI2::Action::Box where the extra parameters weren't
+      getting passed in properly.
+
+2.05  Fri Sep  5 10:30:40 EDT 2003
+
+      Doc updates, small.
+
+2.04  Sat Aug 30 11:30:00 EDT 2003
+
+      Update template/login_box to use action messages (signalling a
+      bad login).
+
+2.03  Mon Jul  7 23:13:56 EDT 2003
+
+      Fix bad link in template/admin_tools_box (thanks to Greg
+      Fenton).
+
+2.02  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.01  Sat Mar 22 12:38:22 EST 2003
+
+      Update templates with new OI.make_url syntax.
+
+2.00  Mon Mar  3 23:03:52 EST 2003
+
+      Update to 2.x (first draft)
+
+1.04  Mon Feb 17 17:03:47 EST 2003
+
+      Since we removed the 'systemboxes' action we need to explicitly
+      include the system boxes action...
+
+1.03  Mon Feb 17 10:35:03 EST 2003
+
+      More docs (including the package docs) and add description of
+      whole box process. Also removed 'systemboxes' action since it's
+      no longer used.
+
+1.02  Sun Feb 16 13:04:40 EST 2003
+
+      Add more docs (examples) and cleaned up a couple minor items in
+      OI::Handler::Box.
+
+1.01  Fri Sep  6 14:24:20 EDT 2002
+
+      Fix error in template template/object_modify_box.tmpl
+
+1.00  Sun Aug 25 13:09:56 EDT 2002
+
+      We're stable -- bump up the version.
+
+0.46  Sat Aug 24 19:34:37 EDT 2002
+
+      Move templates_used_box and function over to base_template
+      package; remove all template/*.meta files since they're no
+      longer needed.
+
+0.45  Thu Apr 25 09:05:10 EDT 2002
+
+      Fix template/object_modify_box.tmpl
+
+0.44  Sun Mar  3 13:02:02 EST 2002
+
+      Fix typos (s/INPUT/PROCESS/g) in template/login_box.tmpl. Thanks
+      to Andreas Nolte for pointing out.
+
+0.43  Wed Jan 23 12:20:26 EST 2002
+
+      Update templates to have no font sizing tags; 'site' templates
+      now appear to be the right package
+
+0.42  Wed Jan 16 19:23:06 EST 2002
+
+      Modify link in admin toolbox
+
+0.41  Mon Nov 19 08:35:34 EST 2001
+
+      Small modifications to ensure items are being removed.
+
+0.40  Mon Nov 19 00:03:43 EST 2001
+
+      Update all box entries in conf/action.perl to have a name and a
+      fully-qualified template name.
+
+0.39  Sun Nov 18 23:41:51 EST 2001
+
+      Update login_box to honor the login->always_remember server
+      config key and to not display the 'remember' checkbox if there's
+      no field specified in the server config.
+
+0.38  Thu Nov  1 00:57:09 EST 2001
+
+      Small fix in box handler to ensure that the base box shell
+      template is specified correctly.
+
+0.37  Mon Oct 29 00:24:48 EST 2001
+
+      Updated the object_modify_box
+
+0.36  Thu Oct 25 11:42:39 EDT 2001
+
+      Modified admin_tools_box to use the base_page links ('/Page/')
+      now.
+
+0.35  Wed Oct 24 16:03:29 EDT 2001
+
+      You can now specify boxes to be removed as:
+
+       push @{ $R->{boxes} }, { name => 'name', remove => 'yes' }
+
+0.34  Wed Oct 17 22:33:05 EDT 2001
+
+      Added 'Lookups' and 'Object Activity' to Admin Tools box
+
+0.33  Thu Oct 11 00:06:42 EDT 2001
+
+      OI/Handler/Box.pm: Customize method names used for
+      system_box_handler and custom_box_handler.
+
+0.32  Mon Sep 24 00:18:47 EDT 2001
+
+      OI/Handler/Box.pm: Be sure we do an 'eval "require
+      $custom_box_handler"' before we actually try to USE methods in
+      $custom_box_handler.
+
+0.31  Sat Sep 22 12:43:09 EDT 2001
+
+      Only display the 'edit' link in the 'Templates Used' box if the
+      template is an object and came from the database; other general
+      cleanup
+
+0.30  Mon Aug 27 13:08:26 EDT 2001
+
+      Don't cache the shell templates any longer -- let
+      OI::TT::Provider do the work.
+
+0.29  Mon Aug 27 09:53:31 EDT 2001
+
+      Remove the 'Module security' link and replace it with 'Security'
+      in template/admin_tools_box.tmpl
+
+0.28  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+0.27  Sun Aug 12 01:43:35 EDT 2001
+
+      Use 'default_object' setting for supergroup in
+      OpenInteract/Handler/SystemBoxes.pm.
+
+0.26  Fri Aug 10 10:29:46 EDT 2001
+
+      Fixed SF bug 432769
+
+0.25  Tue Jul 31 11:25:33 EDT 2001
+
+      Modified handler and template for templates_used_box so that it
+      can handle template names (in 'package::name' format) as well as
+      template objects.
+
+0.24  Tue Jul 24 14:47:00 EDT 2001
+
+      Small changes to OI/Handler/Box.pm to deal with caching the box
+      shell templates.
+
+0.23  Fri Jul 20 06:29:41 EDT 2001
+
+      Moved conf/action.perl info for powered_by_box from
+      base_component to this package.
+
+0.22  Fri Jul 13 09:24:27 EDT 2001
+
+      Cleaned up conf/action.perl action table and modified it to not
+      use security for templates_used box. Also cleaned up the defaults in
+      OI/Handler/SystemBoxes.pm.
+
+0.21  Sat Jun 16 20:21:13 EDT 2001
+
+      Add the powered_by_box and object_modify_box from 'base_component'.
+
+0.20  Sat Jun  9 15:21:20 EDT 2001
+
+      Add docs to OI/Handler/Box.pm about parameters
+
+0.19  Thu Jun  7 02:28:04 EDT 2001
+
+      Fix dumb errors.
+
+0.18  
+
+0.17  Wed Jun  6 15:55:50 EDT 2001
+
+      Cleaned up the main box handler and added documentation.
+
+0.16  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+0.15  Sat Mar 10 00:05:26 EST 2001
+
+      - Fixed typo in template/login_box.tmpl (extra '>' character)
+
+      - Added 'Remember me' checkbox in template/login_box.tmpl
+
+0.14  Sun Feb  4 17:51:42 EST 2001
+
+      Added interface to add your own boxes for every request. Specify
+      the class in your 'conf/server.perl' file under the key
+      box->{custom_box_handler} and make your code available under
+      the routine 'handler()'.
+
+0.13  Sat Jan 27 05:53:02 EST 2001
+
+      Fixed error in OpenInteract/Handler/SystemBox.pm
+
+0.12  Tue Jan 23 23:49:21 EST 2001
+
+      Made sure the component calls worked ok.
+
+0.11  Tue Jan 23 07:18:16 EST 2001
+
+      Modified OpenInteract/Handler/Box.pm to rely on the component
+      processor (base_component/OpenInteract/Handler/Component.pm) to
+      actually generate the HTML.
+
+0.10  Sat Jan 20 21:09:19 EST 2001
+
+      Made the template-only boxes work ok using the old-style calls
+      (which will soon be changed anyway).
+
+0.09  Tue Jan 16 00:46:15 EST 2001
+
+      Various changes in the course of making the module work
+      properly. Due to naming issues (and the fact that website
+      authors might want to change them), we've moved the box
+      processing to <website::Handler::Box and the system boxes to
+      <website::Handler::SystemBoxes. Various other template changes
+      as well as accommodations in the box processing for the older
+      call types.
+
+....
+
+0.04  Mon Jan 15 01:05:09 EST 2001
+
+      Ensure that the theme property is fetched properly in
+      OpenInteract/Box.pm; modify calls to 'fetch_by_name'.
+
+0.03  Mon Jan 15 01:01:17 EST 2001
+
+      Added 'conf/list_module.dat' with system boxes module
+
+0.02  Mon Jan 15 00:55:57 EST 2001
+
+      Fixed problem in OpenInteract/Box.pm (wrong ref to $R); small
+      change in OpenInteract/SystemBoxes.pm
+
+0.01  Mon Jan 15 00:17:52 EST 2001
+
+      Package skeleton created by oi_manage. Created basic structure
+      of package, including the overall box processing
+      (OpenInteract::Box), the system boxes (OpenInteract::SystemBox)
+      and code necessary for other boxes
+      (OpenInteract::Handler::Box). Ported a number of templates over
+      from the old box format to the new, moving them from other
+      packages at the same time.
+

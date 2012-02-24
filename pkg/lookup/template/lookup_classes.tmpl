@@ -1,0 +1,34 @@
+[%- OI.page_title( MSG( 'lookup.classes.page_title' ) );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message;
+    PROCESS status_message -%]
+
+<div align="center">
+
+<h1>[% MSG( 'lookup.classes.title' ) %]</h1>
+
+[% IF NOT lookup_list.size -%]
+
+<p>[% MSG( 'lookup.classes.none_defined' ) %]</p>
+
+[% ELSE -%]
+
+<p>[% MSG( 'lookup.classes.summary' ) %]</p>
+
+[% INCLUDE table_bordered_begin -%]
+
+[% FOREACH lookup_info = lookup_list -%]
+  [%- lookup_url = OI.make_url( ACTION      = 'lookups',
+                                TASK        = 'listing',
+                                lookup_type = lookup_info.lookup_type ) -%]    
+  <tr [% PROCESS row_color( count = loop.count ) %]>
+    <td>[% lookup_info.title %]</td>
+    <td>[% MSG( 'lookup.classes.list_link', lookup_url ) %]</td>
+  </tr>
+[% END -%]
+
+[% INCLUDE table_bordered_end -%]
+
+[% END -%]
+
+</div>

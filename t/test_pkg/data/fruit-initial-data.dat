@@ -1,0 +1,9 @@
+$data = [
+    { import_type => 'object',
+      spops_class => 'OpenInteract2::Fruit',
+      field_order => [ qw( name taste price ) ] }, 
+    [ "Apple", "slightly sour", "1.00" ],
+    [ "Banana", "sweet", "1.00" ],
+    [ "Cherry", "red", "0.05" ],
+    [ "Tomato", "yes, this is a fruit - look it up in the dictionary", "1.00" ],
+];

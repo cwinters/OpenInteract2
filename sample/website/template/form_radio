@@ -1,0 +1,2 @@
+[%- is_picked = ( value == picked ) ? ' CHECKED' : '' -%]
+<input type="radio" name="[% name %]" value="[% value %]"[% is_picked %]>

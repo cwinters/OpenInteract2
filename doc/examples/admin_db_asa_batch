@@ -1,0 +1,2 @@
+$ dbisql -nogui -c "UID=DBA;PWD=SQL;ENG=$DBNAME" my_sql_commands.sql
+$ dbisql -nogui -c "UID=DBA;PWD=SQL;ENG=$DBNAME" "SELECT * FROM SYSTABLE;OUTPUT TO '/tmp/systable.out' FORMAT ASCII;"

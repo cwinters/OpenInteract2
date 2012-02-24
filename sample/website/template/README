@@ -1,0 +1,11 @@
+sample/website/template:
+
+This directory holds all the global templates (a.k.a. 'widgets')
+shipped with OI2. When you create a new website they will be copied to
+$WEBSITE_DIR/template, and when you upgrade an existing OI2 website
+they will also be copied to $WEBSITE_DIR/template, overwriting
+existing files unless listed in the '.no_overwrite' file in that
+directory.
+
+NOTE: If you add a template here be sure to add an entry in FILES so
+we know it should be copied over to the website.

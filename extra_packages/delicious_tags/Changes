@@ -1,0 +1,53 @@
+Revision history for OpenInteract2 package delicious_tags.
+
+0.50  Wed Mar 16 22:51:49 EST 2005
+
+      Upgrade to new package format (package.ini, App.pm, etc.) and
+      bump version number to indicate stability.
+
+0.09  Sat Nov 27 13:01:42 EST 2004
+
+      Add docs to OI2::DeliciousTag and modify some internals; also
+      add some style tags to the display items.
+
+0.08  Sat Nov 27 11:26:54 EST 2004
+
+      Add 'all_tags_box' action; move tag listing to separate template
+      (template/tag_listing.tmpl) to be invoked as component; add more
+      docs to doc/delicious_tags.pod, including how to get tags into
+      and out of the system; add all messages (including errors) to
+      message file.
+
+0.07  Thu Nov 25 08:46:02 EST 2004
+
+      OIN-103: Fix related_tags_box to not blow up when no object
+      passed in. Also add box and other actions to docs.
+
+0.06  Wed Nov 24 22:52:46 EST 2004
+
+      Things are working. Add a new action plus template to display
+      all tagged objects on a page, other small but useful changes.
+
+0.05  Wed Nov 24 22:11:33 EST 2004
+
+      Try and get kinks out...
+
+0.04  Wed Nov 24 21:29:38 EST 2004
+
+      Cosmetic
+
+0.03  Mon Oct 25 23:27:09 EDT 2004
+
+      - Add OI2::DeliciousTagWatcher and configure in package.conf
+
+0.02  Sun Oct 24 22:18:30 EDT 2004
+
+      - Add OI2::Observer::AddDeliciousTags
+
+      - Add 'add_tags()' methods to OI2::DeliciousTaggableObject and
+      OI2::DeliciousTag
+
+0.01  Fri Oct 22 06:03:21 2004
+
+      Everything is new!
+

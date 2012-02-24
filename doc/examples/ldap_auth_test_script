@@ -1,0 +1,19 @@
+#!/usr/bin/perl
+
+use strict;
+use Net::LDAP;
+
+my $host          = 'localhost';
+my $port          = 389;
+my $bind_dn       = 'cn=Manager,dc=MyCompany,dc=com';
+
+my $bind_password = 'password';
+
+my $ldap = Net::LDAP->new( $host, port => $port );
+die "Cannot make LDAP connection\n" unless ( $ldap );
+
+my $ldap_msg = $ldap->bind( dn => $bind_dn, password => $bind_password );
+if ( my $code = $ldap_msg->code ) {
+    die "Error during bind (Code: $code)\n", $ldap_msg->error, "\n";
+}
+print "Connect/bind ok.";

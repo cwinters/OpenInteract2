@@ -1,0 +1,5 @@
+[% IF tag_and_count.size > 0 %]
+[% INCLUDE delicious_tags::tag_listing %]
+[% ELSE %]
+[% MSG( 'tags.no_related_tags' ) %]
+[% END %]

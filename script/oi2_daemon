@@ -1,0 +1,98 @@
+#!/usr/bin/perl
+
+# $Id: oi2_daemon,v 1.16 2005/03/18 13:02:18 lachoy Exp $
+
+use strict;
+use Getopt::Long;
+use HTTP::Daemon::OpenInteract2;
+
+{
+    my ( $OPT_daemon_conf, $OPT_website_dir );
+    GetOptions( 'conf=s'        => \$OPT_daemon_conf,
+                'website_dir=s' => \$OPT_website_dir );
+
+    if ( ! $OPT_website_dir and $ENV{OPENINTERACT2} ) {
+        $OPT_website_dir = $ENV{OPENINTERACT2};
+        print "Using OPENINTERACT2 environment for website ",
+              "directory:\n  $OPT_website_dir\n";
+    }
+
+    unless( -d $OPT_website_dir ) {
+        die "Usage: $0 --website_dir=/path/to/website --conf=/path/to/oi_daemon.ini\n";
+    }
+
+    HTTP::Daemon::OpenInteract2->add_observer( \&log_entries );
+    my $daemon = HTTP::Daemon::OpenInteract2->new({
+        website_dir        => $OPT_website_dir,
+        daemon_config_file => $OPT_daemon_conf,
+    });
+    while (1) {
+        my $client = $daemon->accept;
+        next unless ( $client );
+        my $child = fork();
+        unless ( defined $child ) {
+            die "Cannot fork child: $!\n";
+        }
+        if ( $child == 0 ) {
+            $daemon->interact( $client );
+            $daemon->close;
+            exit(0);
+        }
+        $client->close();
+        undef( $client );
+    }
+    print "All done.\n";
+}
+
+sub log_entries {
+    my ( $class, $type, @msg ) = @_;
+    return unless ( $type eq 'log' );
+    print join( '', @msg ), "\n";
+}
+
+__END__
+
+=head1 NAME
+
+oi2_daemon - Standalone version of OpenInteract2
+
+=head1 SYNOPSIS
+
+ # Specify everything
+ 
+ $ oi2_daemon --website_dir=/path/to/mysite --conf=/path/to/oi2_daemon.ini
+ 
+ # Use ENV for site and an explicit path for configuration
+ 
+ $ export OPENINTERACT2=/path/to/mysite
+ $ oi2_daemon --conf=/path/to/oi2_daemon.ini
+ 
+ # Use ENV for site and the oi2_daemon specified in
+ # $WEBSITE_DIR/conf/oi2_daemon.ini
+ 
+ $ oi2_daemon
+
+=head1 DESCRIPTION
+
+This script uses L<HTTP::Daemon|HTTP::Daemon> to implement a
+standalone web server running OpenInteract 2. Once it's started you
+shouldn't be able to tell the difference between its OpenInteract the
+same application running on Apache, Apache2, or CGI -- it will have
+the same users, hit the same database, manipulate the same packages,
+etc.
+
+B<Performance note>: this daemon will not win any speed contests. It
+will work fine for a handful of users (even if you have big hands),
+but if you're deploying a serious application you should look strongly
+at Apache and mod_perl.
+
+Please see L<HTTP::Daemon::OpenInteract2|HTTP::Daemon::OpenInteract2>
+for additional documentation.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

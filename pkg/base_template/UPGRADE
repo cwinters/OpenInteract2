@@ -1,0 +1,8 @@
+UPGRADE NOTES: base_template
+========================================
+
+< 2.00
+
+If you are using templates from the database, you will need to run
+script/migrate_to_filesystem.pl to move your templates from the
+database to the filesystem.

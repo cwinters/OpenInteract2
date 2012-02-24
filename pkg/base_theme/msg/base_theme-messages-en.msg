@@ -1,0 +1,21 @@
+base_theme.info.label.title = Title
+base_theme.info.label.description = Description
+base_theme.info.label.parent = Parent
+base_theme.info.label.credit = Credit
+base_theme.form.title_update = Edit Theme '[_1]'
+base_theme.form.title_new = Create a New Theme
+base_theme.form.no_edit_parent = This is the main theme, cannot edit parent
+base_theme.form.assign_props = Assign Properties
+base_theme.form.inherited_property = **-denotes inherited property
+base_theme.form.label.value = Value
+base_theme.form.label.description = Description
+base_theme.list.title = Browse Themes
+base_theme.list.summary = All themes currently in the system are listed below.
+base_theme.error.fetch_all = Failed to fetch all themes: [_1]
+base_theme.error.fetch_all_for_parent = Failed to fetch all themes for filling list of parents: [_1]
+base_theme.error.fetch_prop = Failed to fetch theme properties: [_1]
+base_theme.error.add_prop = Cannot add property '[_1]': [_2]
+base_theme.error.update_prop = Cannot update property '[_1]': [_2]
+base_theme.error.remove_prop_belongs = Cannot remove property '[_1]' since it belongs to another theme.
+base_theme.error.remove_prop = Cannot remove property '[_1]': [_2]
+

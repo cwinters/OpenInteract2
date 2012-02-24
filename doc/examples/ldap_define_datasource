@@ -1,0 +1,29 @@
+[datasource_type LDAP]
+connection_manager = OpenInteract2::Datasource::LDAP
+spops_config       = OpenInteract2::SPOPS::LDAP
+
+[datasource main_ldap]
+type          = LDAP
+spops         = SPOPS::LDAP
+host          = ldap.myco.com
+port          = 389
+bind_dn       =
+bind_password =
+base_dn       = dc=MyCo,dc=com
+timeout       = 120
+version       = 2
+sasl          = 0
+debug         = 0
+
+[datasource auth_ldap]
+type          = LDAP
+spops         = SPOPS::LDAP
+host          = ldap.myco.com
+port          = 3890
+bind_dn       = cn=Manager,dc=MyCo,dc=com
+bind_password = crystalline
+base_dn       = dc=MyCo,dc=com
+timeout       = 120
+version       = 2
+sasl          = 0
+debug         = 0

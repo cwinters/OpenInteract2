@@ -1,0 +1,10 @@
+sample/website/conf:
+
+This directory holds the OI2-specific server configuration files --
+Apache 1.x/2.x and other implementations are held in other 'sample/'
+directories. The files here will be copied to $WEBSITE_DIR/conf and
+never written again. All changes to those files installed to the
+website are manual after installation.
+
+NOTE: If you add a file here be sure to add an entry in FILES so we
+know it should be copied over to the website on install.

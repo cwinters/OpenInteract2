@@ -1,0 +1,11 @@
+[% MSG( 'comments.notify.new_comment', server_name ) %]
+
+[% summary.object_title %]
+
+http://[% server_name %][% summary.object_url %]
+
+[% MSG( 'comments.info.name' ) %]: [% comment.poster_name %]
+[% MSG( 'comments.info.url' ) %]: [% comment.poster_url %]
+[% MSG( 'comments.info.comments' ) %]
+[% comment.subject %]
+[% comment.content %]

@@ -1,0 +1,21 @@
+CREATE TABLE page (
+ page_id          %%INCREMENT%%,
+ location         varchar(150) not null,
+ directory        varchar(150),
+ title            varchar(250),
+ author           varchar(200),
+ keywords         varchar(75),
+ boxes            varchar(75),
+ template_parse   char(3) default 'yes',
+ main_template    varchar(40),
+ active_on        %%DATETIME%%,
+ expires_on       %%DATETIME%%,
+ is_active        char(3) default 'no',
+ content_location varchar(150),
+ storage          varchar(10) default 'file',
+ mime_type        varchar(50),
+ page_size        int default 0,
+ notes            varchar(200),
+ primary key      ( page_id ),
+ unique           ( location )
+)

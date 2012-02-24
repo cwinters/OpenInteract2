@@ -1,0 +1,5 @@
+[%- IF comment_error -%]
+   <span class="commentSummary">[% MSG( 'comments.summary.error' ) %]</span>
+[%- ELSE -%]
+    <span class="commentSummary">[% MSG( 'comments.summary', url, summary.num_comments ) %]</span>
+[%- END -%]

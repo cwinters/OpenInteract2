@@ -1,0 +1,21 @@
+[% OI.page_title( "Status of Directory Edit" );
+   DEFAULT theme = OI.theme_properties -%]
+
+[% PROCESS error_message %]
+[% PROCESS status_message %]
+
+[% UNLESS error_msg -%]
+  [% IF action == 'add_subdirectory' %]
+   <h2>Added Subdirectory</h2>
+   <p>Parent directory:
+          <a href="[% OI.make_url( BASE = parent_directory ) %]">[% parent_directory %]</a><br>
+      Created subdirectory:
+          <a href="[% OI.make_url( BASE = created_directory ) %]">[% created_directory %]</a></p>
+  [% END %]
+  [% IF action == 'remove_directory' %]
+   <h2>Removed Directory</h2>
+   <p>Removed directory: <tt>[% directory %]</tt><br>
+   <p>Visit parent directory
+          <a href="[% OI.make_url( BASE = parent_directory ) %]">[% parent_directory %]</a></p>
+  [% END %]
+[% END -%]

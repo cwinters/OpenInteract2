@@ -1,0 +1,25 @@
+[%- OI.page_title( MSG( 'news.list.title' ) );
+    OI.box_add( 'news_tools_box' );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message;
+    PROCESS status_message; -%]
+
+[% INCLUDE news::news_filter_form %]
+
+<h2>[% MSG( 'news.list.title' ) %]</h2>
+
+<p>[% MSG( 'news.list.count', news_list.size ) %]<br>
+[% MSG( 'news.list.filtered_by' ) %]
+[% IF section %] [[% MSG( 'news.info.section' ) %]: [% section %]][% END -%]
+[% IF date %] [[% MSG( 'news.info.date' ) %]: [% date %]][% END -%]
+[% IF NOT section AND NOT date %][% news.list.nothing %][% END -%]
+</p>
+
+[% FOREACH news = news_list -%]
+[%- detail_url = OI.make_url( ACTION = 'news', TASK = 'display',
+                              URL_PARAMS = news.id ) -%]
+<a href="[% detail_url %]">[% news.title %]</a>
+   - [% news.section %]<br />
+   ([% OI.action_execute( 'show_comment_summary', object = news ) %])<br />
+   ([% OI.date_format( news.posted_on, '%b %d %I:%M %p' ) %]) <br />
+[% END %]

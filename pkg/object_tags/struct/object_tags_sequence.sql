@@ -1,0 +1,1 @@
+CREATE SEQUENCE object_tags_seq;

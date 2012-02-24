@@ -1,0 +1,53 @@
+What is the sample directory for?
+========================================
+
+This directory holds sample files shipped with the OpenInteract2
+distribution, used by management tasks to provide initial data for
+actions like creating a new website or creating a new package.
+
+You can copy this directory structure, along with the 'pkg/'
+directory, from the installation directory to a publicly accessible
+location for your users to use. They'll reference the directory as a
+'source_dir' when running management tasks. For instance:
+
+ # pwd
+ /root/.cpan/build/OpenInteract-2.0
+ # mkdir /usr/local/oi2
+ # chmod 755 /usr/local/oi2
+ # cp -r sample pkg /usr/local/oi2
+ # ls -al /usr/local/oi2
+ total 12
+ drwxr-xr-x    3 root     root         4096 Oct  3 15:07 .
+ drwxr-xr-x   12 root     root         4096 Oct  3 15:07 ..
+ drwxr-xr-x    7 root     root         4096 Oct  3 15:07 pkg
+ drwxr-xr-x    7 root     root         4096 Oct  3 15:07 sample
+
+Users creating a package can just do:
+
+ $ cd work/oi2
+ $ oi2_manage create_package --package=mypkg --source_dir=/usr/local/oi2
+
+While users creating a new website can execute:
+
+ $ cd /home/httpd
+ $ oi2_manage create_website --website_dir=/home/httpd/mysite --source_dir=/usr/local/oi2
+
+Note that you cannot simply copy files from the 'sample/' directory
+into their final destination (new website or package). Many of them
+are run through a template processor so aspects can be customized for
+the website being created -- for instance, there's a sample
+configuration file 'sample/website/conf/base.conf' that looks like
+this:
+
+  # Base configuration files used in both the httpd.conf and
+  # any other scripts/programs that want to setup the framework
+  website_dir      [% website_dir %]
+  config_type      ini
+  config_class     OpenInteract2::Config::IniFile
+  config_dir       conf
+  package_dir      pkg
+  config_file      server.ini
+  temp_lib_dir     tmplib
+
+That '[% website_dir %]' gets replaced during the 'create_website'
+process by the actual directory in which the website is deployed.

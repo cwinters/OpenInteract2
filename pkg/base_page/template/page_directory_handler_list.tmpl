@@ -1,0 +1,43 @@
+[% OI.page_title( 'Directory Handlers Available' ); -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+
+<h1>Directory Handlers</h1>
+
+[% IF iterator.has_next -%]
+
+<p>The following directories currently have actions attached to them,
+meaning a directory-index request will trigger the action rather than
+bring up a page. Select the directory and click <tt>Edit</tt> to edit
+it.</p>
+
+[% INCLUDE form_begin( ACTION = 'pagedirectory',
+                       TASK   = 'display_form',
+                       method = 'POST' ) -%]
+
+<select name="directory">
+[% WHILE ( dir = iterator.get_next ) -%]
+  <option value="[% dir.id %]">[% dir.directory %] - [% dir.action %]</option>
+[% END -%]
+</select>
+
+[% PROCESS form_submit( value = "Edit" ) -%]
+
+[% PROCESS form_end %]
+
+[% ELSE -%]
+
+ <p>There are currently no directory handlers defined in the
+ system.</p>
+
+[% END -%]
+
+[% INCLUDE form_begin( ACTION = 'pagedirectory',
+                       TASK   = 'display_add',
+                       method = 'GET' ) -%]
+  <p>[% PROCESS form_submit( value = "Map a New Directory Handler" ) %]</p>
+[% PROCESS form_end %]
+
+</div>

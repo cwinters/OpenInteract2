@@ -1,0 +1,39 @@
+[%- DEFAULT new_date_format = '%Y-%m-%d %l:%M %p';
+    DEFAULT theme           = OI.theme_properties -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row( label_keys = [
+     'whats_new.info.posted_on',
+     'whats_new.info.type',
+     'whats_new.info.description',
+     'global.label.nbsp',
+] ) -%]
+
+[%# NOTE: items where active == 'no' are filtered out for 
+    non-admins, so they never even get this far... %]
+
+[%- count = 1 -%]
+[% WHILE ( new_item = iterator.get_next ) %]
+  [%- IF new_item.active == 'no' -%]
+     [%- use_color = theme.admin_color;
+         row_color = "bgcolor='$use_color'" -%]
+  [%- ELSE -%]
+     [%- row_color = PROCESS row_color -%]
+  [%- END -%]
+  <tr [% row_color %]>
+    <td>[% OI.date_format( new_item.posted_on, new_date_format ) %]</td>
+    <td>[% new_item.listing_type %]&nbsp;</td>
+    <td><a href="[% new_item.url %]">[% new_item.title %]</a></td>
+  [%- IF ACTION.task_security_allowed( 'display_form' ) -%]
+     [% edit_url = OI.make_url( ACTION = 'new', TASK = 'display_form',
+                                URL_PARAMS = new_item.id ) %]
+     <td><a href="[% edit_url %]">[% MSG( 'global.label.edit' ) %]</a></td>
+  [% ELSE -%]
+    <td>&nbsp;</td>
+  [%- END -%]
+  </tr>
+  [%- count = count + 1 -%]  
+[% END %]
+
+[% INCLUDE table_bordered_end -%]

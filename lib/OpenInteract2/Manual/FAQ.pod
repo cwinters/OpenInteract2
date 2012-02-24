@@ -1,0 +1,69 @@
+=head1 NAME
+
+OpenInteract2::Manual::FAQ - Frequently Asked Questions for OpenInteract2
+
+=head1 SYNOPSIS
+
+This document is for people developing OpenInteract2 applications. It
+should also have some gentle introductions for people interested in
+learning how the internals work.
+
+=head1 TEMPLATES
+
+=head2 Q: How do I create good templates? 
+
+
+=head2 Q: What functionality is available from the templates? 
+
+
+=head2 Q: Any gotchas I should know about? 
+
+=head1 DEVELOPING APPLICATIONS
+
+=head2 Q: How do I start?
+
+
+=head2 Q: What sort of functionality can I implement?
+
+
+=head2 Q: How do I talk to a database?
+
+
+=head2 Q: What Perl modules can I use?
+
+
+=head2 Q: How do I generate HTML?
+
+
+=head1 FRAMEWORK: OVERVIEW
+
+=head2 Q: How do the different parts of OI2 fit together? 
+
+
+=head2 Q: How is a HTTP request handled?
+ 
+
+=head2 Q: How do I access different functionality in OI2 from my modules? 
+
+
+=head2 Q: Where can I find diagrams for an overview of how OI2 is glued together? 
+
+=head1 FRAMEWORK: CUSTOMIZING
+
+=head2 Q: How can I use my custom templating system?
+
+
+=head2 Q: How can I use my custom database access system?
+
+
+=head1 COPYRIGHT
+
+Copyright (c) 2005 Chris Winters. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>
+

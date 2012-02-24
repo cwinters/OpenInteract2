@@ -1,0 +1,46 @@
+[%-
+  title = MSG( 'email_tester.title' );
+  OI.page_title( title );
+-%]
+
+[% PROCESS status_message %]
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'emailtester', TASK = 'send',
+                       method = 'POST', name = 'mailer' ) -%]
+
+<h2>[% title %]</h2>
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0; valign = 'top' -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'email_tester.address',
+                                is_required = 'yes',
+                                name        = 'address',
+                                value       = address,
+                                size        = 30 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'email_tester.subject',
+                                is_required = 'yes',
+                                name        = 'subject',
+                                value       = subject,
+                                size        = 30 ); %]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label_key   = 'email_tester.message',
+                                    is_required = 'yes',
+                                    name        = 'message',
+                                    value       = OI.html_encode( message ),
+                                    rows = 8, cols = 60, wrap = 'virtual' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value_key = 'email_tester.send' ) %]
+
+[% INCLUDE table_bordered_end %]
+
+[% PROCESS form_end %]
+
+</div>

@@ -1,0 +1,14 @@
+$security = [ 
+   { import_type => 'object',
+     spops_class => 'OpenInteract2::Security',
+     field_order => [ qw/ class object_id scope scope_id security_level / ],
+     transform_default    => [ 'scope_id' ] },
+   [ 'OpenInteract2::Action::Page', 0,             'w', 'world', 4 ],
+   [ 'OpenInteract2::Action::Page', 0,             'g', 'site_admin_group', 8 ],
+   [ 'OpenInteract2::Page',         'ROOT_OBJECT', 'w', 'world', 4 ],
+   [ 'OpenInteract2::Page',         'ROOT_OBJECT', 'g', 'site_admin_group', 8 ],
+   [ 'OpenInteract2::Action::PageDirectory', 0,    'w', 'world', 1 ],
+   [ 'OpenInteract2::Action::PageDirectory', 0,    'g', 'site_admin_group', 8 ],
+   [ 'OpenInteract2::Action::PageScan', 0,         'w', 'world', 1 ],
+   [ 'OpenInteract2::Action::PageScan', 0,         'g', 'site_admin_group', 8 ],
+];

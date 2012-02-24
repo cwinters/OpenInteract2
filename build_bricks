@@ -1,0 +1,277 @@
+#!/usr/bin/perl
+
+# $Id: build_bricks,v 1.10 2005/10/22 22:10:35 lachoy Exp $
+# build_bricks
+#    Generate the various OI2::Bricks::* classes formed by reading in
+#    the various files used for creating a package/website.
+
+use strict;
+use lib qw( lib );
+use File::Basename qw( basename );
+use MIME::Base64   qw( encode_base64 );
+use OpenInteract2::Brick;
+use Template;
+
+my %SPECS = (
+    'sample/package'          => [
+        'Package', 'package',
+        'All resources used for creating a package',
+        'oi2_manage create_package --package=foo',
+        'This class just holds all the static resources used when creating a package.',
+    ],
+    'sample/package_cpan'     => [
+        'PackageCPAN', 'package_cpan',
+        'All resources used for creating a CPAN distribution from a package',
+        'oi2_manage create_cpan --package_dir=/path/to/mypackage',
+        'This class just holds all the static resources used when creating a CPAN distribution from a package.',
+    ],
+    'sample/package_from_table'     => [
+        'PackageFromTable', 'package_from_table',
+        'All resources used for creating a package based on a table',
+        'oi2_manage easy_app --package=books --table=books --dsn=DBI:Pg:dbname=pubs --username=foo --password=bar',
+        'This class just holds all the static resources used when creating a package with basic Create, Update,Delete and Search functionality based on an existing database table.',
+    ],
+    'sample/apache'           => [
+        'Apache', 'apache',
+        'All resources used for creating Apache 1.x configurations in a new website',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class just holds all the static resources used for creating ' .
+            'Apache configuration files when creating a website.'
+    ],
+    'sample/apache2'          => [
+        'Apache2', 'apache2',
+        'All resources used for creating Apache 2.x configurations in a new website',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class just holds all the static resources used for creating ' .
+            'Apache 2.x configuration files when creating a website.'
+    ],
+    'sample/daemon'           => [
+        'Daemon', 'daemon',
+        'Configuration used for creating the standalone webserver',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class holds resources for configuring the standalone webserver daemon.',
+    ],
+    'sample/website/cgi-bin'  => [
+        'CGI', 'cgi',
+        'Script for running OI2 as a CGI',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class holds the script for running OI2 as a CGI.',
+    ],
+    'sample/website/conf'     => [
+        'WebsiteConfig', 'website_config',
+        'Various non-server-specific configuration files for OI2 website',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class holds various configuration files for running the OI2 website.',
+    ],
+    'sample/website/msg'      => [
+        'Messages', 'messages',
+        'All global localization messages',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class holds all global (non-package) localization messages.',
+    ],
+    'sample/website/template' => [
+        'Widgets', 'widgets',
+        'All global TT2 template files',
+        'oi2_manage create_website --website_dir=/path/to/site',
+        'This class holds all global (non-package) Template Toolkit templates, also known as "widgets".',
+    ],
+);
+
+my ( $OI2_VERSION );
+
+{
+    unless ( -d 'sample' ) {
+        die "You must run this from the root of the OI2 source directory\n";
+    }
+    $OI2_VERSION = read_version();
+    my $template = Template->new();
+
+    my @brick_params = ();
+
+    my $invocation  = join( ' ', $0, @ARGV );
+    my $date        = scalar( localtime );
+
+    while ( my ( $brick_dir, $brick_info ) = each %SPECS ) {
+        my @brick_files = read_brick_files( $brick_dir );
+        my $brick_name = $brick_info->[0];
+        my $full_description = join( "\n\n",
+            $brick_info->[4], get_oi2_version_description(),
+        );
+
+        my %params = (
+            brick_dir         => $brick_dir,
+            brick_name        => $brick_name,
+            lc_brick_name     => $brick_info->[1],
+            brick_summary     => $brick_info->[2],
+            brick_example     => $brick_info->[3],
+            brick_description => $full_description,
+            invocation        => $invocation,
+            date              => $date,
+            oi2_version       => $OI2_VERSION,
+            all_files         => \@brick_files,
+        );
+        push @brick_params, \%params;
+    }
+
+    # Now do the same with packages, but base64 them first...
+
+    my %pkg_brick_base = (
+        brick_dir         => 'pkg',
+        brick_name        => '%s',
+        brick_summary     => "Base-64 encoded OI2 package '%s' shipped with distribution",
+        brick_example     => 'oi2_manage create_website --website_dir=/path/to/site',
+        invocation        => $invocation,
+        date              => $date,
+        oi2_version       => $OI2_VERSION,
+
+    );
+    foreach my $pkg_file ( read_package_files( 'pkg/' ) ) {
+        my %pkg_brick = %pkg_brick_base;
+        my $base_name = $pkg_file->{name};
+        $base_name =~ s/^([^-]+).*/$1/;
+        my $cc_base_name = ucfirst( $base_name );
+        $cc_base_name =~ s/_(\w)/uc($1)/ge;
+        my $pkg_brick_name = $base_name;
+        $pkg_brick{brick_name}        = sprintf( $pkg_brick{brick_name}, $cc_base_name );
+        $pkg_brick{lc_brick_name}     = $pkg_brick_name;
+        $pkg_brick{brick_summary}     = sprintf( $pkg_brick{brick_summary}, $pkg_file->{name} );
+        $pkg_brick{brick_description} = get_package_description(
+            $pkg_file->{name}, $pkg_brick_name
+        );
+        $pkg_brick{all_files} = [ $pkg_file ];
+        push @brick_params, \%pkg_brick;
+    }
+
+
+    my $brick_lib_dir = 'lib/OpenInteract2/Brick';
+    unless ( -d $brick_lib_dir ) {
+        mkdir( $brick_lib_dir );
+    }
+
+    my $brick_template = OpenInteract2::Brick->get_brick_class_template();
+
+    foreach my $brick_param ( @brick_params ) {
+        $brick_param->{authors} = [
+            { name => 'Chris Winters', email => 'chris@cwinters.com' },
+        ];
+        $brick_param->{author_names} = [ 'Chris Winters' ];
+        my $brick_name = $brick_param->{brick_name};
+        my $output_file = "$brick_lib_dir/$brick_name.pm";
+        $template->process( \$brick_template, $brick_param, $output_file )
+            || die "Cannot process files from '$brick_param->{brick_dir}' ",
+                   "-> '$output_file': ", $template->error();
+        print "Generated $output_file with ",
+              scalar( @{ $brick_param->{all_files} } ), " ",
+              "inlined files\n";
+    }
+}
+
+sub read_brick_files {
+    my ( $subdir ) = @_;
+    my $filespec_path = "$subdir/FILES";
+    unless ( -f $filespec_path ) {
+        die "Directory '$subdir' is not a valid sample directory -- it has no 'FILES' file\n";
+    }
+    open( FILESPEC, '<', $filespec_path )
+        || die "Cannot read '$filespec_path': $!";
+    my @files = ();
+    while ( <FILESPEC> ) {
+        chomp;
+        next if ( /^\s*#/ );
+        next if ( /^\s*$/ );
+        my ( $file, $destination ) = split /\s*\-\->\s*/, $_, 2;
+        my $do_evaluate = ( $file =~ s/^\*// ) ? 'no' : 'yes';
+        my $file_path = "$subdir/$file";
+        open( FILE, '<', $file_path )
+            || die "Cannot read '$file_path': $!";
+        my $contents = join( '', <FILE> );
+        close( FILE );
+        push @files, {
+            name        => $file,
+            inline_name => create_inline_name( $file ),
+            destination => $destination,
+            evaluate    => $do_evaluate,
+            contents    => $contents,
+        };
+    }
+    close( FILESPEC );
+    return @files;
+}
+
+sub read_package_files {
+    my ( $subdir ) = @_;
+    my @specs = ();
+    opendir( ZIPS, $subdir )
+        || die "Cannot read zips from '$subdir': $!";
+    my @zips = map { "$subdir/$_" } grep /\.zip$/, readdir( ZIPS );
+    closedir( ZIPS );
+    foreach my $zipfile ( @zips ) {
+        open( ZIP, '<', $zipfile )
+            || die "Cannot read '$zipfile': $!";
+        my ( $buf, @contents );
+        while ( read( ZIP, $buf, 60*57 ) ) {
+            push @contents, encode_base64( $buf );
+        }
+        close( ZIP );
+        my $base_filename = basename( $zipfile );
+        push @specs, {
+            name         => $base_filename,
+            inline_name  => create_inline_name( $base_filename ),
+            destination  => "pkg $base_filename",
+            evaluate     => 'no',
+            contents     => join( '', @contents ),
+        };
+    }
+
+    return @specs;
+}
+
+sub create_inline_name  {
+    my ( $file ) = @_;
+    my $inline_name = uc $file;
+    $inline_name    =~ s/\W//g;
+    return $inline_name;
+}
+
+sub read_version {
+    open( VER, '<', 'VERSION' ) || die "Cannot open version doc: $!";
+    my $version = <VER>;
+    chomp $version;
+    close( VER );
+    $version =~ s/[^\d\_\.]//g;
+    return $version;
+}
+
+sub get_package_description {
+    my ( $pkg_file, $pkg_brick_name ) = @_;
+    my $version_info = get_oi2_version_description();
+    return sprintf( <<'DESC', $pkg_file, $pkg_brick_name, $version_info );
+Are you sure you even need to be reading this? If you are just looking
+to install a package just follow the instructions from the SYNOPSIS.
+
+Still here? This class holds the Base64-encoded versions of package
+file "%s" shipped with OpenInteract2. Once you decode them you
+should store them as a ZIP file and then read them in with
+Archive::Zip or some other utility.
+
+A typical means to do this is:
+
+ my $brick = OpenInteract2::Brick->new( '%s' );
+
+ # there's only one resource in this brick...
+ my ( $pkg_name ) = $brick->list_resources;
+ my $pkg_info = $brick->load_resource( $pkg_name );
+ my $pkg_file = OpenInteract2::Util->decode_base64_and_store(
+     \$pkg_info->{content}
+ );
+
+ # $pkg_file now references a file on the filesystem that you can
+ # manipulate as normal
+
+%s
+DESC
+}
+
+sub get_oi2_version_description {
+    return "These resources are associated with OpenInteract2 version $OI2_VERSION.";
+}

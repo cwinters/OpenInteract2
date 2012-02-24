@@ -1,0 +1,379 @@
+Revision history for OpenInteract package base_security.
+
+2.22  Mon Mar 14 21:30:48 EST 2005
+
+      Ensure we use 'alias_class' if it's available.
+
+2.21  Thu Mar 3 10:10:31 EST 2005
+
+      Move OI2::CreateSecurity to main distribution
+
+2.20  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.19  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.18  Sat Dec  4 00:28:45 EST 2004
+
+      Move errors to l10n file; use status/error shortcuts
+
+2.17  Sun Sep 26 23:24:25 EDT 2004
+
+      Fix warning in action class.
+
+2.16  Tue Jun  8 21:36:30 EDT 2004
+
+      Oops! Running a 'clear' with scope 'all' clears out ALL security
+      settings...
+
+2.15  Tue Jun  8 20:23:44 EDT 2004
+
+      Get this back into working condition for actions AND SPOPS
+      objects.
+
+2.14  Mon Jun  7 22:36:13 EDT 2004
+
+      Assemble the correct list of actions that are secured, modify
+      some labels.
+
+2.13  Thu Mar 18 20:33:53 EST 2004
+
+      In OI2::CreateSecurity, remove the 'CTX->lookup_class()' call
+      with a 'CTX->lookup_object()' call.
+
+2.12  Thu Feb 26 08:42:57 EST 2004
+
+      Template (assign_object_security.tmpl) syntax fix from Salve
+      Nilsen.
+
+2.11  Wed Feb 25 11:45:08 EST 2004
+
+      Add transformation to data migration so that class names get
+      changed from MySite:: -> OpenInteract2:: and
+      OpenInteract2::Handler -> OpenInteract2::Action
+
+2.10  Fri Feb 13 00:23:22 EST 2004
+
+      Extract text from templates into message file.
+
+2.09  Sun Dec 14 22:56:29 EST 2003
+
+      Simple changes for lookup config
+
+2.08  Wed Oct 15 07:56:25 EDT 2003
+
+      Add migration information to OI2::SQLInstall::Security
+
+2.07  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+2.06  Wed Aug 27 11:41:17 EDT 2003
+
+      Remove use of 'security_object' alias on CTX in favor of
+      'lookup_class()' call.
+
+2.05  Mon Aug 11 23:57:36 EDT 2003
+
+      Update _get_user_scopes() to return the user's login
+      name. Thanks to Andrew Hurst <hurst9@llnl.gov> for the spot!
+      (Replicated fix from 1.x)
+
+2.04  Tue Jul 22 21:56:25 EDT 2003
+
+      Delete script/create_object_security.pl since its functionality
+      is now in the management task, accessible via oi2_manage.
+
+2.03  Sat Jul 12 18:13:03 EDT 2003
+
+      Add OI2::CreateSecurity so we can use it from management task.
+
+2.02  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.01  Mon Mar 31 21:35:45 EST 2003
+
+      Update SPOPS config to INI, other changes.
+
+2.00  Mon Mar 24 22:08:57 EST 2003
+
+      Initial OI2 conversion.
+
+1.60  Mon Feb 17 15:38:42 EST 2003
+
+      Updated package docs.
+
+1.59  Tue Jan  7 00:28:20 EST 2003
+
+      Update script/create_object_security.pl to use security objects
+      instead of raw SQL, and lazily use the temporary lib directory.
+
+1.58  Sun Aug 25 11:58:49 EDT 2002
+
+      Remove all template/*.meta files
+
+1.57  Thu May  2 01:49:08 EDT 2002
+
+      Add InterBase-specific files (even though we can't use IB for
+      both normal + security DB yet)
+
+1.56  Thu Apr 25 09:08:10 EDT 2002
+
+      In OI/Handler/Security.pm: ensure that show() has a valid object
+      class to call ->isa() on.
+
+1.55  Tue Apr  2 00:03:59 EST 2002
+
+      Add Oracle-specific info; add a sequence for the security ID for
+      both Oracle and Postgres; rename the table filename to match the
+      table name.
+
+1.54  Fri Dec 28 10:38:55 EST 2001
+
+      First attempt at factoring out SQL generation so it can be
+      called from elsewhere.
+
+1.53  Sun Nov 18 22:42:33 EST 2001
+
+      Modified other templates to use template widgets (where
+      appropriate) and other small changes.
+
+1.52  Sun Nov 18 22:17:24 EST 2001
+
+      Modified the class listing template to be more compact and
+      understandable.
+
+1.51  Thu Oct 11 10:08:02 EDT 2001
+
+      Updated struct/security.sql to have a longer scope_id field;
+      most people won't need to worry about this, but people who use
+      LDAP can have long group/usernames as ID values. Existing users
+      can remain with their existing structure.
+
+1.50  Fri Sep 28 15:11:37 EDT 2001
+
+      Another duh! (Why does this package give me so many problems?)
+      Renamed _cannot_return_msg to _cannot_secure_msg since the
+      latter is what we were calling...
+
+1.49  Fri Sep 14 08:31:50 EDT 2001
+
+      Duh! Add SPOPS::Secure to the security handler so it's actually
+      protected by security. (Thanks to Andreas Nolte
+      <andreas.nolte@bertelsmann.de> for pointing this out.)
+
+1.48  Tue Sep 11 11:48:14 EDT 2001
+
+      Fixed OpenInteract/Security.pm so that if a user does not belong
+      to any groups we will not find security info for ALL groups.
+
+1.47  Wed Sep  5 08:56:42 EDT 2001
+
+      Removed the 'hierarchy' action.
+
+1.46  Wed Aug 29 14:05:12 EDT 2001
+
+      Fixed parameter passing mistake in OI/Handler/Security.pm.
+
+1.45  Sat Aug 25 21:32:27 EDT 2001
+
+      Things basically working...
+
+1.44  Sat Aug 25 19:41:35 EDT 2001
+
+1.43  Sat Aug 25 19:33:22 EDT 2001
+
+1.42  Sat Aug 25 17:55:19 EDT 2001
+
+      Ensure that hierarchy editing can be overridden, fix some
+      templates.
+
+1.41  Sat Aug 25 17:21:23 EDT 2001
+
+      Remove action item for 'module'
+
+1.40  Sat Aug 25 15:54:10 EDT 2001
+
+      Rewrote security editing code.
+
+1.39  Sat Aug 25 10:52:08 EDT 2001
+
+      Added first draft of multipurpose security listing editor.
+
+1.38  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.37  Sun Aug 12 15:13:14 EDT 2001
+
+      Update script/create_object_security.pl to optionally use
+      iterators, be able to specify 'default_objects' keys for the
+      scope_id, and more little items.
+
+1.36  Sun Aug 12 11:17:21 EDT 2001
+
+      Modify data/install_security.dat to use new
+      'transform_default_to_id' action.
+
+1.35  Sat Aug 11 17:36:51 EDT 2001
+
+      Changed conf/spops.conf->isa from OpenInteract::SPOPS to
+      OpenInteract::SPOPS::DBI
+
+1.34  Mon Jul 23 17:05:45 EDT 2001
+
+      Updated to not track object key with each new object saved.
+
+1.33  Mon Jul 16 16:40:27 EDT 2001
+
+      Updated script/create_object_security.pl script to use an
+      iterator to fetch the objects and to use prepared insert
+      statements to move things along.
+
+1.32  Wed Jun 13 00:34:45 EDT 2001
+
+      Updated table structure so that the UNIQUE key is under 255
+      characters. (Thanks to Robert McArthur <mcarthur@dstc.edu.au>
+      for pointing out.)
+
+1.31  Mon Jun 11 15:57:36 EDT 2001
+
+      Updated 'script/create_object_security.pl' to only retrieve the
+      ID fields of the objects and produce some nicer output. You can
+      also pass in a '--where' option and only set security for a
+      subset of objects.
+
+1.30  Fri Jun  8 17:50:47 EDT 2001
+
+      Added 'script/create_object_security.pl' to batch-create
+      security settings. It's self-contained and will run outside of
+      OpenInteract
+
+1.29  Fri Jun  1 11:48:28 EDT 2001
+
+      Fix _build_(group|user)_sql() to return the right structures
+      even if there are no users/groups to check.
+
+1.28  Wed May 30 11:54:31 EDT 2001
+
+      Refactor OpenInteract::Security to be easier to understand and
+      remove redundant and/or unnecessary code. Also add
+      documentation.
+
+1.27  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.26  Tue Mar 13 07:20:31 EST 2001
+
+      Changed security level data: 'oid' -> 'object_id'
+
+1.25  Tue Mar 13 00:48:13 EST 2001
+
+      More structure changes (default + not null fun)
+
+1.24  Mon Mar 12 22:48:03 EST 2001
+
+      Renamed the fieldname 'oid' -> 'object_id' to work with
+      PostgreSQL. Change made in struct/security.sql, conf/spops.sql,
+      OpenInteract/Security.pm (along with changes in SPOPS).
+
+1.23  Tue Mar  6 08:39:11 EST 2001
+
+      Fixed SQL to declare 'scope_id' to be NOT NULL to satisfy the
+      UNIQUE requirement.
+
+1.22  Sun Mar  4 16:24:07 EST 2001
+
+      Modified 'OpenInteract::Security' so the code matches the object
+      properties.
+
+1.21  Sun Mar  4 16:04:01 EST 2001
+
+      Changed structure of table so that 'level' is
+      'security_level'. Changed definition of SPOPS object to
+      match. Changed security level data: 'level' -> 'security_level'
+
+1.20  Tue Feb 20 08:05:14 EST 2001
+
+      Modified conf/spops.perl to reflect SPOPS changes.
+
+1.19  Wed Feb  7 07:41:36 EST 2001
+
+      Fixed SQL to declare 'oid' to be NOT NULL to satisfy the UNIQUE
+      requirement.
+
+1.18  Wed Jan 31 20:55:42 EST 2001
+
+      Cleanup
+
+1.17  Tue Jan  2 23:27:58 EST 2001
+
+      Added 'hierarchy' action which points to a method in the
+      security handler which simply calls a template. Oh, the horror!
+
+1.16  Tue Jan  2 01:19:56 EST 2001
+
+      Fix misspelling in 'conf/action.perl'
+
+1.15  Fri Dec 29 10:47:47 EST 2000
+
+      Add the hierarchy_specify template and the action item
+      ('hierarchysecurity') to map to it.
+
+1.14  Wed Dec 20 23:41:22 EST 2000
+
+      Hierarchical security editing works! The template is generally
+      working ok (needs some touching up graphically, but we can do
+      that later) and the code in OpenInteract/Handler/Security.pm
+      works fine as well. Also modified hierarchy security template to
+      NOT allow clearing of the ROOT_OBJECT security
+      information. Cleaned up conf/spops.perl a little bit along with
+      the Handler.
+
+1.13  Tue Dec 19 14:39:30 EST 2000
+
+      Modifications to the 'hierarchy_show' method.
+
+1.12  Tue Dec 19 14:08:01 EST 2000
+
+      Revise widget for displaying hierarchical security and create
+      the hierarchy_show method in OpenInteract/Handler/Security to
+      fill the template.
+
+1.11  Mon Dec 18 21:57:38 EST 2000
+
+      Create first draft of widget to edit hierarchical security,
+      sitting in between the normal security editing widget and the
+      object subscribing to the hierarchy security. 
+
+      Extended the 'oid' field to be wider in struct/security.sql.
+
+      Modified the assign_object_security template to use the new
+      'isa' template behavior (found in base-1.12+) and to allow an
+      object passed in which is not fetched from the database. We
+      might need to modify this further to pass in just the class and
+      oid so they can be entirely arbitrary.
+
+1.10  Mon Dec 18 16:55:26 EST 2000
+
+      Small changes to OpenInteract::Security, primarily reflecting
+      the SPOPS API change to return undef from fetch_by_object() if
+      no security information for a particular object is found.
+
+1.09  Mon Dec 11 09:59:27 EST 2000
+
+      Changed the length of the 'class' field to 75 characters. If
+      you're not having a problem with the length then you don't need
+      to make any changes, but if you have a long website name certain
+      security class names can get quite long.
+
+1.08  Nov 16
+
+      Started maintaining Changes file. Renamed method in
+      'OpenInteract::Security' to fit with new SPOPS change.

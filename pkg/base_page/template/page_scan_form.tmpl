@@ -1,0 +1,24 @@
+[% OI.page_title( "Scan for new pages" );
+   PROCESS error_message; %]
+
+<h2>Scan for New Pages</h2>
+
+<p>When you upload a new page via FTP or some other means, you can use
+this page to synchronize the files in the directory with the files
+served by the application server.</p>
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'pagescan'
+                       TASK   = 'run',
+                       name   = 'scan_enter'
+                       method = 'GET' ) -%]
+ <p>
+    [% INCLUDE form_text( name = "scan_directory", size = "20" ) %]
+    [% INCLUDE form_submit( value = "Scan" ) %]<br>
+    <em>(Leave empty if you want to scan all directories)</em>
+</p>
+
+[% PROCESS form_end %]
+
+</div>

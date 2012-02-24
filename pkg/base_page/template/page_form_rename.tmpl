@@ -1,0 +1,52 @@
+[%- DEFAULT theme = OI.theme_properties; count = 0 -%]
+[%- OI.box_add( 'edit_document_box', page = page ); -%]
+
+[%- PROCESS base_page::page_common_js -%]
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center">
+
+<h2>Rename an Existing Page</h2>
+
+[% IF page -%]
+
+[% PROCESS form_begin( ACTION = 'page',
+                       TASK   = 'rename_file',
+                       name   = 'page',
+                       method = 'POST' ) -%]
+
+[% INCLUDE form_hidden( name = 'old_location', value = page.location ); -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+<tr><td align="right" colspan="2">
+   <a href="javascript:show_page_help( 'rename' )">help</a>
+</td></tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label = 'Old Location', 
+                           text  = page.location ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'New Location',
+                                name  = 'new_location',
+                                value = page.location,
+                                size  = 50, maxlength = 100 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = 'Rename' ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+[% ELSE -%]
+
+ <p>Cannot display rename form. Reason: No page specified in
+ parameters.</p>
+
+[% END -%]
+ 
+</div>

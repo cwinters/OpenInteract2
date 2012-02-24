@@ -1,0 +1,22 @@
+CREATE TABLE classified (
+ classified_id %%INCREMENT%%,
+ posted_on     timestamp not null, 
+ posted_by     %%USERID_TYPE%% not null,
+ title         varchar(50),
+ organization  varchar(75),
+ deadline      date,
+ description   blob,
+ location      varchar(200),
+ required_skills blob,
+ recommended_skills blob,
+ application_info blob,
+ contact       varchar(100),
+ phone         varchar(50),
+ fax           varchar(50),
+ email         varchar(75),
+ url           varchar(75),
+ active        char(3) default 'yes',
+ expires_on    timestamp,
+ active_on     timestamp,
+ primary key   ( classified_id )
+)

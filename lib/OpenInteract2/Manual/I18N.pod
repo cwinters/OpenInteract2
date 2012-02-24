@@ -1,0 +1,566 @@
+=head1 NAME
+
+OpenInteract2::Manual::I18N - Internationalization in OpenInteract2
+
+=head1 SYNOPSIS 
+
+This part of the manual will describe i18n efforts in OpenInteract2,
+how to create message bundles to distribute with your application, and
+how you can customize the process.
+
+=head1 CAVEATS
+
+I'm a newbie at i18n/l10n efforts. The main purpose is to find the
+path I think most web applications will trod and make that as simple
+as possible to navigate. The hooks in the framework to enable
+localization should be sufficiently unobtrusive so as not to preclude
+other efforts you may have in this area.
+
+So if you have ideas about how things can be done better or more
+flexibly, please join the openinteract-dev mailing list and chime
+in. (See L<SEE ALSO> for more info on the mailing list.)
+
+=head1 WRITING LOCALIZED APPLICATIONS
+
+=head2 100% localization is hard
+
+Localizing every aspect of your application is extremely
+difficult. There are the easy things like translating words on the
+screen, date/time formats and money. Then there are the tough things:
+what does this shade of yellow mean in China versus Saudi Arabia? What
+happens if someone reads this sequence of graphics from right-to-left
+instead of left-to-right? And on and on for many more items you
+couldn't have even thought up yet.
+
+OpenInteract won't presume to take care of all these for you. Instead
+we try to make the most common operations as simple as
+possible. Hopefully that will be sufficient for your needs.
+
+=head1 IDENTIFYING LANGUAGE TO USE
+
+=head2 We have ways of learning about you...
+
+Ordered from most to least important, here's how we identify the
+language to use for the current request. First match wins.
+
+=over 4
+
+=item *
+
+User logged in? Look in 'lang' user property
+
+=item *
+
+Language set in session?
+
+=item *
+
+Language in GET/POST params? ('oi_language')
+
+=item *
+
+Language passed by browser? (use as backup also...)
+
+=item *
+
+Customized identifiers (register in server.ini)
+
+=back
+
+=head2 Custom language identifier
+
+OI has more hooks than your favorite rock band, and this area is no
+exception. During the request initialization process we identify all
+the languages available for this request. Normally this means all the
+languages for a particular user, but you can override it with GET/POST
+parameters or a setting in the session.
+
+We also provide the means for you to step in and implement your own --
+you could parse it from the URL, use L<Geo::IP>, whatever. Just create
+an observer for the controller (under
+L<OpenInteract2::Observer::Controller>) and wait for the 'action
+assigned' observation which occurs every request:
+
+ package OpenInteract2::Observer::Controller::LanguageId;
+ 
+ use Geo::IP;
+ use OpenInteract2::Context qw( CTX );
+ 
+ my $gi = Geo::IP->new( GEOIP_STANDARD );
+ 
+ sub update {
+     my ( $class, $controller, $type, $action ) = @_;
+     return unless ( $type eq 'action assigned' );
+     my $request = CTX->request;
+
+     # get our new languages...
+     my $country = $gi->country_code_by_addr( $request->remote_host );
+     my @langs_from_country = $class->_some_nifty_method( $country );
+ 
+     # assign the new languages after the existing ones
+     $request->assign_languages( $request->language(), @langs_from_country );
+ }
+
+=head1 SETTING UP LOCALIZAION IN YOUR PACKAGE
+
+=head2 Type #1: Message replacement
+
+This is the fairly simplistic means of using keys to represent blocks
+of text. The key gets replaced by the text for whatever language the
+current user is associated with. Here's an example: you setup your
+music library search form like this:
+
+ Artist: _____________
+ 
+ Title:  _____________
+ 
+ Year:   _____________
+ 
+                 <Search>
+
+And you'd like to localize this. Like all other problems dealing with
+programming you just add a layer of abstraction, associating each
+piece of text with a key, then associating text to that key for each
+language (represented here by braces but that's not how they'd look in
+the template):
+
+ {search.artist}: _____________
+ 
+ {search.title}:  _____________
+ 
+ {search.year}:   _____________
+ 
+                 <{search.button}>
+
+Now you just have sets of data for each language:
+
+ en:
+ search.artist = Artist
+ search.title  = Title
+ search.year   = Year
+ search.button = Search
+ 
+ es:
+ search.artist = Artista
+ search.title  = Titulo
+ search.year   = Ano
+ search.button = Hallazgo
+ ...
+
+When the page is rendered these keys get replaced by the associated
+text. Fortunately Perl comes with libraries to make this happen fairly
+painlessly. And a nice side-effect is that the message files are in a
+sufficiently simple format that you can ship them off to someone else
+and just plug them in your application when they're ready.
+
+There's more about the messages and the file format below.
+
+=head2 Type #2: Template negotation
+
+A second type of localization is template negotiation. Hopefully you
+won't need to use it as often because it can require more
+maintenance. Instead of replacing text in the template you replace the
+entire template wholesale.
+
+It works in much the same way, except instead of placing text in the
+various language files you place template names under a particular
+key. (The name is in the normal 'package::template' syntax.) And just
+like invoking a template from your action you can do this in two ways:
+
+=over 4
+
+=item 1.
+
+specify the template in your action
+
+=item 2.
+
+specify the template in your action configuration
+
+=back
+
+Here's a quick example of the first, passing the message key in your
+action C<generate_content()> call:
+
+ sub mytask {
+     my ( $self ) = @_
+     my %params = ( ... );
+     ...
+     return $self->generate_content(
+                     \%params, { message_key => 'mytask.template' } );
+ }
+
+And an example of the second, passing the message key in the action
+configuration (C<action.ini>):
+
+ [foo template_source]
+ mytask = msg:mytask.template
+
+In your message files you'd have:
+
+ messages_en.msg:
+ mytask.template = mypackage::mytemplatename_english
+
+ messages_es.msg:
+ mytask.template = mypackage::mytemplatename_spanish
+
+The templates get the exact same data under the exact same variable
+names, but you can control the layout and text per language.
+
+See
+L<OpenInteract2::Manual::Templates|OpenInteract2::Manual::Templates>
+and L<OpenInteract2::Action|OpenInteract2::Action> for more
+information.
+
+=head2 Signficance of Message Filenames
+
+The names of the filenames we process are fairly flexible, but one
+aspect is not. The language B<must> be the last distinct set of
+characters before the file extension. So the following are ok:
+
+  myapp-en.msg         # lang is 'en'
+  myotherapp-es-MX.mo  #      ...'es-MX'
+  messages_en_HK.po    #      ...'en_HK'
+
+The following are not:
+
+ english-messages.msg
+ messages-en-part2.mo
+ messagesen.po
+
+If you create a message filename that does not conform to this
+specification, it not only won't be processed but will halt the entire
+localization reading process altogether.
+
+You can check whether your application's message filenames are
+formatted properly with the 'check_package' task will alert you to
+malformed message filenames -- see
+L<OpenInteract2::Manage::Package::Check> or just run from your package
+development directory:
+
+ $ oi2_manage check_package
+
+=head1 MESSAGE FILES
+
+=head2 Supported Formats: PO, MO and Custom
+
+OpenInteract2 supports reading localized messages from
+C<gettext>-formatted files (a.k.a, 'PO' or 'MO' files) as well as a
+custom format. All are treated in the same way -- once read in all
+messages get flattened into a single per-language namespace regardless
+of their source.
+
+To include localization files with your package just drop them into
+the 'msg/' subdirectory. OI2 will find them at server startup and read
+them all in.
+
+Note that if you use PO or MO files you'll need to have
+L<Locale::Maketext::Lexicon> installed. If you don't the server
+startup process will halt and tell you to install it.
+
+=head2 Custom Message File Format
+
+The message file format is fairly simple:
+
+=over 4
+
+=item B<skip comments and blanks>
+
+Unless we're in the middle of a continued value, we'll skip all
+commented lines (those beginning with a '#') and blank lines.
+
+=item B<key/value pairs>
+
+A message key is unique per language and has a single value that is
+its associated message for that language. It is separated from the
+message by an '=' and may contain any character B<except> a '='.
+
+=item B<continued values>
+
+A message value may span multiple lines using the standard '\'
+notation at the end of a line. (Examples below.)
+
+=item B<runtime replacements>
+
+A message value may have one or more runtime replacements which match
+up with parameters passed in. These replacement declarations can get
+relatively sophisticated -- we discuss them briefly below but for true
+enlightenment read the documentation for
+L<Locale::Maketext|Locale::Maketext>.
+
+=back
+
+So here is a simple declaration for two message keys without
+continued values or runtime replacements:
+
+ company.title=Welcome to MyCompany!
+ company.phone   =   Call 412-555-1212 for more information.
+
+Two things to note:
+
+=over 4
+
+=item 1.
+
+The keys ('company.title' and 'company.phone') are abstract and
+semi-hierarchical. There's a FAQ below about why we chose opaque
+message IDs for the core OI packages, but you don't have to do so. The
+only tricky part is ensuring you don't stomp on someone else's
+namespace. One way to do avoid this is using your package/application
+name as the first part of the hierarchy.
+
+=item 2.
+
+The message reader will truncate any whitespace around the '='.
+
+=back
+
+=head2 Continued Message Values
+
+Here's a declaration of two keys, one of which has a continued value:
+
+ company.intro = You have decided to learn about MyCompany, a leader \
+     in the maintenance of the status quo around the world. Ensure your \
+     status is the one that's in quo!
+ company.title = Welcome to MyCompany!
+
+The main things here are:
+
+=over 4
+
+=item 1.
+
+The '\' B<must> be at the end of the line or the remainder of your
+message will get lost. (You may have whitespace between the '\' and
+the end of line.)
+
+=item 2.
+
+You can have multiple continuations for a single value. Leading space
+from successive lines will be lopped off.
+
+=item 3.
+
+The value returned will not have any embedded newlines. (TODO: This
+may change, speak up if you have strong feelings about it.)
+
+=back
+
+=head2 Runtime replacements
+
+Since we just use L<Locale::Maketext|Locale::Maketext> behind the
+scenes you can do anything in your message values that it allows. Here
+is a quick summary of the most common options.
+
+First, you often need to embed one or more values in a
+message. Position is important: the translation of your message may
+shift around the order of the values so you cannot treat it like a
+C<sprintf>. For instance, you might have:
+
+ db.error.process = While processing the statement [_1] the database \
+     returned an error [_2]
+
+In another language this might be something like the following
+nonsense:
+
+ db.error.process = La base de datos volvio un error [_2] mientras \
+     que procesaba la declaracion [_1] 
+
+When we ask for the message we need to pass in two values which will
+get plugged into the message at runtime:
+
+ my ( $sth );
+ eval {
+     $sth = $dbh->prepare( $sql );
+     $sth->execute();
+ };
+ if ( $@ ) {
+   my $error_msg = $lh->maketext( 'db.error.process', $sql, $@ );
+   # ...
+ }
+
+Since they're ordered there's no ambiguity.
+
+Second, you often need to plugin values that depending on their value
+may change words around them. For instance:
+
+ cart.numitems = You have [_1] items in your shopping cart.
+
+Easy enough, but what happens when the number is 1? Or 0?
+
+ You have 1 items in your shopping cart.
+ You have 0 items in your shopping cart.
+
+It's understandable, but not user-friendly. Fortunately
+L<Locale::Maketext|Locale::Maketext> does this for us:
+
+ cart.numitems = You have [quant,_1,item,items,no items]
+
+With a '1' this will generate:
+
+ You have 1 item in your shopping cart.
+
+And with a '0':
+
+ You have no items in your shopping cart.
+
+Nifty!
+
+=head1 USAGE
+
+=head2 In Template Toolkit templates
+
+Since the Template Toolkit is the preferred content generation system
+for OI it has the best support for fetching and displaying
+messages. Every template has the function 'MSG' in its namespace. This
+function takes a message key as the first argument and optional
+parameters as successive arguments. Each of these gets filled in the
+message in order. So you might have:
+
+ [% MSG( 'search.results.count', results.size ) %]
+
+Which refers to a message key:
+
+ search.results.count = You found [_1] types of candy
+
+The argument C<results.size> will replace the C<[_1]> placeholder when
+the message is interpreted.
+
+Additionally, many of the OI template widgets take message keys as
+arguments in place of labels. For instance, instead of:
+
+ [% INCLUDE header_row( labels = [ 'foo', 'bar', 'baz' ] ) %]
+
+You can use:
+
+ [% INCLUDE header_row( label_keys = [ 'label.foo', 'label.bar', 'label.baz' ] ) %]
+
+Most of the time if the original argument was 'foo' the keyed argument
+will be 'foo_key', so:
+
+ Old (and still works):
+ [% INCLUDE label_form_text_row( label = 'Phone Number',
+                                 name  = 'phone_number',
+                                 size  = 20 ) %]
+ [% INCLUDE form_button( value = 'Click Me!' ) %]
+ 
+ New:
+ [% INCLUDE label_form_text_row( label_key = 'myform.phone',
+                                 name      = 'phone_number',
+                                 size      = 20 ) %]
+ [% INCLUDE form_button( value_key => 'global.button.click' ) %]
+
+=head2 In code during a request
+
+You can always grab a language handle from the
+L<OpenInteract2::Request> object:
+
+ my $lh = CTX->request->language_handle;
+
+When first called during the request's lifetime this will determine
+what language the user is using and get a suitable L<Locale::Maketext>
+handle. Successive calls during the request will return the same
+handle.
+
+You can then call 'maketext' on the object and get a translation:
+
+ my $lh = CTX->request->language_handle;
+ my ( $sth );
+ eval {
+     $sth = $dbh->prepare( $sql );
+     $sth->execute();
+ };
+ if ( $@ ) {
+   my $error_msg = $lh->maketext( 'db.error.process', $sql, $@ );
+   ...
+
+L<OpenInteract2::Action> subclasses have a shortcut with the C<_msg>
+method. (The underscore is an indication that it's reserved for
+subclasses, a.k.a. 'protected' in other languages. The method itself
+does not enforce this.) So if the above were in an action it might
+look like this:
+
+ sub do_something {
+     my ( $self ) = @_;
+     my ( $sth );
+     eval {
+         $sth = $dbh->prepare( $sql );
+         $sth->execute();
+     };
+     if ( $@ ) {
+         $self->param_add(
+             error_msg => $self->_msg( 'db.error.process', $sql, $@ ) );
+     ...
+
+=head2 In code outside a request
+
+Assuming that you started up the L<OpenInteract2::Context> object in
+the normal fashion, you can just use the L<Locale::Maketext> usage:
+
+ my $lh = OpenInteract2::I18N->get_handle( 'lang', 'lang', 'lang'... );
+ die $lh->maketext( 'db.error.process', $sql, $@ );
+
+where each 'lang' is a user (or system) language in order of
+preference.
+
+=head1 FAQ
+
+B<Why did you use opaque IDs for the message keys?>
+
+In the L<Locale::Maketext|Locale::Maketext> docs Sean Burke recommends
+using keys based on the base language -- that is, B<not> using opaque
+message keys. His suggestion makes for very readable translation
+documents but I think in practice it would be extremely brittle -- if
+you change the key in the base language even for punctuation you'll
+need to change all of them. Feh. (Then again, Mr. Burke is a bona-fide
+superhero, so we'll see how that shakes out...)
+
+Additionally a lot of this was inspired by the message (or 'resource')
+bundle technology built in to the Java 2 platform. (See L<SEE ALSO>
+for more on this.) Message bundles shipped with applications built on
+Struts or Spring typically use the hierarchical message syntax, with
+different levels separated by a dot. So you might have
+'myapp.search.label.firstname' which gets more specific as you
+traverse the key from left to right. How specific you want to get is
+up to you.
+
+That said, there's nothing stopping you from using your own standard
+for declaring keys in your application. Use ID numbers, letters, days
+of the week, whatever. Just make sure your package's keys don't trod
+on another's.
+
+=head1 SEE ALSO
+
+L<OpenInteract2::I18N|OpenInteract2::I18N>
+
+L<OpenInteract2::I18N::Initializer|OpenInteract2::I18N::Initializer>
+
+L<Locale::Maketext|Locale::Maketext>
+
+L<Locale::Maketext::Lexicon|Locale::Maketext::Lexicon>
+
+gettext: L<http://www.gnu.org/software/gettext/>
+
+openinteract-dev mailing list:
+
+L<http://lists.sourceforge.net/lists/listinfo/openinteract-dev>
+
+Article published in TPJ 13 by Sean Burke about Locale::Maketext:
+
+L<http://search.cpan.org/~sburke/Locale-Maketext-1.06/lib/Locale/Maketext/TPJ13.pod>
+
+Web Localization in Perl by Autrijus Tang 
+
+L<http://www.autrijus.org/webl10n/TABLE_OF_CONTENTS.html>
+
+Java Internationalization: Localization with ResourceBundles
+
+L<http://developer.java.sun.com/developer/technicalArticles/Intl/ResourceBundles/>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003-2004 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

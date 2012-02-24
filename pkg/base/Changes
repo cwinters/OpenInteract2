@@ -1,0 +1,458 @@
+Revision history for OpenInteract package base.
+
+2.50  Tue Oct 18 23:02:14 EDT 2005
+
+      OIN-190: Create a simple action and page for testing your email
+      settings.
+
+2.15  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.14  Sun Feb 27 21:24:53 EST 2005
+
+      OIN-38: The object keys weren't gone! A remnant remained to be
+      expunged (SQLInstaller).
+
+2.13  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.12  Thu Feb 17 22:14:27 EST 2005
+
+      OIN-38: Remove everything related to object keys. Begone!
+
+2.11  Sat Dec  4 00:10:31 EST 2004
+
+      Add message for package error.
+
+2.10  Fri May 21 21:47:06 EDT 2004
+
+      Add a 'template_only' action we can instantiate for use in
+      template-only boxes.
+
+2.09  Wed Mar 17 00:01:49 EST 2004
+
+      Implement actual redirects and logout procedures.
+
+2.08  Tue Feb 10 23:55:34 EST 2004
+
+2.07  Tue Feb 10 23:04:16 EST 2004
+
+      Extract messages for package
+
+2.06  Mon Oct 13 19:10:50 EDT 2003
+
+      Add note in OI2::SQLInstall::Base about data migration
+
+2.05  Fri Sep  5 10:31:15 EDT 2003
+
+      Small doc updates.
+
+2.04  Tue Jul 22 22:00:36 EDT 2003
+
+      Remove script/session_cleanup.pl
+
+2.03  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.02  Thu Mar 27 08:19:41 EST 2003
+
+      Update OI2::SQLInstall::Base to return a 'datasource: foo'
+      string rather than the kludgy 'session'.
+
+2.01  Sat Mar 22 12:27:15 EST 2003
+
+      Update templates to use new OI.make_url syntax.
+
+2.00  Thu Feb 20 22:57:15 EST 2003
+
+      Update to 2.x
+
+1.72  Mon Feb 17 11:03:08 EST 2003
+
+      Documentation update (minor)
+
+1.71  Wed Jan  8 00:37:52 EST 2003
+
+      Add 'script/session_cleanup.pl' for cleaning sessions out of the
+      database.
+
+1.70  Sun Aug 25 12:33:45 EDT 2002
+
+      Translate most documentation to HTML and move to global site
+      doc/ directory.
+
+1.69  Sun Aug 25 10:54:40 EDT 2002
+
+      Remove template/*.meta files; also update doc/template.pod and
+      doc/package.pod.
+
+1.68  Tue Aug 20 17:41:57 EDT 2002
+
+      Update several docs in doc/
+
+1.67  Thu May  2 09:23:27 EDT 2002
+
+      Add Interbase-specific tables
+
+1.66  Wed Apr 17 12:14:12 EDT 2002
+
+      Gave a default to 'last_accessed' in
+      struct/sessions_oracle.sql. (Thanks to Ben Avery for all these
+      Oracle changes.)
+
+1.65  Tue Apr 16 14:46:18 EDT 2002
+
+      Set the 'timestamp' to 'date' in struct/sessions_oracle.sql
+
+1.64  Mon Apr  1 21:14:50 EST 2002
+
+      Add Oracle-specific tables.
+
+1.63  Wed Oct 17 21:41:20 EDT 2001
+
+      Moved the struct/object_track.sql to the object_activity
+      package.
+
+1.62  Mon Sep 24 09:11:45 EDT 2001
+
+      Fix typo in template/package_listing.tmpl
+
+1.61  Sat Sep 22 12:34:28 EDT 2001
+
+      Just some general cleanup in tempalate/package_listing.tmpl and
+      OI/Handler/Package.pm.
+
+1.60  Mon Aug 27 01:21:28 EDT 2001
+
+      Remove just about everything from conf/list_modules.dat
+
+1.59  Tue Aug 21 08:33:40 EDT 2001
+
+      Modify struct/object_track.sql to have the user ID type in it
+      rather than the 'increment_type'. (This is to allow for user IDs
+      that are character-based, as in LDAP.)
+
+1.58  Mon Aug 20 10:59:59 EDT 2001
+
+      Patch to OpenInteract/Handler/Redirect.pm from Christian Lemburg
+      <lemburg@aixonix.de> to use the right 'no template' key when
+      redirecting.
+
+1.57  Sat Aug 18 12:42:58 EDT 2001
+
+      Modified the schema for 'object_track' to work with
+      MySQL. Existing users should not require an upgrade.
+
+1.56  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.55  Mon Aug 13 00:19:45 EDT 2001
+
+      Add new OpenInteract::Template::* modules to conf/list_modules.dat
+
+1.54  Sun Aug 12 12:35:54 EDT 2001
+
+      Remove entry in 'conf/list_modules.dat' for
+      OpenInteract::Session::MySQL -- no longer needed
+
+1.53  Sun Aug 12 11:17:21 EDT 2001
+
+      Modify data/install_security.dat to use new
+      'transform_default_to_id' action.
+
+1.52  Thu Jul 19 14:07:30 EDT 2001
+
+      Move the 'OpenInteract/Handler/GenericDispatcher.pm' file to the
+      core distribution.
+
+1.51  Sun Jul 15 19:45:40 EDT 2001
+
+      Add 'unique' constraint to struct/object_keys.sql
+
+1.50  Fri Jul 13 10:48:10 EDT 2001
+
+      Moved OpenInteract/SearchManage.pm and
+      OpenInteract/SearchIterator.pm to a new package,
+      'results_manage'
+
+1.49  Thu Jul 12 12:26:32 EDT 2001
+
+      Added script (script/class_to_object_key.pl) to create an
+      object_key for all members in a particular class.
+
+1.48  Wed Jul 11 22:53:26 EDT 2001
+
+      Added new table to match a 32-character key with an object class
+      and ID and updated OpenInteract/SQLInstall/Base.pm.
+
+1.47  Tue Jul 10 23:31:51 EDT 2001
+
+      Remove unnecessary stuff from conf/list_module.dat
+
+1.46  Tue Jul 10 22:49:41 EDT 2001
+
+      Shuffled a whole bunch of files from this package into the core
+      distribution. They were:
+
+          OpenInteract.pm
+          OpenInteract/Auth.pm
+          OpenInteract/Cache.pm
+          OpenInteract/Cache/File.pm
+          OpenInteract/Cache/IPC.pm
+          OpenInteract/Cookies.pm
+          OpenInteract/Cookies/CGI.pm
+          OpenInteract/Cookies/Apache.pm
+          OpenInteract/Error/Main.pm
+          OpenInteract/Error/System.pm
+          OpenInteract/Session.pm
+          OpenInteract/Session/DBI.pm
+          OpenInteract/Session/MySQL.pm
+          OpenInteract/Template.pm
+          OpenInteract/Template/Toolkit.pm
+          OpenInteract/UI/Main.pm
+          OpenInteract/Utility.pm
+
+1.45  Mon Jul  9 10:42:28 EDT 2001
+
+      Added the 'OpenInteract::SearchIterator' class, which iterates
+      through search results of mixed classes.
+
+      Also modified OpenInteract/Error/Main.pm to reflect SPOPS API
+      change regarding return from ->save().
+
+1.44  Sat Jun 16 20:34:33 EDT 2001
+
+      Added the 'OpenInteract::SearchManage' class, which enables you
+      to easily save search results to disk and retrieve them later,
+      page through them and retrieve an iterator to grab the objects
+      for you.
+
+      Also added the ability for handlers to declare a default level
+      of security (using the exported 'DEFAULT_SECURITY_KEY'). Thanks
+      to Dave Rolsky for asking about this at YAPC!
+
+1.43  Wed Jun 13 00:55:06 EDT 2001
+
+      Changed the schema of 'object_track' so the primary key fits
+      under 255 characters. Also added an 'INSTALL' file warning for
+      MySQL 3.22- users. (Thanks to Robert McArthur
+      <mcarthur@dstc.edu.au>)
+
+1.42  Thu May 31 21:58:12 EDT 2001
+
+      Changed the relevant ID fields from 'int' to
+      '%%INCREMENT_FIELD%%'.
+
+1.41  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.40  Wed May 16 22:59:25 EDT 2001
+
+      Added some more documentation information to various modules.
+
+1.39  Mon Mar 26 07:22:01 EST 2001
+
+      OpenInteract.pm: Allow the content type to be set manually when
+      sending a file (PDF, CSV, etc.) Most of the time Apache will
+      pick up the type properly, but sometimes you need to do it
+      manually.
+
+1.38  Mon Mar 19 07:44:52 EST 2001
+
+      Changed the field 'oid' in struct/object_track.sql to
+      'object_id' and expanded it.
+
+1.37  Tue Mar 13 07:20:31 EST 2001
+
+      Changed security level data: 'oid' -> 'object_id'
+
+1.36  Sat Mar 10 00:11:01 EST 2001
+
+      Modify OpenInteract/Auth.pm to check to see if the user checked
+      the 'Remember me' box in the login form. If not, the expiration
+      is undefined and should expire when the browser closes. 
+
+      To use this you will need to set the 'remember_field' of the
+      'login' key in your website's conf/server.perl to the name of
+      the checkbox in the login form (by default this is
+      'login_remember').
+
+1.35  Wed Mar  7 23:56:55 EST 2001
+
+      Modified the 'default' clause in struct/object_track.sql to not
+      have 'not null'.
+
+1.34  Wed Mar  7 22:57:12 EST 2001
+
+      - OpenInteract/Session/MySQL.pm: Cleaned up, moved the warning
+      message regarding a failure to create a session to the error
+      handler
+
+      - OpenInteract/Session/DBI.pm: Fixed to retrieve the right
+      parameters regarding the session class and the parameters to
+      pass.
+
+      - OpenInteract/Error/System.pm: Fleshed out error handler for
+      failure to create session (310).
+
+1.33  Sun Mar  4 16:04:01 EST 2001
+
+      Changed security level data: 'level' -> 'security_level'
+
+1.32  Sun Mar  4 12:26:46 EST 2001
+
+      Added the Cookie processing modules to the conf/list_modules.dat
+      file; added debugging to see in the error log which cookie
+      processing module is being used.
+
+1.31  Sun Mar  4 11:31:38 EST 2001
+
+      Split out the CGI::Cookie/Apache::Cookie functions into
+      OpenInteract/Cookies/CGI.pm and OpenInteract/Cookies/Apache.pm,
+      respectively. Calling a method on OpenInteract::Cookies will
+      result in an immediate die() being thrown with a message to
+      change the config file to use the proper one of these.
+
+1.30  Wed Feb 21 22:23:59 EST 2001
+
+      Added feature to 'date_into_hash()' template function: pass in
+      'today' as the second argument and if the first argument (date)
+      doesn't exist the system will substitute in today's date.
+
+1.29  Wed Feb 21 06:57:10 EST 2001
+
+      Modified OpenInteract/Session.pm and
+      OpenInteract/Session/MySQL.pm in troubleshooting error found
+      when a session key is not found in the data store.
+
+1.28  Wed Feb 21 06:28:56 EST 2001
+
+      Modified OpenInteract/Template.pm to work with new package scheme.
+
+1.27  Mon Feb 19 12:38:32 EST 2001
+
+      Updated OpenInteract/Handler/Package.pm to work with new package
+      scheme along with template/package_list.tmpl and
+      template/package_detail.tmpl.
+
+1.26  Mon Feb 19 00:06:13 EST 2001
+
+      Added Template Toolkit powered by logo to html/images
+
+1.25  Wed Feb  7 00:35:14 EST 2001
+
+      Bugfix! Fixed bug exposed by Wim Kerkhoff <wim@merilus.com> in
+      OpenInteract/Auth.pm which didn't take the fact that it had not
+      found a user referenced in a session to heart, instead marking
+      the user as logged in and trying to fetch groups, etc. Major
+      mess -- the user would get 501 errors and not know why.
+
+1.24  Tue Feb  6 17:09:29 EST 2001
+
+      One-line change in OpenInteract.pm which allows you to force the
+      content type in $R->{page}->{content_type}
+
+1.23  Tue Feb  6 16:05:08 EST 2001
+
+      Removed default login/password fieldnames from
+      OpenInteract/Auth.pm and modified it to throw an error if we
+      cannot find any fieldnames. (They should be in the server.perl.)
+      Added a new error code to OpenInteract/Error/System --> code 205
+      now corresponds to 'cannot_find_login_fields'.
+
+1.22  Fri Feb  2 00:22:55 EST 2001
+
+      Fixed redirect handler
+
+1.21  Thu Feb  1 22:34:05 EST 2001
+
+      New graphics!
+
+1.20  Tue Jan 30 22:04:21 EST 2001
+
+      Cleanup, and lots of it.
+
+1.19  Tue Jan 23 07:13:53 EST 2001
+
+      Did some reformatting of files along with some basic
+      cleanup. Removed OpenInteract/Handler/Boxes.pm in favor of the
+      base_box package now included with the base distribution.
+
+1.18  Sun Jan 14 23:22:08 EST 2001
+
+      Added call to OpenInteract/Template.pm to track the templates
+      used in the current request; also added documentation to this
+      file as well as OpenInteract/Template/Toolkit.pm. Modified
+      OpenInteract/Auth.pm to add 'logged_in' key to $R->{auth} so you
+      can always easily tell whether a user is logged in or not; also
+      modified it to get login/password field names from the server
+      configuration.
+
+1.17  Tue Jan  2 00:10:14 EST 2001
+
+      Oops -- referred to _send_static_file() in OpenInteract.pm when
+      it was mistakenly named _send_static_page(). Fixed the latter.
+
+1.16  Fri Dec 29 19:12:11 EST 2000
+
+      Radically changed how OpenInteract.pm is setup -- instead of
+      being a monolithic subroutine 'handler' the 'handler' routine
+      calls lots of smaller routines, each of which accomplishes just
+      a little. Error checking is greatly simplified and hopefully the
+      whole thing is much easier to grasp and follow.
+
+      While it all looks different the functionality is basically the
+      same. The only thing changed were the directive processing --
+      directives are now kept in the configuration file (server.perl)
+      rather than within the handler.
+
+      Modified how the OpenInteract/UI/Main.pm primary conductor --
+      added lots of documentation, changed how it specifies template
+      names and how it processes directives.
+
+1.15  Fri Dec 29 18:58:01 EST 2000
+
+      Modify how the deal with the directive in OpenInteract.pm -- do
+      everything with the URL in _parse_url() (get rid of
+      _find_action_from_url()) and if a directive is found eradicate
+      it before constructing the $R->{path}->{original}. Modify
+      OI/UI/Main.pm to have the right theme template keys (later
+      modification will look them up in the config, but for now it's
+      too confusing)
+
+1.14  Fri Dec 29 18:40:14 EST 2000
+
+      First batch of changes to modify OpenInteract.pm and
+      OI/UI/Main.pm (see notes for v. 1.16 for the scoop).
+
+1.13  Sat Dec 23 01:29:15 EST 2000
+
+      Added lots of documentation to doc/package.pod and
+      doc/action.pod.
+
+1.12  Mon Dec 18 22:11:03 EST 2000
+
+      Added behavior 'isa' to OpenInteract/Template/Toolkit to tell
+      from a template whether an object has in its ancestry a
+      particular class.
+
+1.11  Thu Dec 14 13:53:32 EST 2000
+
+      Added two behaviors to OpenInteract/Template/Toolkit to
+      encode/decode HTML from within the template.
+
+1.10  Fri Dec  1 00:38:24 EST 2000
+
+      Fixed (?) package handler so that it should list installed packages ok. 
+
+1.09  Sun Nov 26 11:43:10 EST 2000
+
+      Fixed OpenInteract/UI/Main.pm so that the Popup window template
+      will be displayed properly. (Earlier versions not tracked in
+      Changelog.)

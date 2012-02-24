@@ -1,0 +1,67 @@
+Revision history for OpenInteract package tips_quotes_cw.
+
+1.04  Sun Mar  6 11:42:06 EST 2005
+
+      Move to new package format.
+
+1.03  Sat Nov 27 23:27:27 EST 2004
+
+      - Add Kurt Vonnegut quote to RandomQuote
+
+1.02  Thu Jul 15 00:15:05 EDT 2004
+
+      Add 100 shaolin principles.
+
+1.01  Fri May 21 11:35:37 EDT 2004
+
+      Turn everything into actions.
+
+1.00  Fri May 21 11:25:32 EDT 2004
+
+      Update to OI2
+
+0.09  Tue Feb 25 20:49:14 EST 2003
+
+      Duh! Why specify a 'sql_plugin' in the package.conf when there's
+      nothing to install? Thanks to Andrew Hurst <hurst9@llnl.gov> for
+      pointing out the problem.
+
+0.08  Sun Sep  8 13:46:23 EDT 2002
+
+      modify how the LW, JHI and MJD quotes are kept (makes it easier
+      to add new ones); add a new list of quotes from random sources.
+
+0.07  Wed Aug 14 23:43:17 EDT 2002
+
+      Fix HTML entity stuff (by skipping it -- ha!)
+
+0.06  Wed Aug 14 23:15:39 EDT 2002
+
+      Added OpenInteract::JHIQuote (Thanks to Elaine -HFB- Ashton
+      (elaine@chaos.wustl.edu) for the quotes!). Added to the plugin
+      and docs as well.
+
+      Fixed quoting error in OpenInteract::MJDAdvice (Thanks to
+      (perl@dellah.anu.edu.au) for the spot!)
+
+0.05  Tue Aug 13 22:18:17 EDT 2002
+
+      Stupid package naming error.
+
+0.04  Tue Aug 13 22:13:02 EDT 2002
+
+      Quote HTML entities where appropriate.
+
+0.03  Tue Aug 13 21:57:14 EDT 2002
+
+      Fix MJD full HTML; add note to docs about OI::Package change or
+      manual package configuration change.
+
+0.02  Tue Aug 13 21:44:27 EDT 2002
+
+      Add get_full_html() to the different quotefiles
+
+0.01  Tue Aug 13 20:45:06 2002
+
+      Package skeleton created by oi_manage
+

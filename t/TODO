@@ -1,0 +1,345 @@
+Tests Needed
+========================================
+
+Apache::OI2 (apache1.t)
+
+   - starts up with startup.pl, takes request
+
+Apache::OI2::Auth (apache1_auth.t)
+
+   - accepts superuser login via HTTP auth
+
+HTTP::Daemon::OI2 (daemon.t)
+
+   - starts up, takes request
+
+OI2::Action (action.t)
+
+ execute()
+   (wraps up find_task(), find_security_level(), check_security(),
+    check task validity(), find_task_method())
+   - Set security level manually to something that won't work
+   and ensure we get an exception
+   - Set 'task' to something invalid and ensure we get an exception
+   - Set 'task' to something valid but nonexistent and ensure we
+   get an exception.
+   - Run and ensure we get the right content back.
+   - Run again and this time pass in properties/parameters and
+   ensure they're set
+   - Call 'generate_content' with known parameters and ensure we get
+   the right content back
+
+ caching
+   - Set cache to be active, run 'generate_content' and see that a
+   cache document was created
+   - Run 'generate_content' again with different parameters and
+   ensure we get the same document back (put a parameter dependency
+   in there)
+   - Clear the cache
+   - Modify cache settings to depend on a parameter
+   - Run 'generate_content' and see that a cache document was
+   created
+   - Run 'generate_content' with a different parameter and see that
+   we get a different document back; also see that a new cache
+   document was created
+
+ action_type (e.g., 'lookup')
+   - Check that it's the right class
+   - Check that it has the right params/properties
+
+ observable
+   - Add observer to action and catch observation
+   - Add observer to action and catch FILTER observation, run the
+   filter and ensure generated content is modified.
+
+OI2::Action::CommonAdd (action_common_add.t)
+
+   - run display_add and check that:
+      - form exists
+      - being sent to right URL
+   - run add with HTTP request and data and check:
+      - object created with correct data
+      - sent to correct URL (action/task) afterwards
+   - run add with programmatic request and data and check:
+      - object created with correct data
+      - sent to correct URL (action/task) afterwards
+   - run add with incorrect data and check:
+      - display_add task run
+      - action_view message(s) set
+
+OI2::Action::CommonDisplay (action_common_display.t)
+
+   - run display and check that correct form displayed
+
+OI2::Action::CommonRemove (action_common_remove.t)
+
+   - run remove with correct ID and check:
+        - correct object removed
+        - redirected to correct URL (action/task)
+   - run remove with incorrect ID and check:
+        - fail_task executed with error message set
+   - run remove with correct ID but insufficient privileges:
+        - security_fail_task executed with error message set
+   - _remove_customize is run and action returns content if returned
+
+OI2::Action::CommonRemove (action_common_search.t)
+
+OI2::Auth (auth.t)
+
+   - Since this is just a dispatcher we don't have to test much
+   - Different iterations of running 'login' (mock...)
+     - See that it responds to 'auth_user_class'
+     - See that it responds to 'auth_group_class'
+     - See that it responds to 'auth_admin_class'
+     - See that it responds to 'custom_login_handler'
+
+OI2::Auth::AdminCheck (auth_admin.t)
+
+   - Add pseudo user (not logged in) --> not admin
+   - Add normal user --> not admin
+   - Add user in site_admin_group --> admin
+   - Add superuser --> admin
+
+OI2::Auth::Group (auth_group.t)
+
+   - Add pseudo user (not logged in) --> no groups
+   - Add normal user --> public group
+   - Add user in site_admin_group --> public + site_admin
+   - If 'cache_group' is set see that groups are set in session
+   - Ensure auth_group is set properly in request
+
+OI2::Auth::User (auth_user.t)
+
+   - Pass group in and ensure it's set in request
+   - Make no user info available and ensure we get the not-logged-in user and 
+     that the 'logged-in' flag isn't set
+   - Set the user ID in the session and see it's fetched/set
+   - Set the user ID in the session and set 'cache_group', see that the user
+     object is set in the session
+   - Set the cached user in the session and see it's recognized
+   - Ensure auth_user, auth_is_logged_in set properly in request
+
+OI2::Cache (cache.t)
+
+   - Setup mock cache implementation and see that they calls get
+     passed back properly
+
+OI2::Cache::File (cache_file.t)
+
+   - Set caching to filesystem and save scalar, arrayref, hashref,
+     object and see they're retrieved. (Precompute MD5 keys and find
+     in filesystem?)
+   - Make call to remove an object, see that it is
+   - Make call to remove all objects, see that they are
+
+OI2::Config::TransferSample (config_transfer.t)
+
+   - Create sample FILES in t/use/ and file pointers
+   - Create object, point it at FILES, copying files somewhere else
+   - Create object, point it at FILES, set some content replacement
+   variables, and copy files somewhere else, then check for content
+
+OI2::ContentGenerator (content_gen.t)
+
+OI2::ContentGenerator::HtmlTemplate (content_gen_htmlt.t)
+
+OI2::ContentGenerator::TT2Plugin (content_gen_ttplugin.t)
+
+OI2::ContentGenerator::TT2Process (content_gen_tt.t)
+
+OI2::ContentGenerator::TT2Provider (content_gen_ttprovider.t)
+
+OI2::ContentGenerator::TemplateSource (content_gen_template_source.t)
+
+OI2::ContentGenerator::TextTemplate (content_gen_textt.t)
+
+OI2::Context (context.t)
+
+OK - Ensure that the following propogate changes to both the exported
+   variables and the server config, as appropriate
+
+OK    assign_deploy_url
+OK    assign_deploy_image_url
+OK    assign_deploy_static_url
+OK    assign_request_type
+OK    assign_response_type
+
+OK - Lookup datasource names
+OK - Lookup default object IDs
+OK - Lookup controller info by name
+OK - Lookup content generator info by name
+OK - Lookup content generator object by name
+ - Lookup filters by name
+   ... set filter registry
+   ... add filter
+OK - Lookup directories
+OK - Lookup temporary library directory
+OK - Lookup temporary library refresh filename
+OK - Lookup action config override filename  
+OK - Lookup SPOPS config override filename  
+OK - Lookup session configuration
+OK - Lookup login configuration
+OK - Check aliases
+ - Check security
+
+OI2::Controller (controller.t)
+
+OI2::Controller::MainTemplate (controller_main.t)
+
+OI2::Controller::ManageBoxes (controller_box.t)
+
+OI2::Controller::ManageTemplates (controler_templates.t)
+
+OI2::Controller::Raw (controller_raw.t)
+
+OI2::Cookie (cookie.t)
+
+OI2::Datasource::DBI (ds_dbi.t)
+
+OI2::Datasource::LDAP (ds_ldap.t)
+
+OI2::DatasourceManager (ds_manager.t)
+
+OI2::Filter (filter.t)
+
+OI2::Log (log.t)
+
+OI2::Log::OIAppender (log_appender.t)
+
+OI2::Manage::Package::CreatePackage (manage_package_create.t)
+
+OI2::Manage::Website::CleanExpiredSessions (manage_clean_sessions.t)
+
+OI2::Manage::Website::CreateSecurity (manage_create_security.t)
+
+OI2::Manage::Website::CreateSuperuserPassword (manage_create_password.t)
+
+OI2::Manage::Website::InstallPackage (manage_package_install.t)
+
+OI2::Manage::Website::InstallPackageData (manage_install_data.t)
+
+OI2::Manage::Website::InstallPackageSecurity (manage_install_security.t)
+
+OI2::Manage::Website::InstallPackageSql (manage_install_sql.t)
+
+OI2::Manage::Website::InstallPackageStructure (manage_install_structure.t)
+
+OI2::Manage::Website::ReindexObjects (manage_reindex.t)
+
+OI2::Manage::Website::RemovePackage (manage_package_remove.t)
+
+OI2::Manage::Website::TestDB (manage_testdb.t)
+
+OI2::Manage::Website::TestLDAP (manage_testldap.t)
+
+OI2::Manage::Website::ThemeDump (manage_theme_dump.t)
+
+OI2::Manage::Website::ThemeInstall (manage_theme_install.t)
+
+OI2::Manage::Website::Upgrade (manage_website_upgrade.t)
+
+OI2::Manage::Website::ViewSession (manage_view_session.t)
+
+OI2::Package (package.t)
+OK   - full_name() correct
+OK   - parse_full_name() works
+OK   - get_changes() returns changelog
+OK   - get_files() returns MANIFEST files
+OK   - get_module_files() returns .pm files
+OK   - get_spops_files() returns SPOPS conf files
+OK   - get_action_files() returns action conf files
+OK   - get_doc_files() returns doc files
+   - install() works (overlap with management task)
+OK   - create_skeleton() works (overlap with management task)
+   - remove() from repository
+   - generate_distribution_digest() works (doc?)
+   - find_file() returns right path
+
+OI2::Repository (repository.t)
+OK   - find_file( $pkg, $file ) calls right package
+
+OI2::Request (request.t)
+OK   - set_implementation_type() works
+OK   - set_implementation_type() fails on bad type
+OK   - new() returns correct type of object
+   - ... and passes @params to subclass's init()
+OK   - get_current (?) (matches object from $new)
+OK   - param single value, multivalue, return single,
+     return arrayref in scalar context, return
+     array in list context
+OK   - param_toggled
+OK   - param_date with format, get back DateTime object
+OK   - param_date without format (set foo_year, foo_month, foo_day),
+       get back DateTime object
+OK   - param_datetime with format, get back DateTime object
+OK   - param_datetime without format (set foo_year, foo_month, foo_day,
+     foo_hour, foo_minute, foo_am_pm), get back DateTime object
+   - auth_user_id == auth_user->id
+   - action_messages, set hash of messages and retrieve
+   - add_action_message, set single message and retrieve w/ action_messages
+   - _set_upload() adds single, multiple uploads at once
+   - _set_upload() adds to (rather than replaces) upload when one already set
+   - upload() fetches uploads by name
+   - clean_uploads() deletes all of them
+   - cookie() sets cookie
+   - _parse_cookies() given cookie string sets name/values
+   - _parse_cookies() uses 'cookie_header' property if none given
+   - create_session() creates session if cookie set
+   - ...doesn't create session (just empty hashref) if not set
+   - theme() returns current theme
+   - theme( $theme ) sets the theme AND theme_values()
+   - create_theme() creates the correct theme for logged-in user
+   - ...and for not logged-in user without a theme_id
+
+OI2::Response (response.t)
+
+   - set_implementation_type
+   - new() returns object and passes @params to subclass's init()
+   - get_current (?) (matches object from $new)
+   - content_type() gets/sets the right header
+   - header() gets/sets headers
+   - remove_header() removes headers
+   - cookie() gets cookie values already set
+   - cookie( $cookie ) sets cookie under correct name
+   - cookie( \%cookie ) returns nothing since it's not a CGI::Cookie
+   - remove_cookie( $name ) works, doesn't fail when $name doesn't exist
+   - save_session() calls the right method
+   - set_file_info() sets 'Content-Length' and 'Content-Type' headers
+   - set_file_info() returns undef if send_file() not set
+   - set_file_info() throws exception if send_file() exists but its filename doesn't
+   - return_url() if set translates relative to absolute; getter works
+
+OI2::ResultsIterator (results_iter.t)
+
+OI2::ResultsManage (results_manage.t)
+
+OI2::SPOPS (spops.t)
+
+OI2::SPOPS::DBI (spops_dbi.t)
+
+OI2::SPOPS::LDAP (spops_ldap.t)
+
+OI2::SQLInstall (sql_install.t)
+
+OI2::Session (session.t)
+
+OI2::Setup (needed?)
+
+OI2::URL (url.t)
+   - create_relative_to_absolute()
+   - parse_action()
+   - create_deployment()
+   - create_from_action()
+
+OI2::Upload (upload.t)
+
+OI2::Util (util.t)
+   - now()
+   - today()
+   - read_file_lines()
+   - read_file_perl()
+   - send_email() (??)
+
+
+========================================
+$Id: TODO,v 1.4 2003/08/26 11:31:05 lachoy Exp $

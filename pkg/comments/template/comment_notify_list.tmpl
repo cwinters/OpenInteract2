@@ -1,0 +1,37 @@
+[% PROCESS error_message %]
+
+<h2>[% MSG( 'comments.notify_list.title' ) %]</h2>
+
+<p>
+[%- IF summary;
+      object_desc = PROCESS comments::comment_object( url   = summary.object_url,
+                                                      title = summary.object_title );
+      MSG( 'comments.notify_list.summary_thread', "<span class="commentObject">$object_desc</span>." );
+    ELSE;
+      MSG( 'comments.notify_list.summary_no_thread' );
+    END -%]
+</p>
+
+[% IF notes.size > 0 -%]
+
+<div align="center">
+[% INCLUDE table_bordered_begin -%]
+[%- count = 0 -%]
+
+[% INCLUDE header_row( label_keys = [ 'comments.info.name', 'comments.info.email' ] ) -%]
+[% FOREACH notify = notes -%]
+<tr [% PROCESS row_color %] valign="top">
+  <td>[% notify.name %]</td>
+  <td>[% notify.email %]</td>
+</tr>
+[%- count = count + 1 -%]
+[% END -%]
+
+[% INCLUDE table_bordered_end -%]
+</div>
+
+[% ELSE -%]
+
+<p>[% MSG( 'comments.notify_list.no_notifications' ) %]</p>
+
+[% END -%]

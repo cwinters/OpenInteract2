@@ -1,0 +1,6 @@
+\bCVS\b
+~$
+\.old$
+\.bak$
+^tmp
+^_

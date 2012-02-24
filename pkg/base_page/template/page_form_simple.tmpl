@@ -1,0 +1,62 @@
+[%- DEFAULT theme = OI.theme_properties;
+    count = 0;
+    OI.page_title( "Upload a New Page" ); -%]
+
+[%- PROCESS base_page::page_common_js -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2>Upload a New Page</h2>
+
+[% IF directory -%]
+
+[%- dir_url = OI.make_url( BASE = directory ) -%]
+<p>Adding to directory: 
+  <tt><b><a href="[% dir_url %]">[% directory %]</a></b></tt></p>
+
+[% PROCESS form_begin( ACTION = 'page',
+                       TASK   = 'add',
+                       method = 'POST',
+                       name   = 'page',
+                       upload = 'yes' ) -%]
+
+[% INCLUDE form_hidden( name = "directory",  value = directory );
+   INCLUDE form_hidden( name = "location",   value = page.location );
+   INCLUDE form_hidden( name = "is_active",  value = 'yes' );
+   INCLUDE form_hidden( name = 'use_upload', value = 'yes' );
+   INCLUDE form_hidden( name = 'storage',    value = 'file' );
+   INCLUDE form_hidden( name = 'form_type',  value = 'simple' ) %] 
+
+[% INCLUDE table_bordered_begin -%]
+
+[%- help_url = "javascript:show_page_help( 'upload' )" -%]
+<tr><td align="right" colspan="2"><a href="[% help_url %]">help</a></td></tr>
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Title', 
+                                name  = 'title',
+                                value = page.title,
+                                size = 30, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_upload_row( label = 'Upload File',
+                                  name  = 'content_upload' ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = 'Add' ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+[% ELSE -%]
+
+ <p>Failed to display upload form. Reason: No directory specified in
+ parameters.</p>
+
+[% END -%]
+ 
+</div>

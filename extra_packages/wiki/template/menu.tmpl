@@ -1,0 +1,21 @@
+<table class="wikiMenu">
+<tr><td align="left">
+<a href="[% OI.make_url( ACTION = 'wiki' ) %]">[% MSG( 'wiki.link_home' ) %]</a> | 
+<a href="[% OI.make_url( ACTION = 'wiki', TASK = 'list' ) %]">[% MSG( 'wiki.link_all_pages' ) %]</a> |
+<a href="[% OI.make_url( ACTION = 'wiki', TASK = 'recent' ) %]">[% MSG( 'wiki.link_recent' ) %]</a>
+[% IF node %]
+| <a href="[% OI.make_url( ACTION = 'wiki', TASK = 'referenced_by' ) %][% node %]">[% MSG( 'wiki.link_references' ) %]</a>
+[% END %]
+</td>
+<td align="right">
+[% PROCESS form_begin( ACTION = 'wiki',
+                       TASK   = 'search',
+                       name   = 'search' ) %]
+[% PROCESS form_text( name = 'keywords', size = 10 ) %]
+[% PROCESS form_submit( value_key = 'wiki.search' ) %]
+
+[% PROCESS form_end %]
+
+</td></tr>
+</table>
+

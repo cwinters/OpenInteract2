@@ -1,0 +1,17 @@
+[%- IF OI.logged_in -%]
+  [%- user       = OI.login;
+      edit_url   = OI.make_url( ACTION  = 'user',
+                                TASK    = 'display',
+                                user_id = user.id );
+      logout_url = OI.make_url( ACTION    = 'logout',
+                                return_to = OI.return_url ); -%]
+<span class="userInfo">
+[% user.login_name %]: [% user.first_name %] [% user.last_name %]
+</span><br />
+<span align="right">
+<a href="[% edit_url %]">[% MSG( 'user_info_box.customize' ) %]</a> |  
+<a href="[% logout_url %]">[% MSG( 'user_info_box.signout' ) %]</a>
+</span>
+[%- ELSE -%]
+[%- MSG( 'user_info_box.no_login' ) -%]
+[%- END -%]

@@ -1,0 +1,185 @@
+=head1 NAME
+
+OpenInteract2::Manual::Logging - Logging in OpenInteract2
+
+=head1 SYNOPSIS
+
+This part of the manual describes the logging system, common usages
+and ways you can modify its behavior.
+
+=head1 USE STANDARD SOLUTIONS
+
+While you could justifiably say that OpenInteract recreates the
+application server wheel, the framework certainly isn't hesitant about
+using best-of-breed solutions where they're appropriate. Logging is
+one of these cases. Instead of the homegrown solution that existed in
+OI 1.x and early betas of 2.x, we're now using
+L<Log::Log4perl|Log::Log4perl> to handle the job for us.
+
+Why? It makes for a far more flexible logging solution, allowing you
+to screen out the chaff and only view the wheat of the matter at
+hand. You can declare what messages get viewed and where the messages
+are sent in an external configuration file.
+
+And it's simple to use as well. Here's a simple example:
+
+ use Log::Log4perl            qw( get_logger );
+ use OpenInteract2::Constants qw( :log );
+ 
+ sub foo {
+     my ( $self ) = @_;
+     my $log = get_logger( LOG_APP );
+     $log->is_debug &&
+         $log->debug( "Entering the 'foo' method of action" );
+ }
+
+Line 1 imports the C<get_logger> method as a shortcut, and line 2
+imports OI2 logging constants. Line 6 fetches the logger associated
+with the category referred to by the constant C<LOG_APP>, and lines 7
+and 8 actually use the logging object.
+
+=head1 QUICK LOG4PERL OVERVIEW
+
+For more detailed information see the L<Log::Log4perl|Log::Log4perl>
+or the website listed in L<SEE ALSO>.
+
+The main elements of log4perl are log levels, appenders and categories. 
+
+A log level comes from the standard syslog list: 'debug', 'info',
+'warn', 'error', 'fatal'. No, you may not define more levels. (You
+don't need them.)
+
+An appender tells log4perl where to send messages. An appender may add
+messages to a log file, send them to the console, send an email, or
+even create custom error objects and serialize them (see
+L<OpenInteract2::Log::OIAppender|OpenInteract2::Log::OIAppender> for
+an example).
+
+A category is a classification for a message, and you associate a
+category with a logging level. This determines whether a message gets
+displayed. Categories also inherit from one another, so you can
+control a number of categories by setting the level of a category
+higher up the tree. Often times you'll use a class name as a
+category. This has the benefit of having a inheritance built in: a
+category 'My::App::Custom' will inherit logging levels from 'My::App'
+if not associated a level itself.
+
+You may also associate a logging level threshold with an appender,
+which means it will not write messages with a level underneath what's
+defined.
+
+The log4perl configuration file has associations for the root logger
+(kind of like the UNIVERSAL class from which all other classes
+inherit), declared appenders and categories, and the logging levels
+associated with each. (There are other ways to configure log4perl, but
+we'll stick with the external file.)
+
+=head2 SAMPLE CONFIGURATION
+
+Here's an example from the configuration file shipped with OI2, found
+in C<$WEBSITE_DIR/conf/log4perl.conf>:
+
+ ########################################
+ # ROOT CATEGORY
+  
+ log4perl.logger = FATAL, FileAppender, OIAppender
+  
+ ########################################
+ # OI2 CATEGORIES
+  
+ # This is the root OI2 logger. Lowering its level without specifying
+ # the other OI2 loggers will result in lots of messages.
+  
+ log4perl.logger.OI2            = INFO
+ log4perl.logger.OI2.CONFIG     = WARN
+ ...
+ 
+ ########################################
+ # OI2 APPENDERS
+ 
+ # Normal file log
+ log4perl.appender.FileAppender          = Log::Log4perl::Appender::File
+ log4perl.appender.FileAppender.filename = /logs/oi2.log
+ log4perl.appender.FileAppender.layout   = Log::Log4perl::Layout::PatternLayout
+ log4perl.appender.FileAppender.layout.ConversionPattern = %d: %C %L %m %n
+ 
+ # Creates an error object and saves it to the database. Don't lower
+ # the threshold too much!
+ 
+ log4perl.appender.OIAppender          = OpenInteract2::Log::OIAppender
+ log4perl.appender.OIAppender.layout   = Log::Log4perl::Layout::PatternLayout
+ log4perl.appender.OIAppender.layout.ConversionPattern = %c && %C && %L && %m
+ log4perl.appender.OIAppender.Threshold = ERROR
+
+The original configuration defines a number of categories under the
+'OI2' parent, this only lists two. The parent's level is set to
+'INFO'. This means that a message logged with a level of 'DEBUG' will
+not be written to the appender. The level for one the subcategory
+'OI2.CONFIG' is set to 'WARN', which means a message logged with a
+level of 'DEBUG' or 'INFO' will not be written to the appender.
+
+So the following would write to the appender:
+
+ # Note: LOG_OI and LOG_CONFIG are constants; more below
+ 
+ my $log = get_logger( LOG_OI );
+ $log->info( "This info message will get written" );
+ $log->warn( "This warn message will get written" );
+ 
+ my $log_conf = get_logger( LOG_CONFIG );
+ $log_conf->warn( "This warn message will get written" );
+ $log_conf->error( "This error message will get written" );
+
+But these would not:
+
+ my $log = get_logger( LOG_OI );
+ $log->debug( "This debug message will NOT get written" );
+ 
+ my $log_conf = get_logger( LOG_CONFIG );
+ $log_conf->debug( "This debug message will NOT get written" );
+ $log_conf->info( "This info message will NOT get written" );
+
+=head1 OI CUSTOMIZATIONS
+
+=head2 Custom Categories
+
+OI2 has a number of predefined categories in the
+L<OpenInteract2::Constants|OpenInteract2::Constants> class, such as
+C<LOG_ACTION> (used for internal processing by
+L<OpenInteract2::Action|OpenInteract2::Action> and partners),
+C<LOG_CACHE> (to see what the cache is doing), C<LOG_AUTH> (for
+messages about user logins), and more. 
+
+Most appropriate for package authors is C<LOG_APP> for applications.
+You can of course use your own categories but you might find it easier
+to control using this framework.
+
+=head2 Custom Appender
+
+OI2 comes with a custom appender which takes a message, creates an
+error object from it and saves it to your filesystem organized by
+date. From there you can browse it using the OI admin tools.
+
+WARNING: Do not set the 'Threshold' too low on the OI
+appender. Otherwise your error log will be flooded with messages,
+making it essentially useless.
+
+=head1 SEE ALSO
+
+L<Log::Log4perl|Log::Log4perl>
+
+L<http://log4perl.sourceforge.net/>
+
+L<OpenInteract2::Log|OpenInteract2::Log>
+
+L<OpenInteract2::Log::OIAppender|OpenInteract2::Log::OIAppender>
+
+L<OpenInteract2::ErrorStorage|OpenInteract2::ErrorStorage>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

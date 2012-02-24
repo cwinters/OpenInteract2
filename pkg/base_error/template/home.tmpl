@@ -1,0 +1,65 @@
+[%-
+  title = MSG( 'base_error.home.title' );
+  OI.page_title( title );
+-%]
+
+[%- PROCESS error_message;
+    PROCESS status_message; -%] 
+
+<h2>[% title %]</h2>
+
+<p>[% MSG( 'base_error.home.summary', num_errors, num_days ) %]</p>
+
+<div align="center">
+
+[% INCLUDE base_error::list %]
+
+[% INCLUDE form_begin( ACTION = 'error_browser', TASK = 'home', method = 'GET' ) %]
+
+<table border="0">
+<tr [% PROCESS row_color %]>
+ <td>[% MSG( 'base_error.home.num_days_back' ) %]</td>
+ <td>[% INCLUDE form_text( name = 'num_days' value = num_days, size = 3 ) %]</td>
+ <td>[% MSG( 'base_error.home.num_errors' ) %]</td>
+ <td>[% INCLUDE form_text( name = 'num_errors' value = num_errors, size = 3 ) %]</td>
+ <td>[% INCLUDE form_submit( value_key = 'global.button.go' ) %]</td>
+</tr>
+</table>
+
+[% INCLUDE form_hidden( name = 'num_months', value = num_months ) %]
+[% INCLUDE form_end %]
+
+</div>
+
+<hr noshade="noshade" width="25%" />
+
+<div align="center">
+
+<p>[% MSG( 'base_error.home.by_month' ) %]</p>
+
+<table border="0">
+[% FOREACH month = by_month_sorted -%]
+  [% by_month_url = OI.make_url( ACTION = 'error_browser', TASK = 'by_month',
+                                 date_spec = month ) -%]
+<tr align="right">
+  <td><a href="[% by_month_url %]">[% month %]</a>:</td>
+  <td>[% by_month.$month %]</td>
+</tr>
+[% END -%]
+</table>
+
+[% INCLUDE form_begin( ACTION = 'error_browser', TASK = 'home', method = 'GET' ) %]
+
+<table border="0">
+<tr [% PROCESS row_color %]>
+ <td>[% MSG( 'base_error.home.num_months' ) %]</td>
+ <td>[% INCLUDE form_text( name = 'num_months', value = num_months, size = 3 ) %]</td>
+ <td>[% INCLUDE form_submit( value_key = 'global.button.go' ) %]</td>
+</tr>
+</table>
+
+[% INCLUDE form_hidden( name = 'num_days',   value = num_days );
+   INCLUDE form_hidden( name = 'num_errors', value = num_errors ) %]
+[% INCLUDE form_end %]
+
+</div>

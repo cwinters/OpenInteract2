@@ -1,0 +1,74 @@
+[%- DEFAULT theme = OI.theme_properties;
+    style_url   = OI.make_url( BASE = '/main.css' );
+    home_url    = OI.make_url( BASE = '/' );
+    logo_url    = OI.make_url( IMAGE = '/images/oi_logo.gif' );
+    powered_url = OI.make_url( IMAGE = '/images/pw_by_oi.gif' ); -%]
+<html>
+ <head>
+  <link rel="stylesheet" href="[% style_url %]" />
+  <title>[% title %]</title>
+ <script language="javascript">
+<!--
+
+[% script %]
+
+[% PROCESS global_javascript %]
+
+// -->
+ </script>
+ </head>
+ <body bgcolor="[% theme.bgcolor %]">
+
+<a href="[% home_url %]"><img src="[% logo_url %]" width="316" height="74" 
+                 border="0" alt="[% MSG( 'base_main.label.logo' ) %]"></a>
+<br clear="all">
+<table border="0" width="100%" cellpadding="2" bgcolor="[% theme.main_menu_border_color %]">
+<tr><td>
+<table border="0" width="100%" bgcolor="[% theme.main_menu_bgcolor %]"
+       cellpadding="4" cellspacing="0">
+ <tr valign="middle">
+   <td align="left"><div class="titlebar">
+       <b><a href="[% home_url %]">[% MSG( 'base_main.label.home' ) %]</a></b> |
+       <b><a href="[% OI.make_url( ACTION = 'user' ) %]">[% MSG( 'base_main.label.users' ) %]</a></b> |
+       <b><a href="[% OI.make_url( ACTION = 'group' ) %]">[% MSG( 'base_main.label.groups' ) %]</a></b> |
+       <b><a href="[% OI.make_url( ACTION = 'page',
+                                   TASK   = 'directory_list' ) %]">[% MSG( 'base_main.label.pages' ) %]</a></b> |
+       <b><a href="[% OI.make_url( ACTION = 'news' ) %]">[% MSG( 'base_main.label.news' ) %]</a></b> |
+       <b><a href="[% OI.make_url( ACTION = 'new' ) %]">[% MSG( 'base_main.label.whats_new' ) %]</a></b>
+   </div></td>
+   <td align="right">[%- INCLUDE full_text::search_box( submit_label = MSG( 'base_main.label.search' ) ) -%]</td>
+ </tr>
+</table>
+
+</td></tr>
+</table>
+
+<table border="0" width="100%" bgcolor="[% theme.bgcolor %]"
+       cellpadding="1" cellspacing="0">
+ <tr valign="top">
+  <td width="75%" align="left">
+   <br>
+
+[% content %]
+
+  </td>
+  <td width="25%" align="right">
+   <br>
+
+[%- OI.action_execute( 'boxes' ) -%]
+
+ </td></tr>
+</table>
+
+<hr width="50%" noshade="noshade">
+<p align="center">
+  [% MSG( 'base_main.phrase.questions' ) %]
+</p>
+<p align="right">
+ <a href="http://openinteract.sourceforge.net/cgi-bin/twiki/view/OI/PoweredBy"><img
+      src="[% powered_url %]" width="88" height="31" 
+      border="0" alt="[% MSG( 'base_main.label.powered_by' ) %]"></a>
+</p>
+
+ </body>
+</html>

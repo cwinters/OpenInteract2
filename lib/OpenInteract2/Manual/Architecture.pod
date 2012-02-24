@@ -1,0 +1,627 @@
+=head1 NAME
+
+OpenInteract2::Manual::Architecture - Overview of the OpenInteract2 Architecture
+
+=head1 SYNOPSIS
+
+This part of the OpenInteract2 manual describes the major pieces of
+the system and traces a users's request from catching the URL to
+returning the content.
+
+=head1 USING MVC LINGO
+
+In case you've been hiding under a rock, MVC stands for
+B<M>odel-B<V>iew-B<C>ontroller. It's a method of separating the
+different concerns of your application for flexibility and other
+reasons. While too broad to be a pattern it's still extremely useful
+to keep in mind as you're developing.
+
+MVC was developed in Smalltalk and targeted at desktop
+applications. It's meant to decouple the various graphical widgets
+from the actions resulting from them. While some have argued that MVC
+isn't appropriate for web applications (see link to Andy Wardley's
+discussion in L<SEE ALSO>), it's still useful to categorize how the
+different pieces of the application are separated.
+
+=head2 Model
+
+This is the smarts of your application and, unless you're a graphic
+designer, probably the area on which you'll spend the most time. The
+model consists of your application's core objects and processes. The
+objects are normally persistent. So the model for a shopping cart
+application may consist of the products in the cart (persistent), the
+cart itself (semi-persistent), the customer (persistent), different
+payment types (persistent) and the order process (transient).
+
+Generally we use relational databases for persistence, but this also
+encompasses other storage technologies (LDAP, GDBM, CSV, etc.).
+
+In OpenInteract you most often use SPOPS to represent your
+application's state as persistable objects. There are many hooks for
+initializing SPOPS classes and adding useful behaviors to the
+objects. But OI doesn't require that you use SPOPS for everything --
+you can easily use another CPAN module (like L<Class::DBI|Class::DBI>)
+for your model.
+
+The processes are normally represented as Action objects, although
+they may be generic enough to be a normal perl object that's
+instantiated by an Action. To use the hackneyed shopping cart example:
+the order process would probably be a separate object (e.g.,
+'OpenInteract2::OrderProcess') so you can use it from a web action and
+in response to emails or some other input
+
+=head2 View
+
+The view is what the user sees of your application. The view and model
+communicate in a fairly limited but flexible fashion. In the GUI world
+a typical MVC example would be a spreadsheet: one view is of tabular
+data, another view is a pie chart, another view is a line chart. The
+model stays the same, the view changes.
+
+A typical web application view is a template with some sort of
+processing engine behind it. The template takes some sort of data
+structure and extracts the necessary information to display it to the
+user.
+
+OI is fairly flexible about views. The model (Action) always returns
+content. Generally the Action will collect data, do some sort of
+validation on it and then pass it on to the Content Generator along
+with the name of a view. But the Action can also decide to return the
+content itself. (This is unusual but has its place.)
+
+The view name corresponds to a template file somewhere in a
+package. So the view 'mypkg::foo' would refer to a file with a name
+like C<$WEBSITE_DIR/pkg/mypkg-x.xx/template/foo>. And the Content
+Generator is reponsible for taking the data from the model and passing
+it to the view so it can be processed. The model doesn't care how the
+data are used and the view doesn't care from where the data came.
+
+=head2 Controller
+
+Also known as a dispatcher, this uses a utility (ActionResolver) to
+decide which model (Action) is called and how to represent the data
+from the outside world. These are represented by the Controller object
+which dispatches the user's request, the Request object which takes
+the user's inputs (however they arrive) and translates them to a
+standard format, and the Response object which translates the work
+done during the request cycle into something the user can understand.
+
+For a web application:
+
+=over 4
+
+=item *
+
+The Request will store the URL requested, pull out useful information
+from the headers and network information, and parse the GET/POST
+request into parameters and file uploads.
+
+=item *
+
+The Controller hands the URL off to the ActionResolver, which
+instantiates a number of small objects in a chain of
+responsibility. It then asks each if it's able to create an action
+from the given URL. Once created the Controller executes the Action,
+capturing its output. It doesn't care what the Action does or how the
+Action does it. The Controller will also place this Action's output in
+a larger context (e.g., as part of a larger web page) as necessary.
+
+=item *
+
+The Response returns the content along with any necessary headers to
+the user.
+
+=back
+
+=head1 OI METADATA: CONTEXT
+
+=head2 Overview
+
+The Context (abbrev: CTX) glues the system together so you'll see it a
+lot.It holds all application configuration information and provides a
+central lookup mechanism for actions, content generators, controllers
+and SPOPS object classes.
+
+It is a singleton (there's only one in the system at any time) and you
+can import this singleton reference from the
+L<OpenInteract2::Context|OpenInteract2::Context> class.
+
+=head2 Creating the Context
+
+Creating the context is one of the first actions you take when
+starting an OI2 server. While it can be created without referencing a
+website it's not much use if you don't. (You should only need do this
+when bootstrapping a new website into existence, and this is already
+done for you in
+L<OpenInteract2::Manage::Website::Create|OpenInteract2::Manage::Website::Create>.)
+
+So normally it looks something like this:
+
+ my $ctx = OpenInteract2::Context->create({
+     website_dir => $website_dir
+ });
+
+Once it's created the C<CTX> symbol from L<OpenInteract2::Context> can
+be imported and used anywhere, like this:
+
+ use OpenInteract2::Context qw( CTX );
+ 
+ sub foo {
+     my ( $self ) = @_;
+     my $login_info = CTX->lookup_login_config;
+     ...
+ }
+
+=head1 ADAPTER
+
+=head2 Overview
+
+The job of the adapter is to translate the world's information to
+something understandable by OpenInteract and then translate what
+OpenInteract generates into information for the outside world. So it
+sits between your interface (e.g., Apache/mod_perl, CGI, etc.) and the
+OpenInteract server. The information it translates from the outside
+world includes parameters from the user, user authentication,
+information about the request (hostname, URL, referer, cookies, etc.)
+and other data. It places these data into the relevant
+L<OpenInteract2::Request|OpenInteract2::Request> subclass.
+
+Once the OpenInteract cycle is complete the adapter translates
+OpenInteract data (content, headers, etc.) into a response to send
+back to the user via the relevant
+L<OpenInteract2::Response|OpenInteract2::Response> subclass. For an
+example see L<Apache::OpenInteract2|Apache::OpenInteract2>.
+
+=head2 Creating your own adapter
+
+Creating an adapter is not difficult. Adapter classes tend to be
+fairly short as most of the work is done in in the
+L<OpenInteract2::Request|OpenInteract2::Request> and
+L<OpenInteract2::Response|OpenInteract2::Response> subclasses. For
+instance, here's the full adapter for Apache/mod_perl 1.x:
+
+ package Apache::OpenInteract2;
+ 
+ use strict;
+ use Log::Log4perl            qw( get_logger );
+ use OpenInteract2::Auth;
+ use OpenInteract2::Constants qw( :log );
+ use OpenInteract2::Context   qw( CTX );
+ use OpenInteract2::Request;
+ use OpenInteract2::Response;
+ 
+ sub handler($$) {
+     my ( $class, $r ) = @_;
+     my $log = get_logger( LOG_OI );
+ 
+     $log->is_info &&
+         $log->info( scalar( localtime ), ": request from ",
+                     "[", $r->connection->remote_ip, "] for URL ",
+                     "[", $r->uri, '?', scalar( $r->args ), "]" );
+ 
+     my $response = OpenInteract2::Response->new({ apache => $r });
+     my $request  = OpenInteract2::Request->new({ apache => $r });
+ 
+     OpenInteract2::Auth->login( $r->pnotes( 'login_user' ) );
+ 
+     my $controller = eval {
+         OpenInteract2::Controller->new( $request, $response )
+     };
+     if ( $@ ) {
+         $response->content( $@ );
+     }
+     else {
+         $controller->execute;
+     }
+     $response->send;
+     return $response->status;
+ }
+ 
+ 1;
+
+Very easy -- it's only about 15 lines if you remove the logging! This
+even has a little twist by passing in the 'login_user' key from the
+Apache C<pnotes> (line 23), which is a hook to the
+L<Apache::OpenInteract2::HttpAuth|Apache::OpenInteract2::HttpAuth>
+class to allow HTTP (rather than cookie) authentication.
+
+Some gotchas to note:
+
+=over 4
+
+=item *
+
+B<Tell OI2 what adapter you are>
+
+Either at server startup or the first time your adapter processes a
+request you must tell OI2 what type of adapter you are. This is very
+simple, just two method calls on the L<OpenInteract2::Context>
+object. Here's an example where we do it outside the adapter itself in
+the Apache 1.x C<startup.pl> file:
+
+ # Create the context...
+ my $ctx = OpenInteract2::Context->create( $bootstrap );
+ 
+ # ...let the context know what type of adapter we are
+ $ctx->assign_request_type( 'apache' );
+ $ctx->assign_response_type( 'apache' );
+
+Here's one where we do it inside the adapter for a CGI process:
+
+ my $ctx = OpenInteract2::Context->create({
+     website_dir => $website_dir
+ });
+ $ctx->assign_request_type( 'cgi' );
+ $ctx->assign_response_type( 'cgi' );
+
+The currently available adapter types, all listed in the 'request' and
+'response' server configuration keys, are:
+
+=over 4
+
+=item *
+
+B<apache>: For Apache/mod_perl 1.x
+
+=item *
+
+B<apache2>: For Apache/mod_perl 2.x
+
+=item *
+
+B<cgi>: For CGI processes; also usable under FastCGI (see the script
+C<cgi-bin/oi2.fcgi> for the easy setup).
+
+=item *
+
+B<lwp>: For running inside a LWP server
+
+=item *
+
+B<standalone>: For setting everything up yourself, which means that it
+could in theory run inside an SMTP daemon, FTP server, etc.
+
+=back
+
+You can add a new request/response type in two ways. The easiest is
+just to add the request/response type and class to the server
+configuration:
+
+ [request]
+ ...
+ myenv = OpenInteract2::Request::MyEnvironment
+ 
+ [response]
+ ...
+ myenv = OpenInteract2::Response::MyEnvironment
+
+You can also programmatically register the adapters in your server startup :
+
+ OpenInteract2::Request->register_factory_type(
+         myenv => 'OpenInteract2::Request::MyEnvironment' );
+ 
+ OpenInteract2::Response->register_factory_type(
+         myenv => 'OpenInteract2::Response::MyEnvironment' );
+
+No matter which you choose, all calls to 'assign_request_type' and
+'assign_response_type' will have 'myenv' available.
+
+=item *
+
+B<Create response before request> - It may seem backwards but you need
+to create the response object before the request object. (This is due
+to a dependency.) 
+
+=back
+
+If your adapter is more of a standalone service (like the
+C<oi2_daemon>) that spawns off children/threads for requests, you also
+need to also be aware of the following:
+
+=over 4
+
+=item * 
+
+B<Initialize logging> - You'll need to initialize log4perl. This is
+normally as simple as passing a parameter to the C<create> method of
+L<OpenInteract2::Context|OpenInteract2::Context>, but you can also use
+one of the methods in L<OpenInteract2::Log|OpenInteract2::Log>.
+
+=item *
+
+B<Close all database connections> - Before spawning off
+children/threads from the parent you B<MUST> shutdown all database
+connections. They won't survive the fork/thread and you'll get very
+strange errors. Do this with the C<shutdown> method in
+L<OpenInteract2::DatasourceManager|OpenInteract2::DatasourceManager>.
+
+=back
+
+=head1 CONTROLLER
+
+=head2 Overview
+
+Once the adapter has created the request and response it hands off the
+processing to the
+L<OpenInteract2::Controller|OpenInteract2::Controller> object. Now
+we're entirely inside the OI2 server environment. Its main
+responsibility is to match up the URL with an L<OpenInteract2::Action>
+object and execute it, returning its generate content to the browser.
+
+To match up the URL with the Action we use a chain of responsibility
+pattern, organized by L<OpenInteract2::ActionResolver>. Children
+classes under this namespace are C<require>d at server startup. So for
+each request the main ActionResolver class will instantiate all its
+children and pass each the L<OpenInteract2::Request> object and
+URL. Each child can decide to match up the URL with an
+L<OpenInteract2::Action> object or do nothing.
+
+The ActionResolvers shipped with the system can respond to:
+
+=over 4
+
+=item B<user directory requests>
+
+So something like C<http://foo.com/~lucyliu/> will get recognized by
+this resolver and matched to a user action. A successive item in the
+URL (e.g., '/~lucyliu/profile/') will get assigned as the action's
+task.
+
+=item B<name from URL>
+
+This will get used most often -- from something like
+C<http://foo.com/news/latest/> it finds the name ('news') and tries to
+lookup an action based on it. If found it also assigns the next item
+in the URL as the action's task.
+
+=item B<action not found or action missing>
+
+If the name in the URL wasn't matched to a URL we assign it to the
+'not found' action. This is a catch-all action and very useful if you
+want to map what look like simple page requests to an
+L<OpenInteract2::Action> object. By default we use the 'page' action.
+
+And if there was no action in the URL (e.g., C<http://foo.com/>) we
+invoke the 'none' action. This also uses the 'page' action.
+
+=back
+
+Once the action's found we call C<execute()> on it, which generates
+its content. The most-used controller
+(L<OpenInteract2::Controller::MainTemplate|OpenInteract2::Controller::MainTemplate>)
+places that generated content in a larger scope so you can control
+common graphical elements (sidebars, menus, etc.) from once
+place. Another controller
+(L<OpenInteract2::Controller::Raw|OpenInteract2::Controller::Raw>)
+returns the content as-is.
+
+=head1 ACTION
+
+=head2 Overview
+
+Actions are the core of OpenInteract2. Each action provides a discrete
+set of functionality. What "discrete set" means is up to the
+developer, but typically this is a set of CRUDS (CReate - Update -
+Delete - Search) operations on a class of objects.
+
+Each action is represented by zero or more URLs, and each operation is
+specified by a task referenced in that URL. So if I created a 'news'
+action my URLs might look like:
+
+ http://foo.com/news/
+ http://foo.com/news/display/
+ http://foo.com/news/search_form/
+ http://foo.com/news/search/
+
+Every task returns some sort of content, generally by passing data to
+a Content Generator which marries it with a template. See
+L<OpenInteract2::Action|OpenInteract2::Action> for much more
+information.
+
+=head1 CONTENT GENERATOR
+
+=head2 Overview
+
+As mentioned above tasks in an Action return content. They normally
+generate that content by assembling a set of data and passing that
+data off to a content generator. A content generator is a wrapper
+around some sort of templating system, such as the L<Template|Template
+Toolkit>, L<HTML::Template|HTML::Template> or
+L<Text::Template|Text::Template> or even your own homegrown
+system. (Admit it, you've written your own.)
+
+Each action is associated with a content generator. And you can even
+associate an action with multiple content generators so you can settle
+a bet as to which templating system is easiest to use.
+
+=head1 TRACING A REQUEST
+
+Now we'll trace a request throughout OpenInteract.
+
+=head2 Step 0: Startup Tasks
+
+The adapter or another process (e.g., 'startup.pl' in a mod_perl
+setup) will run a number of tasks at server startup. This includes:
+
+=over 4
+
+=item *
+
+Initialize logging
+
+=item *
+
+Create context with website directory
+
+=item *
+
+Assign the proper request/response types to request
+
+=item *
+
+If threaded/forking: disconnect all database handles.
+
+=back
+
+=head2 Step 1: User Request Meets Adapter
+
+This step is a little fuzzy by necessity: we purposefully don't know
+in what form the request is coming in or how the adapter handles it.
+
+If you're running a web server the typical user request is coming over
+HTTP from a browser, feed reader, bot or some other client.
+
+=head2 Step 2: Adapter Creates Request/Response Objects
+
+The adapter creates the
+L<OpenInteract2::Response|OpenInteract2::Response> and
+L<OpenInteract2::Request|OpenInteract2::Request> objects, in that
+order. Each one has necessary initialization steps done behind the
+scenes when you create it. In particular the request object will read
+the necessary headers, parameters, uploaded files, cookies and create
+the session from the cookie.
+
+It also finds the 'relevant' part of the URL and determines the action
+and task from it. The 'relevant' part is what's leftover after the
+URL-space (aka, deployment context, set in the
+C<context_info.deployed_under> server configuration key) is lopped off.
+
+=head2 Step 3: Adapter Logs in User
+
+It can optionally handle extra authentication as this point such as
+HTTP auth or some other capability. Generally this will consist of
+retrieving a user object created from some other part of the system or
+creating a user object based on trusted information (like a user ID)
+from another area.
+
+If available this user object is passed to the C<login> method of the
+L<OpenInteract2::Auth|OpenInteract2::Auth> class so it has a head
+start.
+
+=head2 Step 4: Adapter Creates Controller
+
+Adapter creates the
+L<OpenInteract2::Controller|OpenInteract2::Controller> object with the
+request and response objects created earlier.
+
+The controller invokes a chain of responsibility provided by
+L<OpenInteract2::ActionResolver> to figure out what action to create
+based on the URL.
+
+=head2 Step 5: Adapter Executes Controller
+
+If the controller was created properly the adapter calls C<execute()>
+on it. This starts the content generation process running.
+
+The controller will call C<execute()> on the action which starts the
+action's content generation process.
+
+If the controller was not created properly it threw an exception which
+we return as content.
+
+=head2 Step 6: Action Finds Task 
+
+The action needs to find which task to execute. Normally this is as
+simple as getting the value of the C<task> property. But the
+individual action can override this, or if no task was specified we
+use the value of C<task_default>.
+
+=head2 Step 7: Action Checks Validity
+
+Find out if the task is invalid. A valid task:
+
+=over 4
+
+=item *
+
+Does not start with a '_'
+
+=item *
+
+Is not listed in C<task_invalid>
+
+=item *
+
+Is listed among the tasks in C<task_valid> if that property is
+defined.
+
+=back
+
+If the task is valid we also ensure that this user has the proper
+security level to execute it.
+
+=head2 Step 8: Action Generates Content
+
+First, we check the cache to see if content exists and if it does, we
+return it without going any further.
+
+Next we execute the method specified by what we've determined to be
+the task. (This is almost certainly the method with the same name as
+the task.)
+
+An action can generate content by itself but most times it just
+gathers the necessary data and passes it, along with a template
+specification, to a content generator which returns the content for
+the action.
+
+If any observers are registered with the action they receive a
+'filter' observation. Any of these observers can modify the content
+we've just generated.
+
+If the cache is activated for this method we'll cache the content. In
+any case we return the content, finishing the flow for the action and
+moving back up to the controller.
+
+=head2 Step 9: Controller Places Action Content in Larger Scope (optional)
+
+The main action is done and has returned its content to the
+controller. One controller
+(L<OpenInteract2::Controller::Raw|OpenInteract2::Controller::Raw>)
+will just return this content and call it a day.
+
+Most times you'll want to take that content and put it into another
+template. The controller just instantiates a new content generator and
+goes through the same process as the action, passing it a set of data
+(of which the generated action content is part) and a template
+specification (normally from the 'main_template' theme property).
+
+Oftentimes the main template will hold multiple discrete actions of
+its own. For example, the default main template shipped with OI has an
+action to generate the list of boxes that appears on the right-hand
+side. You could trigger an action to get the latest weather
+conditions, webcam photo, news headlines, whatever you wish.
+
+Each of these actions is just like any other and goes through the same
+process listed above.
+
+=head2 Step 10: Controller Sets Content to Response
+
+Whether it's the action content or the scoped content (for lack of a
+better name), we set the content in the response object, which hasn't
+done much until now except hold the occasional outgoing cookie.
+
+The controller's job is done and flow now returns back up a level to
+the adapter.
+
+=head2 Step 11: Adapter Asks Response to Send
+
+The only job left of the adapter is to ask the response to send the
+content.
+
+=head2 Step 12: Adapter Cleans Up
+
+The adapter can do any necessary cleanup.
+
+=head1 SEE ALSO
+
+Andy Wardley's email about MVC and web applications:
+
+L<http://lists.ourshack.com/pipermail/templates/2002-November/003974.html>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

@@ -1,0 +1,726 @@
+Revision history for OpenInteract package base_page.
+
+2.33  Tue Sep 20 23:32:31 EDT 2005
+
+      Make configurable the wrapper template when displaying a page
+      using the parameter 'wrapper_template'. If you don't change your
+      configuration the old behavior will hold.
+
+      Also, ensure we respect the 'main_template' setting in a page
+      and communicate that up to the relevant controller
+      (OI2::Controller::MainTemplate).
+
+2.32  Mon Mar 14 21:38:00 EST 2005
+
+      Small template fix so that 'Map a new directory handler' works
+      properly on 'page_directory_handler_list.tmpl'.
+
+2.31  Fri Mar 11 00:31:28 EST 2005
+
+      OIN-87: Check to see if a page existing within an
+      already-existing location (claimed by another action) before
+      saving.
+
+2.30  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.29  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.28  Sat Nov 27 13:53:53 EST 2004
+
+      From Salve Nilsen:
+
+      - describe all the other pages (other than index.html) that are
+      installed with the standard demo site (in data/page.dat).
+
+      - allow display of 'text/plain' and 'text/css'
+
+      - add 'display' link to page form
+
+2.27  Mon Oct  4 23:18:59 EDT 2004
+
+      OIN-51: Our _class_initialize() is no longer being called, so
+      the storage classes don't get initialized.
+
+2.26  Mon Oct  4 21:15:03 EDT 2004
+
+      OIN-89: Fix stupid bug introduced with last update, thanks to
+      Heiko Klein for spotting.
+
+2.25  Sat Oct  2 19:12:18 EDT 2004
+
+      OIN-60: have the page action put the box declarations attached
+      to a page in 'box_remove' and 'box_add' buckets
+
+2.24  Sat Oct  2 18:29:55 EDT 2004
+
+      OIN-64: ensure the 'page' gets passed to the
+      'edit_document_box'.
+
+2.23  Tue Jun  8 21:17:42 EDT 2004
+
+      Modify error messages from storing page (Salve Nilsen)
+
+2.22  Sun Jun  6 02:05:10 EDT 2004
+
+      OIN-16: update status messages
+
+2.21  Sat May 22 10:56:00 EDT 2004
+
+      'response' is no longer an action property, get it instead from
+      CTX.
+
+2.20  Fri May 21 23:58:43 EDT 2004
+
+      Add CSS file.
+
+2.19  Fri May 21 21:51:53 EDT 2004
+
+      Add migration information to OI2::SQLInstall::Page for the
+      base_page objects.
+
+2.18  Tue May 11 00:28:55 EDT 2004
+
+      Page object now overrides 'check_action_security()' so it can
+      fetch the object with the 'location' necessary to check
+      hierarchical security.
+
+2.17  Mon May 10 23:08:33 EDT 2004
+
+      Try to cleanup the main page action (OI2::Action::Page); break
+      out the ruleset from OI2::Page into OI2::PageRules and declare
+      it explicitly in conf/spops_page.ini; add page_id to page
+      editing form
+
+2.16  Mon May 10 01:19:48 EDT 2004
+
+      Fix OI2::Page to use 'fetch_by_location()' instead of 'fetch()'
+
+2.15  Fri Apr  9 07:51:00 EDT 2004
+
+      Add ID to page table, lots of other little changes.
+
+2.14  Tue Feb 10 00:23:57 EST 2004
+
+      Add favicon.ico
+
+2.13  Mon Feb 9 00:23:37 EST 2004
+
+      - Cosmetic
+
+2.12  Thu Sep  4 00:09:52 EDT 2003
+
+      Add 'TASK_EDIT' key to 'display' entries in conf/spops_page.ini
+      and conf/spops_page_directory.ini
+
+2.11  Wed Sep  3 20:59:09 EDT 2003
+
+2.10  Sat Aug 30 17:50:45 EDT 2003
+
+2.09  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+2.08  Tue Jul  8 08:45:54 EDT 2003
+
+      Add c_display_add_template and c_display_form_template to action
+      config. (oops) Thanks to Greg Fenton for pointing it out.
+
+2.07  Mon Jul  7 23:11:06 EDT 2003
+
+      Template link fix (page_directory_list); small doc fix in
+      doc/base_page.pod (oi_manage -> oi2_manage); both pointed out by
+      Greg Fenton.
+
+2.06  Fri Jul  4 11:32:31 EDT 2003
+
+      Updated link for Sybase ASA in html/index.html. (Thanks to Greg
+      Fenton.)
+
+2.05  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.04  Sun Apr  6 13:36:28 EDT 2003
+
+      Changes replicated from 1.x ('mime_type' field width expanded)
+
+2.03  Thu Apr  3 13:33:15 EST 2003
+
+      Changes replicated from 1.x (page size, directory sort order on
+      index)
+
+2.02  Mon Mar 31 21:35:45 EST 2003
+
+      Update SPOPS config to INI, other changes.
+
+2.01  Mon Mar 24 22:46:29 EST 2003
+
+      Actually do the templates...
+
+2.00  Mon Mar 24 21:48:57 EST 2003
+
+      Initial conversion to OI2
+
+1.21  Mon Mar 10 23:35:06 EST 2003
+
+      ...and when we do the initial fetch, before the object we fetch
+      has a leading '/' as well.
+
+1.20  Mon Mar 10 23:29:31 EST 2003
+
+      Ensure the location always has a leading '/'
+
+1.19  Mon Mar 10 23:21:20 EST 2003
+
+      Undo change from 1.18 and approach issue differently -- treat
+      requests of non-extension documents before treating it as
+      directory request. Thanks to Jon <jon@3ev.com> for pointing out
+      the problem.
+
+1.18  Mon Mar 10 23:07:06 EST 2003
+
+      Update how we handle directory requests.
+
+1.17  Mon Feb 17 11:46:13 EST 2003
+
+      Update docs.
+
+1.16  Mon Jan  6 22:46:33 EST 2003
+
+      Change all 'datetime' datatypes to use the '%%DATETIME%%' key.
+
+1.15  Fri Dec 13 22:36:22 EST 2002
+
+      Add security checks to add subdirectory, remove directory and
+      rename file.
+
+1.14  Fri Dec 13 17:10:14 EST 2002
+
+      Ack! Common use case (create new subdirectory, then add file to
+      it) adds a path with two '//' to the db. To fix, add behavior to
+      pre_save_action to ensure the location does not have any '/+'
+      patterns.
+
+1.13  Fri Dec 13 17:06:46 EST 2002
+
+      Directory removal, directory creation, file rename and quick
+      file delete all working ok now.
+
+1.12  Fri Dec 13 16:58:59 EST 2002
+
+1.11  Fri Dec 13 16:15:46 EST 2002
+
+1.10  Fri Dec 13 16:11:35 EST 2002
+
+1.09  Fri Dec 13 16:06:04 EST 2002
+
+1.08  Fri Dec 13 15:52:55 EST 2002
+
+1.07  Fri Dec 13 15:33:32 EST 2002
+
+1.06  Fri Dec 13 15:05:37 EST 2002
+
+1.05  Fri Dec 13 14:53:14 EST 2002
+
+1.04  Fri Dec 13 14:37:21 EST 2002
+
+      - Add OI::Handler::Page->rename for simple renaming of
+      files. (Accompanying view: template/page_form_rename.tmpl)
+
+      - Add OI::Handler::Page->remove_directory action. This removes a
+      directory, all its subdirectories and all its files. A
+      confirmation step has been added to prevent inadvertent mishaps.
+
+      - Add help file template/page_rename_help.tmpl plus add
+      information on creating new directories to
+      template/page_upload_help.tmpl.
+
+1.03  Fri Dec 13 12:47:04 EST 2002
+
+1.02  Fri Dec 13 11:44:52 EST 2002
+
+      - Be able to add subdirectories using the simple browser
+      interface. (Subdirectories are still created on-the-fly when you
+      use the more complex browser interface.)
+
+      - Modify storage classes (OI::Page::*) to use 'rename_content'
+      instead of 'rename'.
+
+1.01  Mon Nov 11 10:19:43 EST 2002
+
+      Use File::Spec instead of coddling together join statements in
+      OpenInteract::Page::File. Thanks to Raúl Romero
+      <raul@bgta.homeip.net> for the bug report.
+
+1.00  Sun Aug 25 11:56:10 EDT 2002
+
+      Move up to version 1 since it's stable; remove all
+      template/*.meta files.
+
+0.98  Mon May  6 23:54:25 EDT 2002
+
+      Update html/index.html to reflect new Oracle status as well as
+      the OI wiki url.
+
+0.97  Thu May  2 08:42:04 EDT 2002
+
+      Add InterBase-specific tables and structures.
+
+0.96  Mon Apr 22 10:45:45 EDT 2002
+
+      Change datatype from 'blob' to 'clob' in
+      struct/page_content_oracle.sql.
+
+0.95  Tue Apr 16 15:03:22 EDT 2002
+
+      Change datatype from 'datetime' to 'date' in
+      struct/page_oracle.sql
+
+0.94  Tue Apr 16 14:43:38 EDT 2002
+
+      Structural change: set 'size' -> 'page_size' in
+      struct/page_oracle.sql. (Thanks to Ben Avery)
+
+0.93  Sat Apr 13 12:11:42 EDT 2002
+
+      Fix sequence for content type.
+
+0.92  Mon Apr  1 21:42:08 EST 2002
+
+      Add Oracle-specific tables. Add explicit sequence for
+      'content_type' table.
+
+0.91  Thu Mar 28 10:04:23 EST 2002
+
+      Change 'size' in 'page' table to 'page_size', since 'size' is a
+      reserved word in Oracle. Also added field_map in conf/spops.perl
+      for backward compatibility. If you are upgrading and do not wish
+      to alter your 'page' table, remove or comment out this line.
+
+0.90  Sun Mar  3 14:07:43 EST 2002
+
+      Modified the table definition for content_type to make the
+      'extensions' field larger. Thanks to Bernie Ledwick
+      (Bernard.Ledwick@ntlworld.com) for reporting the error.
+
+0.89  Fri Feb 15 16:57:04 EST 2002
+
+      In OpenInteract/Handler/Page.pm: If this is using the simple
+      upload form, check to see if the page already exists in the
+      database and if so, set the 'saved' status of the object so it
+      knows to do an update rather than an insert.
+
+0.88  Wed Jan 30 12:37:53 EST 2002
+
+      Small template fix (ensure old location getting written properly
+      to the page_form); call the right storage implementation method
+      for renaming the content. (duh)
+
+0.87  Wed Jan 30 12:27:35 EST 2002
+
+      In OI/Handler/Page.pm, override fetch_object() to first check
+      for 'old_location' so we can do updates properly. (Kicking
+      myself for not creating 'page' with an auto-incrementing primary
+      key...)
+
+0.86  Wed Jan 30 11:50:17 EST 2002
+
+      - Modify OI/Page.pm to include an interface for renaming the
+      location of content; give OI/Page/Database.pm and
+      OI/Page/Http.pm dummy implementations of rename_content() and
+      create a renaming scheme for Files
+
+      - Modify OI/Handler/Page.pm to use the new
+      _edit_post_action_customize() callback from
+      OI::CommonHandler. (You must get OI::CommonHandler from CVS for
+      this or wait for 1.38 to come out.)
+
+      - Add File::Copy to the list of dependencies
+
+0.85  Wed Jan 30 10:36:24 EST 2002
+
+      Minor template changes (remove font tags) in
+      templates/page_directory_list.tmpl and
+      templates/page_scan_form.tmpl
+
+0.84  Wed Jan 23 16:48:37 EST 2002
+
+      Fix script/scan_for_new.pl to bring in the PageScan module at
+      the right time.
+
+0.83  Wed Jan 23 15:25:00 EST 2002
+
+      Cosmetic template edit for edit_document_box
+
+0.82  Mon Jan 21 15:18:08 EST 2002
+
+      Refine the filename/location cleaning.
+
+0.81  Mon Jan 21 15:00:49 EST 2002
+
+      Thanks to prompting from Andreas Nolte, modify OI::PageScan so
+      it does the Right Thing wrt files found that have spaces and/or
+      other bad characters.
+
+0.80  Mon Jan 21 12:12:03 EST 2002
+
+      Added help page, small template modifications
+
+0.79  Mon Jan 21 10:38:47 EST 2002
+
+      Added the '_edit_status' display task for when an edit is
+      complete. This is optional and the module has the two standard
+      options for you.
+
+0.78  Sun Jan 20 11:15:01 EST 2002
+
+      Fixed upload in 'simple' form to remove any path information
+      from the filename the client gives us.
+
+0.77  Fri Jan 18 13:20:58 EST 2002
+
+      Added 'simple' page upload form.
+
+0.76  Thu Jan 17 18:10:00 EST 2002
+
+0.75  Thu Jan 17 17:46:51 EST 2002
+
+0.74  Thu Jan 17 17:32:49 EST 2002
+
+      Add some initial MIME types just based on extension, since
+      File::MMagic seems to get it wrong sometimes. Small template
+      changes so that the page editing form knows what's new and
+      what's an existing object.
+
+0.73  Thu Jan 17 17:20:30 EST 2002
+
+0.72  Thu Jan 17 16:59:25 EST 2002
+
+      Template modifications, enable file add from directory (if
+      permission dictates), other modifications.
+
+0.71  Thu Jan 17 16:38:10 EST 2002
+
+      Don't automatically lowercase all locations (OI::Handler::Page);
+      capture errors in OI::Handler::PageScan and display them in the
+      results template
+
+0.70  Wed Jan 16 19:33:16 EST 2002
+
+      Add page with administrative actions
+
+0.69  Wed Jan 16 19:05:09 EST 2002
+
+      Ditch the number formatting stuff and use the new routine in
+      OI::Template::Plugin. Other cleanups.
+
+0.68  Wed Jan 16 18:33:26 EST 2002
+
+0.67  Wed Jan 16 18:26:31 EST 2002
+
+      Factored out the work from script/scan_for_new.pl into an object
+      that can be instantiated. Added action ('PageScan') that
+      provides a web front-end to the functionality in the
+      scan_for_new.pl script.
+
+0.66  Wed Jan 16 08:35:04 EST 2002
+
+      Return a consistent message if a directory index isn't found.
+
+0.65  Tue Jan 15 08:37:59 EST 2002
+
+      In OI::Page, ensure that we don't try to fetch an empty location
+      or one with a leading '.'.
+
+0.64  Thu Jan 10 00:19:21 EST 2002
+
+      Include better debugging in OI::Handler::Page->_is_active() so
+      we can find out why a page was marked inactive.
+
+0.63  Wed Jan  9 11:34:51 EST 2002
+
+      Add OI::Handler::Page->_search_criteria_customize() so that
+      admins can search for active/inactive pages, and everyone else
+      is restricted to active ones. Also modified the template for the
+      page search form to indicate which options are admin-only.
+
+0.62  Wed Jan  9 08:30:59 EST 2002
+
+0.61  Wed Jan  9 08:25:31 EST 2002
+
+0.60  Wed Jan  9 08:21:52 EST 2002
+
+      Add debugging helpers for page handler.
+
+0.59  Wed Jan  9 01:13:36 EST 2002
+
+      Fix OI::Handler::Page->_get_task() to check case-insensitively
+      for the 'Page' action (find 'page' and 'Page'). Also respect the
+      parameter 'is_new_object' passed in when 'create()' is called.
+
+0.58  Thu Dec 27 15:22:20 EST 2001
+
+      Cleanup -- rename some methods, etc. We're cookin' with gas!
+
+0.57  Thu Dec 27 15:00:42 EST 2001
+
+0.56  Thu Dec 27 14:48:44 EST 2001
+
+      Thought the better of putting directories under security. Other
+      modifications so that directories can check page security, if it
+      exists.
+
+0.55  Thu Dec 27 14:26:52 EST 2001
+
+      - Refactored OI::Handler::Page->show() so it's not so monolithic
+      and easier to follow.
+
+      - Create a new indexing routine for index files (e.g.,
+      'index.html') and moved that logic out of
+      OI::Page->page_by_directory().
+
+      - Moved (in conf/action.perl) the files you specify as index
+      files from the 'page' action to the 'fileindex' action.
+
+      - Added hierarchical security to page_directory objects.
+
+0.54  Thu Dec 27 11:23:13 EST 2001
+
+      Template tweaks.
+
+0.53  Thu Dec 27 11:07:06 EST 2001
+
+      Add 'filename_only()' to OpenInteract::Page; pass 'this_dir' to
+      directory_index template so we can create a full location for
+      subdirectories. Do NOT include dot-leading dirs (before we ONLY
+      included them: one little exclamation point...)
+
+0.52  Thu Dec 27 10:56:05 EST 2001
+
+      Add directories to the simple index
+
+0.51  Wed Dec 26 15:13:51 EST 2001
+
+      Updated to pass a second parameter to directory handlers
+      ('directory') so they can tell the original directory requested,
+      since inheritance now seems to work.
+
+0.50  Wed Dec 26 14:58:12 EST 2001
+
+0.49  Wed Dec 26 14:48:55 EST 2001
+
+0.48  Wed Dec 26 14:00:38 EST 2001
+
+      Added 'subdirs_inherit' to 'page_directory' table and
+      functionality to OI/PageDirectory.pm to fetch a parent directory
+      with this flag turned on using fetch_by_directory(); added lots
+      of docs to doc/base_page.pod about directory handlers and other
+      items. The page directory listing template now includes all
+      actions available for directory handlers.
+
+0.47  Wed Dec 26 11:01:29 EST 2001
+
+      - Added 'image_source' to content type so you can associate an
+      image with a content type. (Used for indexing...)
+
+      - Created first version of a directory indexer
+
+      - Added Number::Format to list of modules required
+
+0.46  Mon Dec 24 15:29:36 EST 2001
+
+0.45  Mon Dec 24 15:15:45 EST 2001
+
+      Add 'page_directory.sql' to the installer; trap directory-find
+      errors OI::Page->page_by_location() in an eval {}
+
+0.44  Mon Dec 24 14:18:44 EST 2001
+
+      Add first draft of directory handlers; move the page fetching
+      out of OI/Handler/Page.pm and into OI/Page.pm.
+
+0.43  Wed Dec 12 09:02:09 EST 2001
+
+      Update doc/base_page.pod to have security updating note and
+      SQL. (Thanks to Andreas Nolte <andreas.nolte@bertelsmann.de> for
+      pointing this out.)
+
+0.42  Sun Dec  2 20:32:03 EST 2001
+
+      If the extension given doesn't match the DEFAULT_EXTENSION, then
+      search for that page object as well.
+
+      If no expiration date given and the active date is ok, then the
+      page is active.
+
+0.41  Sun Dec  2 18:49:38 EST 2001
+
+      Fixed error found in SPOPS definition for 'content_type' object
+      -- thanks for spot and fix by ralf@math.uni-bonn.de.
+
+      Modified script/static_page2base_page.pl to be more robust and
+      work better. (I converted a DB of ~1700 pages using it, so I
+      know it works :-)
+
+      When given a request without an extension, treat it as a page
+      request without the DEFAULT_EXTENSION as well as a directory
+      request. 
+
+0.40  Wed Nov 28 23:31:56 EST 2001
+
+      Fix tiny but important error that blanked out filesystem
+      contents when editing them...
+
+0.39  Wed Nov 28 08:33:05 EST 2001
+
+      Update data/page.dat to reflect the structure changes
+
+0.38  Tue Nov 27 08:37:59 EST 2001
+
+      Minor form template change.
+
+0.37  Tue Nov 27 08:33:51 EST 2001
+
+      Use _class_initialize() in OpenInteract::Page rather than BEGIN{}
+
+0.36  Tue Nov 27 08:29:50 EST 2001
+
+      Add 'mime_type_content' class method to OpenInteract::Page, and
+      add docs to script/static_page2base_page.pl.
+
+0.35  Mon Nov 26 23:58:45 EST 2001
+
+      Okay, really, this time it's ready.
+
+0.34  Mon Nov 26 23:40:40 EST 2001
+
+      Various small fixes, cleaned up and (hopefully ready to go).
+
+0.33  Mon Nov 26 23:16:36 EST 2001
+
+      Make storage class handling more flexible.
+
+0.32  Mon Nov 26 23:01:03 EST 2001
+
+      Fixed the http content fetch, other stuff.
+
+0.31  Mon Nov 26 22:39:55 EST 2001
+
+      Doc and other updates.
+
+0.30  Mon Nov 26 08:48:38 EST 2001
+
+      Add 'size' field to table, and modify 'script/scan_as_new.pl' so
+      it actually works.
+
+0.29  Mon Nov 26 01:29:33 EST 2001
+
+      Added the fields 'storage' and 'content_location' so we can
+      implement URL content retrieval and aliases. Also added a script
+      to scan a directory for new files and add the metadata to the
+      database.
+
+0.28  Tue Nov  6 09:20:36 EST 2001
+
+      Added login page and graphics for directory listing.
+
+0.27  Mon Oct 29 19:42:47 EST 2001
+
+      Didn't find the reference to _forbidden_page in
+      OI/Handler/Page.pm earlier because I'd misspelled the method
+      call -- doh!
+
+0.26  Mon Oct 29 10:01:52 EST 2001
+
+      If the page is displayable and uploaded, read in the content
+      from the filehandle and set {content} to a scalar ref. Otherwise
+      only one of our different post-save rules that need access to
+      the content as a filehandle will work.  (Fun)
+
+0.25  Mon Oct 29 09:01:47 EST 2001
+
+      If the page isn't displayable, take 'content' off the list of
+      fields to be indexed.
+
+0.24  Sun Oct 28 23:34:14 EST 2001
+
+      - Added first draft of script to move old static_page objects to
+      base_page objects, storing them in the filesystem by default
+
+      - Added index page (html/index.html) and its metadata record
+
+      - The edit_document_box now takes a page object rather than just
+      its location, and it displays a 'Show page security' link as
+      well.
+
+0.23  Fri Oct 26 18:11:17 EDT 2001
+
+0.22  Fri Oct 26 18:04:44 EDT 2001
+
+0.21  Fri Oct 26 17:58:22 EDT 2001
+
+0.20  Fri Oct 26 17:47:04 EDT 2001
+
+0.19  Fri Oct 26 17:43:45 EDT 2001
+
+0.18  Fri Oct 26 17:32:22 EDT 2001
+
+0.17  Fri Oct 26 17:26:38 EDT 2001
+
+      Added content_type object and lookup table definitions
+
+0.16  Thu Oct 25 11:35:39 EDT 2001
+
+0.15  Thu Oct 25 11:21:50 EDT 2001
+
+      Enable the mime-type to be retrieved from an upload, and all
+      non-displayable pages get put into the filesystem.
+
+0.14  Thu Oct 25 11:00:43 EDT 2001
+
+0.13  Thu Oct 25 10:48:56 EDT 2001
+
+0.12  Thu Oct 25 10:37:45 EDT 2001
+
+0.11  Thu Oct 25 10:14:49 EDT 2001
+
+0.10  Thu Oct 25 10:07:20 EDT 2001
+
+      Allow File and Database serializers to read from scalar, scalar
+      ref or filehandle. Also fix the template to allow uploads (duh)
+
+0.09  Thu Oct 25 10:01:31 EDT 2001
+
+      Ensure the file serializer can create a path for the file (duh)
+
+0.08  Thu Oct 25 09:53:40 EDT 2001
+
+      Added security and other items to allow 'create()' requests to
+      work; other fixes.
+
+0.07  Thu Oct 25 01:02:41 EDT 2001
+
+      Added the upload field for content
+
+0.06  Wed Oct 24 18:57:36 EDT 2001
+
+0.05  Wed Oct 24 18:33:12 EDT 2001
+
+      Cool - things basically work; now to the details...
+
+0.04  Wed Oct 24 18:15:01 EDT 2001
+
+0.03  Wed Oct 24 17:52:39 EDT 2001
+
+0.02  Wed Oct 24 17:47:15 EDT 2001
+
+0.01  Wed Oct 24 16:47:01 EDT 2001
+
+      Package skeleton created by oi_manage -- ported the
+      'static_page' package to OI::CommonHandler, cleaned it up and
+      extended it so we can use the filesystem or the database to
+      store page objects.

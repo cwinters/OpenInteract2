@@ -1,0 +1,7 @@
+[% IF nodes.size == 0 -%]
+[% MSG( 'wiki.no_nodes' ) %]
+[% ELSE -%]
+[% FOREACH node = nodes -%]
+    * [[% node %]]
+[% END -%]
+[% END %]

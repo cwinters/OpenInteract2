@@ -1,0 +1,88 @@
+[%########################################
+  page_directory_list( selected_dir, dir_list, children_files )
+    List directories in the system, with optionally one directory
+    selected so that all files in it are listed.
+
+  Parameters:
+    selected_dir:   should be set to the name of the directory selected
+    dir_list:       should be an arrayref of arrayrefs, the first element
+                    is the directory name, the second the number of files 
+                    in the directory.
+    children_files: SPOPS::Iterator object containing BasicPage objects. 
+                    These are objects in the 'selected_dir'.
+  ########################################%]
+
+[%########################################
+  BLOCKS
+  ########################################-%]
+
+[%- BLOCK create_expand_choice -%]
+  [%- IF is_chosen -%]
+     [%- ( is_last ) ? '/images/file_minus_collapse_last.gif'
+                     : '/images/file_minus_collapse.gif' -%]
+  [%- ELSE -%]
+     [%- ( is_last ) ? '/images/file_plus_expand_last.gif'
+                     : '/images/file_plus_expand.gif' -%]
+  [%- END -%]
+[%- END -%]
+
+
+[% BLOCK show_files_in_directory-%]
+   [%- dir_name = dir_info.0 -%]
+   [%- WHILE ( page = children_files.get_next ) -%]
+     [%- edit_url = OI.make_url( ACTION   = 'page',
+                                 TASK     = 'display_form',
+                                 location = page.location ) -%]
+     <tr [% PROCESS row_color %]>
+      <td align="right"><img src="/images/file_tree_line.gif"
+                             height="16" width="19"></td>
+      <td>&nbsp;</td>
+      <td><a href="[% edit_url %]">[% page.location.replace( "^$dir_name\/", '' ) %]</a></td>
+      <td>[% page.title %]</td>
+     </tr>
+    [% END -%]
+[% END -%]
+
+
+[%########################################
+  DISPLAY START
+  ########################################-%]
+
+[%- OI.page_title( 'Document Listing' );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message -%]
+
+<h2 align="left">Document Manager</h2>
+
+<p align="left">Listing of all document directories. in the
+system. Click on the '+' to expand a directory and see its files.</p>
+
+<div align="center">
+
+[% INCLUDE table_bordered_begin( internal_padding = 'none', table_width = '90%' ) -%]
+
+[%- last_dir_index = dir_list.max;
+    last_dir       = dir_list.$last_dir_index.0 -%]
+
+[% FOREACH dir_info = dir_list -%]
+  [%- is_chosen     = ( dir_info.0 == selected_dir ) ? 1 : 0;
+      is_last       = ( dir_info.0 == last_dir )     ? 1 : 0;
+      expand_choice = PROCESS create_expand_choice;
+      count         = loop.count;
+      dir_url       = OI.make_url( ACTION       = 'page',
+                                   TASK         = 'directory_list',
+                                   selected_dir = dir_info.0 ) -%]
+<tr [% PROCESS row_color %]>
+  <td align="right">
+     <a href="[% dir_url %]"><img src="[% expand_choice %]"
+                                  height="16" width="19" border="0"></a></td>
+  <td colspan="3">[% dir_info.0 %] ([% dir_info.1 %])</td>
+</tr>
+  [%- IF is_chosen -%]
+      [%- PROCESS show_files_in_directory -%]
+  [% END -%]
+[%- END -%]
+
+[% PROCESS table_bordered_end -%]
+
+</div>

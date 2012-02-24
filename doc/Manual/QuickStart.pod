@@ -1,0 +1,211 @@
+=head1 NAME
+
+OpenInteract2::Manual::QuickStart - Create an OpenInteract2 website in ten minutes!
+
+=head1 SYNOPSIS
+
+This part of the manual will walk you through setting up an
+OpenInteract2 website.
+
+=head1 APPLICATION SERVER IN TEN MINUTES
+
+=head2 Prerequisites
+
+To make this quickstart install happen you'll need the following.
+
+=over 4
+
+=item *
+
+OpenInteract2 installed. This is the normal four-step installation
+process (see L<MODULE INSTALL>); in addition to installing the various
+modules it will copy the script C<oi2_manage> to somewhere in your
+path.
+
+=item *
+
+Access to the OpenInteract2 source directory. This includes the
+packages and template files necessary to create a website.
+
+=item *
+
+L<DBD::SQLite|DBD::SQLite> installed. This is a standalone, file-based
+SQL database you have to do very little configuration for. (Win32
+users can grab the PPM from the theoryx5 repository -- see L<SEE
+ALSO>.)
+
+=back
+
+Note that you do not need an install of Apache or other third-party
+webserver for this quick start. We use a standalone webserver using
+L<HTTP::Daemon|HTTP::Daemon>.
+
+=head2 Creating a Website
+
+Set the environment variable OPENINTERACT2 to the directory where your
+website will live. The directory shouldn't exist yet.
+
+ $ export OPENINTERACT2=/PATH/TO/WEBSITE
+
+(You'll need to use the full path for now, relative paths will fail in
+non-obvious ways.)
+
+Many OI2 scripts use this environment variable and it saves us
+typing. We'll refer to this as C</PATH/TO/WEBSITE> throughout this guide.
+
+Next, issue the command to create the website:
+
+ $ oi2_manage create_website
+
+=head2 Configuring Your Site: server.ini
+
+Once you've done that, you'll need to edit the server configuration
+file. There are lots of items to edit, but for now we'll assume you
+want to see something running as soon as possible to see how things
+work.
+
+Open up C</PATH/TO/WEBSITE/conf/server.ini> in your favorite text
+editor and make the following changes, replacing your actual website
+directory for C</PATH/TO/WEBSITE> throughout:
+
+B<Set email information>
+
+Change:
+
+ [mail]
+ smtp_host     = 127.0.0.1
+ admin_email   = admin@mycompany.com
+ content_email = content@mycompany.com
+
+to something relevant to your situation.
+
+B<Set database metadata>
+
+Change:
+
+ [datasource main]
+ type          = DBI
+ dbi_type      = 
+ dsn           = 
+ username      =
+ password      =
+
+to:
+
+ [datasource main]
+ type          = DBI
+ dbi_type      = SQLite
+ dsn           = dbname=/PATH/TO/WEBSITE/oi2test.db
+ username      =
+ password      =
+
+B<Set session handler>
+
+The session handler is already set to write its data to the
+filesystem, so there's nothing to do!
+
+=head2 Seed the Database
+
+You need to create the database tables and seed it with initial data:
+
+ $ oi2_manage install_sql --package=SYSTEM
+
+This tells the OI2 website you've specified in the environment
+variable C<OPENINTERACT2> to run the SQL installation routines for all
+packages named in the SYSTEM key. This happens to be all the packages
+installed when you created the website. Handy!
+
+This should issue a bunch of messages listing the different tables
+created, data files used, etc. Peruse them at your leisure.
+
+=head2 Create the Superuser Password
+
+Now it's time to create the superuser password:
+
+ $ oi2_manage create_password --password=cindilauper
+
+(replacing 'cindilauper' with your favorite password)
+
+=head2 Start the Server
+
+Now, we'll startup the standalone (LWP-based) webserver. Issue the
+command:
+
+ $ oi2_daemon
+
+This uses the C<OPENINTERACT2> environment variable set earlier. You
+should see a message similar to this:
+
+ Using OPENINTERACT2 environment for website directory:
+   /PATH/TO/WEBSITE
+ Using daemon configuration from website directory
+ OpenInteract2 now running at URL <http://localhost:8080>
+
+Now fire up your web browser to the given URL and you should see the
+'Welcome to OpenInteract 2!' page. Try and login as 'superuser' with
+the password you set. Have fun!
+
+=head2 Behind the Curtain
+
+If you want to see what's going on behind the scenes you can modify
+the debugging level. In the file
+C</PATH/TO/WEBSITE/conf/log4perl.conf> change:
+
+ log4perl.logger.OI2             = INFO
+
+to:
+
+ log4perl.logger.OI2             = DEBUG
+
+Restart your server once you've made the change and monitor the file
+C</PATH/TO/WEBSITE/logs/oi2.log> for what's going on behind the
+curtain. You may see a message like this:
+
+ 2003/06/26 10:30:15: OpenInteract2::DatasourceManager 121 Disconnecting
+ datasource main from manager shutdown
+
+Don't worry about it. We have to do this to prevent the forked
+children from sharing the parent's database handle.
+
+Also, note that the standalone daemon pipes STDOUT to a file
+C<daemon.log> found in the directory from which you started the
+daemon. Normally the only messages you find here are from libraries
+used by OI2.
+
+You'll also find in C</PATH/TO/WEBSITE/conf> a file C<oi2.pid> holding
+the daemon's process ID. On unix-y systems you can use this to kill
+the process:
+
+ $ kill -15 `cat /PATH/TO/WEBSITE/conf/oi2.pid`
+
+=head1 MODULE INSTALL
+
+The normal Perl module installation process is:
+
+ perl Makefile.PL
+ make
+ make test (**optional)
+ make install
+
+OpenInteract2 also supports the new L<Module::Build|Module::Build>
+process which is more portable since it doesn't need a C<make>
+implementation:
+
+ perl Build.PL
+ perl Build
+ perl Build test
+ perl Build install
+
+=head1 SEE ALSO
+
+Win32 PPD for SQLite (ActivePerl 5.8x)
+
+L<http://theoryx5.uwinnipeg.ca/ppms/DBD-SQLite.ppd>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

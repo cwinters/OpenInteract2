@@ -1,0 +1,48 @@
+[user]
+class                   = OpenInteract2::User
+code_class              = OpenInteract2::User::LDAP
+isa                     = OpenInteract2::User
+is_secure               = yes
+field                   = cn
+field                   = sn
+field                   = givenname
+field                   = mail
+field                   = userpassword
+field                   = uid
+field                   = objectclass
+multivalue              = objectclass
+id_field                = cn
+ldap_base_dn            = ou=People
+ldap_object_class       = top
+ldap_object_class       = person
+ldap_object_class       = inetOrgPerson
+ldap_object_class       = organizationalPerson
+ldap_fetch_object_class = person
+name                    = full_name
+object_name             = User
+
+[user field_map]
+last_name  = sn
+first_name = givenname
+password   = userpassword
+login_name = uid
+email      = mail
+user_id    = uid
+
+[user links_to]
+OpenInteract::Group = uniquemember
+
+[user creation_security]
+user  = 
+group = site_admin_group:WRITE
+world = READ
+
+[user track]
+create = 0
+update = 1
+remove = 1
+
+[user display]
+ACTION = user
+TASK   = display
+

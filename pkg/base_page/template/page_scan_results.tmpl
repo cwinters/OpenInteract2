@@ -1,0 +1,60 @@
+[% OI.page_title( "Page scanning results" ) %]
+
+<h2>Results of Scan for New Pages</h2>
+
+[% IF page_list.size == 0 -%]
+<p>No new pages were found.</p>
+[% ELSE -%]
+
+  <p>The following pages were added. Click on a name to see more
+  information about that page:</p>
+
+<div align="center">
+
+  [% INCLUDE table_bordered_begin -%]
+
+  [% INCLUDE header_row( labels = [ 'Location', 'Size', 'Title' ]  ) -%]
+
+  [% FOREACH page = page_list -%]
+    [%- edit_url = OI.make_url( ACTION   = 'page',
+                                TASK     = 'display_form',
+                                location = page.location ) -%]
+    <tr valign="top" [% PROCESS row_color %]>
+      <td><a href="[% edit_url %]">[% page.location %]</a></td>
+      <td>[% OI.byte_format( page.size ) %]</td>
+      <td>[% page.title %]&nbsp;</td>
+    </tr>
+  [% END -%]
+
+  [% PROCESS table_bordered_end -%]
+
+</div>  
+
+[% END -%]
+
+<h2>Errors</h2>
+
+[% IF error_list.size == 0 -%]
+
+<p>I did not enounter any errors.</p>
+
+[% ELSE -%]
+
+<div align="center">
+
+  [% INCLUDE table_bordered_begin -%]
+
+  [% INCLUDE header_row( labels = [ 'Location', 'Error' ]  ) -%]
+
+  [% FOREACH error_item = error_list -%]
+    <tr valign="top" [% PROCESS row_color %]>
+      <td>[% error_item.location %]</td>
+      <td>[% error_item.error %]</td>
+    </tr>
+  [% END -%]
+
+  [% PROCESS table_bordered_end -%]
+
+</div>
+
+[% END -%]

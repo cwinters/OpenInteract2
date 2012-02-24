@@ -1,0 +1,64 @@
+[%# Because this template is used for editing other templates, it's a
+    good idea to change the default tags. -%]
+[%- TAGS star -%]
+[*- is_saved = ( tmpl.name );
+    title = ( is_saved )
+              ? MSG( 'base_template.form.title_update', tmpl.name )
+              : MSG( 'base_template.form.title_new' );
+    OI.page_title( title );
+    DEFAULT theme = OI.theme_properties;
+    OI.box_add( 'template_tools_box', tmpl = tmpl ); -*]
+
+<div align="center">
+[* PROCESS error_message;
+   PROCESS status_message; -*]
+</div>
+
+<div align="center" class="demarcatePage">
+
+<h2>[* title *]</h2>
+
+[* task = ( is_saved ) ? "update" : "add" -*]
+[* PROCESS form_begin( ACTION = 'template',
+                       TASK   = task,
+                       method = 'POST',
+                       name   = 'template' ) -*]
+
+[* PROCESS table_bordered_begin -*]
+[*- valign = 'top'; count = 0; -*]
+
+[*- count = count + 1 -*]
+[* INCLUDE label_form_select_row( label_key   = 'base_template.info.package',
+                                  post_label  = MSG( 'base_template.form.package_info' ),
+                                  name        = 'package',
+                                  label_list  = package_labels,
+                                  value_list  = package_list,
+                                  plain       = 1,
+                                  picked      = tmpl.package ) -*]
+
+[*- count = count + 1 -*]
+[* INCLUDE label_form_text_row( label_key   = 'base_template.info.name',
+                                is_required = 1,
+                                name        = 'name',
+                                value       = tmpl.name ) -*]
+
+[*- count = count + 1 -*]
+[* INCLUDE label_form_textarea_row( label_key   = 'base_template.info.template',
+                                    name        = 'contents',
+                                    is_required = 1,
+                                    colspan     = 2,
+                                    cols        = 80,
+                                    rows        = 15,
+                                    value       = OI.html_encode( tmpl.contents ) ) -*]
+
+[*- count = count + 1 -*]
+[* INCLUDE form_submit_row( value = MSG( 'global.button.modify' ) ) -*]
+  
+[* PROCESS table_bordered_end -*]
+
+[* PROCESS form_hidden( name = "package_original", value = tmpl.package );
+   PROCESS form_hidden( name = "name_original",    value = tmpl.name ); -*]
+
+[* PROCESS form_end *]
+
+</div>

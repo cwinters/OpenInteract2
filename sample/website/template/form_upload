@@ -1,0 +1,3 @@
+[%- field_pre_label -%]
+<input type="file" name="[% name %]">
+[%- field_label -%]

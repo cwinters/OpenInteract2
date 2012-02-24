@@ -1,0 +1,4 @@
+$ mysql --user=$ADMINUSER --password=$ADMINPASSWORD $DBNAME
+mysql> GRANT ALL ON $DBNAME.* TO $WEBUSER@localhost 
+mysql> IDENTIFIED BY '$WEBPASSWORD'\g
+

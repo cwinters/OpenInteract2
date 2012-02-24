@@ -1,0 +1,6 @@
+$security = [ 
+   { import_type => 'object',
+     spops_class => 'OpenInteract2::NewsSection',
+     field_order => [ qw/ section / ] },
+   [ 'Public' ],
+];

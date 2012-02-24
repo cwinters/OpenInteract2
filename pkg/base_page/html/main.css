@@ -1,0 +1,19 @@
+.box { 
+  background: #eeeeee;
+  border: 1px solid black;
+  text-align: left;
+  margin: 0px 2px 2px 0px;
+}
+
+.boxTitle { 
+  background: #999933;
+  color: #ffffcc;
+  font-size: 110%;
+  font-weight: bold;
+  text-align: center;
+}
+
+.boxContent { 
+  margin: 0px 2px 2px 0px;
+  text-align: left;
+}

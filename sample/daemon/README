@@ -1,0 +1,7 @@
+sample/daemon:
+
+The files here are used for configuring the standalone OI2 daemon
+running under HTTP::Daemon. They are copied to your website's 'conf/'
+directory on creation and should be referenced them in the daemon
+startup.
+

@@ -1,0 +1,17 @@
+<div align="center">
+
+<h1>[% MSG( 'error_no_default.title' ) %]</h1>
+
+<table width="50%" border="0" cellpadding="5" cellspacing="0">
+
+<tr><td align="left">
+[% MSG( 'error_no_default.summary', author_email ) %]
+</td></tr>
+
+<tr><td align="right">
+[% MSG( 'error_no_default.signed' ) %]
+</td></tr>
+
+</table>
+
+</div>

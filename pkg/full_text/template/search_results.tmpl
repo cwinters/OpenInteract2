@@ -1,0 +1,67 @@
+[% MACRO page_menu BLOCK -%]
+<table border="0" width="75%">
+  <tr>
+    <td align="left">[% MSG( 'full_text.search_results.total_hits' ) %]: [% total_hits %]</td>
+    <td align="right">[% menu %]</td>
+  </tr>
+</table>
+[% END -%]
+
+[%- OI.page_title( MSG( 'full_text.search_results.title' ) );
+    PROCESS error_message -%]
+
+<h2>[% MSG( 'full_text.search_results.title' ) %]</h2>
+
+[% IF total_hits <= 0 -%]
+
+<p>[% MSG( 'full_text.search.results.no_results' ) %]</p>
+
+[% PROCESS full_text::tiny_search -%]
+
+[% ELSE -%]
+
+[%- page_url = OI.make_url( ACTION    = 'search',
+                            search_id = search_id );
+    raw_page_menu = PROCESS page_count( total_pages     = total_pages,
+                                        current_pagenum = current_page,
+                                        url             = page_url ) -%]
+
+<div align="center">
+
+[% INCLUDE full_text::tiny_search( form_name = 're_search',
+                                   keywords  = keywords ) -%]
+
+[%- menu = page_menu( menu = raw_page_menu, hits = total_hits ) -%]
+[% menu %]
+
+[% INCLUDE table_bordered_begin( internal_padding = 3 ) -%] 
+
+[% INCLUDE header_row( label_keys = [
+    'full_text.search.results.type',
+    'full_text.search.results.description', 'global.label.nbsp',
+] ) -%]
+
+[%- count = 0 -%]
+[% WHILE ( obj = search_iterator.get_next ) -%]
+  [%- oi = OI.object_description( obj ) -%]
+  <tr valign="top" [% PROCESS row_color %]>
+     <td>[% oi.name  %]</td>
+     <td>[% oi.title %]&nbsp;</td>
+     <td align="right"><a href="[% oi.url %]">[% MSG( 'global.label.view' ) %]</a>
+  [% IF obj.tmp_security_level >= OI.security_level.write -%]
+    | <a href="[% oi.url_edit %]">[% MSG( 'global.label.edit' ) %]</a>
+  [% END %]</td>
+  </tr>
+  [%- count = count + 1 -%]
+[%# <!-- DEBUG: Class ([* oi.class *]) OID: ([* oi.oid *]) --> %]
+[% END -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% IF hits_on_page > 20 -%]
+[% menu %]
+[% END -%]
+
+</div>
+
+[% END -%]

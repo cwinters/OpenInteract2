@@ -1,0 +1,4 @@
+[%- DEFAULT is_checked = ( value == picked );
+    is_checked_label = ( is_checked ) ? 'CHECKED' : '' -%] 
+<input type="checkbox" name="[% name %]"
+       value="[% value %]" [% is_checked_label %]> [% field_label %]

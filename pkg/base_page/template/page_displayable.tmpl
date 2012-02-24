@@ -1,0 +1,10 @@
+[% OI.page_title( page.title );
+   OI.main_template( page.main_template );
+   FOREACH box_name = box_add;
+       OI.box_add( box_name );
+   END;
+   FOREACH box_name = box_remove;
+       OI.box_remove( box_name );
+   END;
+-%]
+[% content %]

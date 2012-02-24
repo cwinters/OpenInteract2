@@ -1,0 +1,69 @@
+INSTALLING OPENINTERACT 2
+=========================
+
+(1) Run the normal perl install
+
+ perl Makefile.PL
+ make
+ make test (this may take a while...)
+ make install
+
+You can also use Module::Build:
+
+ perl Build.PL
+ ./Build
+ ./Build test
+ ./Build install
+
+This procedure will install the base libraries. Normal Perl
+installation rules apply.
+
+OI2 comes with a number of files that need to be available for package
+authors and people creating websites. You can run:
+
+ $ oi2_manage create_source_dir --source_dir=/opt/OpenInteract2
+
+from the distribution directory to create it.
+
+UPGRADING FROM 1.x?
+--------------------
+
+DO NOT WORRY about modules overwriting. Everything is in the
+'OpenInteract2::' namespace so your existing 1.x libraries will be
+untouched. Also, please read 'perldoc
+OpenInteract2::Manual::Conversion' after you install. The short news:
+there's no simple conversion for everything, but you'll be gaining
+lots of functionality.
+
+DEPENDENCIES
+--------------------
+
+OpenInteract2 uses a number of libraries, all of them are readily
+available via CPAN. For those on Win32 systems without a compiler,
+most of them are also available via the PPM installation system. Some
+modules requiring compilation are not available via the standard PPM
+repository and are available at:
+
+ http://openinteract.sourceforge.net/
+
+Instructions for setup and download are located there as well.
+
+(2) Create a website
+
+See 'perldoc OpenInteract2::Manual::QuickStart' for instructions on
+getting a site running in just a few minutes!
+
+(3) Read up
+
+Check out the documentation, starting with 'OpenInteract2::Manual',
+which has pointers to many other documents. Or, after finishing your
+website installation you can go to the '/SystemDoc/' path and read the
+docs through your browser. In the manual you'll find information about
+administering OpenInteract2, notes about packages, what goes into
+creating a website, building/configuring Apache, how to create develop
+a package, and much more.
+
+Good luck, and have fun!
+
+=========================
+$Id: INSTALL,v 1.4 2003/06/30 14:43:48 lachoy Exp $

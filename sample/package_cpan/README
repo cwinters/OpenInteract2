@@ -1,0 +1,7 @@
+sample/package_cpan:
+
+The files here are used as templates for creating a new CPAN
+distribution from a package.
+
+NOTE: If you add a file here be sure to add an entry in FILES so we
+know it should be copied over to the dist when it's created.

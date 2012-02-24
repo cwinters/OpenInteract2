@@ -1,0 +1,398 @@
+[%- TAGS star -%]
+=head1 NAME
+
+OpenInteract2::Manual::Widgets - Template Widgets in OpenInteract
+
+=head1 DESCRIPTION
+
+OpenInteract2 supports using templates as a simple graphical widget. A
+widget is a common element into which you can just plug in text or
+parameters to customize it. For example, an 'INPUT' element of type
+'TEXT' is a particular type of widget -- you can customize its size,
+name, and default value. (Some widget implementations will maintain
+state for you across requests, have validation, etc. These don't do
+that.)
+
+Widgets can also include other widgets. Such as a row that uses the
+'INPUT TEXT' widget described above to create a labeled input field,
+with a label on the left and the input widget on the right.
+
+One of the main benefits of using these over HTML is centralization --
+a change in one place enacts changes throughout your site. All column
+headers can look a certain way and be changed easily, all textboxes
+can be consistent and you can create widgets specific to your site and
+needs -- such as for inputting dates or money, or displaying
+addresses-- for a consistent user interface.
+
+Here's an example:
+
+ [%########################################
+   form_text( name, value, size, maxlength, field_label )
+      Generate a simple text field.
+ 
+      Defaults:
+         size      = 20
+         maxlength = 50
+   ########################################-%]
+
+ [%- DEFAULT size      = 20;
+     DEFAULT maxlength = 50; -%]
+ [%- field_pre_label -%]
+ <input type="text" name="[% name %]" value="[% value %]"
+        size="[% size %]" maxlength="[% maxlength %]">
+ [%- field_label -%]
+
+And you would reference this like:
+
+ [% INCLUDE form_text( name = "batting_average",
+                       value = ".389" size = 5 ) -%]
+
+And when the template is processed, get in return:
+
+ <input type="text" name="batting_average" value=".389" 
+        size="5" maxlength="50">
+
+Calling widgets from other widgets is just as simple:
+
+
+ [%########################################
+   label_form_text_row( label, count, name, value, 
+                        field_label )
+      Display a row to input text: label on left,
+      text input on right. 
+ 
+      Defaults:
+        colspan = 2
+   ########################################-%]
+ 
+ [%- DEFAULT colspan = 2; -%]  
+ [%- INCLUDE label_row_begin( colspan = 1 ) -%]
+ [%- INCLUDE data_cell_begin %][% INCLUDE form_text %]
+ </td></tr>
+
+Here we call three separate items, two of which ('label_row_begin' and
+'data_cell_begin') aren't really 'widgets' but rather just named areas
+for common code. This might be called:
+
+ [% INCLUDE label_form_text_row( label = 'Batting Average',
+                                 name  = 'batting_average',
+                                 value = '.389', size = 5 ) -%]
+
+And result in:
+
+ <tr valign="middle">
+   <td align="right"><b>Batting Average</b></td>
+   <td align="right">
+     <input type="text" name="batting_average" value=".389"
+             size="5" maxlength="50">
+   </td>
+ </tr>
+
+And you're not restricted to simple fill-in elements either. You can
+represent a common data-oriented widget -- such as a drop-down box
+representing countries your company services -- in this manner as
+well. Here's how such a call might look:
+
+ [%# Use USA as default, antagonizing the rest of the world...-%]
+ [%- picked_country = user.country || 'United States' -%]
+ [% INCLUDE label_form_country_select( label  = 'Countries',
+                                       name   = 'country',
+                                       picked = picked_country ) -%]
+
+Using this, the page designer doesn't care how many countries the
+company services, whether a new one has been added to the list,
+etc. Just make the call and the graphic element will be created the
+same way every time.
+
+Using these template widgets you can build a library of display
+elements very quickly.
+
+=head1 WIDGET LISTING
+
+As of version 2.0, OpenInteract comes with the following widgets:
+
+=over 4
+
+=item *
+
+data_cell_begin
+
+=item *
+
+date_select
+
+=item *
+
+error_message
+
+=item *
+
+form_begin
+
+=item *
+
+form_button
+
+=item *
+
+form_checkbox
+
+=item *
+
+form_end
+
+=item *
+
+form_hidden
+
+=item *
+
+form_login
+
+=item *
+
+form_password
+
+=item *
+
+form_radio
+
+=item *
+
+form_radioset
+
+=item *
+
+form_reset
+
+=item *
+
+form_select
+
+=item *
+
+form_select_intro
+
+=item *
+
+form_select_option
+
+=item *
+
+form_select_options_iterator
+
+=item *
+
+form_select_options_list
+
+=item *
+
+form_select_options_plain_list
+
+=item *
+
+form_submit
+
+=item *
+
+form_submit_row
+
+=item *
+
+form_text
+
+=item *
+
+form_textarea
+
+=item *
+
+form_upload
+
+=item *
+
+header_cell
+
+=item *
+
+header_row
+
+=item *
+
+label_form_checkbox_row
+
+=item *
+
+label_form_date_row
+
+=item *
+
+label_form_login_row
+
+=item *
+
+label_form_radio_row
+
+=item *
+
+label_form_select_row
+
+=item *
+
+label_form_text_row
+
+=item *
+
+label_form_textarea_row
+
+=item *
+
+label_row
+
+=item *
+
+label_row_begin
+
+=item *
+
+label_text_row
+
+=item *
+
+object_updates
+
+=item *
+
+page_count
+
+=item *
+
+row_color
+
+=item *
+
+search_results_page_listing
+
+=item *
+
+show_label
+
+=item *
+
+table_bordered_begin
+
+=item *
+
+table_bordered_end
+
+=item *
+
+to_group
+
+=back
+
+Every website has its own copy of the widgets in the website
+C<template/> directory, so if you want to modify the appearance of any
+of these items, you can. For instance, if you want to pass in a
+Spanish equivalent for labels, you can modify 'show_label', which is
+currently the ultra-simple:
+
+ [%########################################
+   show_label( label )
+      Display a label.
+   ########################################-%]
+ <b>[% label %]</b>
+
+with:
+
+ [%########################################
+   show_label( label, spanish )
+      Display a label (displaying spanish version if available)
+   ########################################-%]
+ <b>[% label %]</b> [% IF spanish %](<em>[% spanish %]<em>)[% END -%]
+
+=head1 OPERATION
+
+When you create a website you have a number of widgets installed in
+the C<$WEBSITE_DIR/template> directory. When you upgrade to a new
+version of OpenInteract2 these widgets will overwritten unless they're
+listed in the C<$WEBSITE_DIR/template/.no_overwrite> file. You can
+also add new ones and reference them just like the built-ins, and you
+can do so just by copying files to the directory or by using the
+browser interface to create and edit them. (Or both.)
+
+=head2 Gotchas
+
+The Template Toolkit docs warn about this, but it's worth
+reiterating. You can use either the C<INCLUDE> or C<PROCESS>
+directives to run these widgets. The difference between them is
+subtle.
+
+=over 4
+
+=item * 
+
+C<INCLUDE> ensures that variables you modify within the widget (even
+with a C<DEFAULT>) are localized to the widget.
+
+=item *
+
+C<PROCESS> does not localize variables within the widget -- any
+changes you make in the widget are propogated outside the widget.
+
+=back
+
+For instance, say you have the following:
+
+ [% PROCESS form_text( name  = 'this',
+                       value = 'that' ) %]
+ [% PROCESS form_select( name        = 'them',
+                         list        = object_list,
+                         value_field = 'id',
+                         label_field = 'full_name' ) %]
+
+You'd be extremely surprised to find your SELECT box being 20 rows
+long! that's because inside the 'form_text' widget there's a
+statement:
+
+ [% DEFAULT size = 20 %]
+ [% INCLUDE examples/widget_process_default | linenum %]
+
+Since we didn't pass any value for 'size' into 'form_text', it's set
+to 20. But the tricky part is that this value is B<also> passed into
+the 'form_select' widget since it's in our environment and we didn't
+pass it explicitly in the C<PROCESS> call.
+
+You could argue that instead of using C<DEFAULT> we should do
+something like:
+
+ [% text_size = size || 20 %]
+
+So that the common variable 'size' isn't set as a side-effect. And
+that's a valid argument. But then as a widget writer you have to have
+knowledge of the variables the other widgets are using. And as a
+widget user you have to have knowledge of what happens inside the
+widget.
+
+With these potential pitfalls, why use C<PROCESS> at all? The Template
+Toolkit manual states that using C<PROCESS> is a little faster. So you
+have a trade-off to make: a little speed for knowledge that things
+will work like you think they will.
+
+The template widgets shipped with OpenInteract generally fall on the
+side of being able to sleep at night -- every widget works like you
+think it should. (Or at least how B<someone> thought it should.) You
+can always change them for you site if you like, but we've found it's
+better to use C<INCLUDE> and not deal with the potential headaches. If
+you're sure the widget won't have any side effects -- that it doesn't
+have any C<DEFAULT> or other variable modification statements -- then
+go ahead and use C<PROCESS>.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2001-2004 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>
+

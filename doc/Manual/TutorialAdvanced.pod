@@ -1,0 +1,760 @@
+[%- TAGS star -%]
+=head1 NAME
+
+OpenInteract2::Manual::TutorialAdvanced - Tutorial for advanced OpenInteract functionality
+
+=head1 SYNOPSIS
+
+This document will walk through some of the more advanced (but still
+common) actions you can do with OpenInteract2.
+
+For the examples in this document we'll rely on the 'book' application
+created in L<OpenInteract2::Manual::Tutorial>.
+
+=head1 ACTIONS: SETTING UP A LOOKUP TABLE 
+
+=head2 Create the data structure
+
+One of the immediate problems with our 'book' record is that there's
+no way to categorize them. Sure, most books cross categories -- my
+favorite: 'Computer Programming' + 'Self-Help' -- but our books don't
+even have B<one>.
+
+But we don't want the user to type in any old category. We should be
+able to define a list of known categories then allow her to choose one
+of them when creating or updating a book.
+
+So, first we'll create a table to hold these categories. It's commonly
+known as a 'lookup' table because it's so simple, all we do is find
+values:
+
+ CREATE TABLE book_category (
+     category_id   %%INCREMENT%%,
+     category      varchar(25) not null,
+     primary key( category_id )
+ );
+
+Store this in C<struct/book_category.sql> and if you're using
+Oracle/PostgreSQL add a sequence in
+C<struct/book_category_sequence.sql>:
+
+ CREATE SEQUENCE book_category_seq 
+
+Now we'll need to add the table and sequence to our SQL installer
+class. In C<OpenInteract2/SQLInstall/Book.pm> change:
+
+ my %FILES = (
+    oracle  => [ 'book.sql', 'book_sequence.sql' ],
+    pg      => [ 'book.sql', 'book_sequence.sql' ],
+    default => [ 'book.sql' ],
+ );
+
+to:
+
+ my @tables    = qw( book.sql book_category.sql );
+ my @sequences = qw( book_sequence.sql book_category_sequence.sql );
+ my %FILES = (
+    oracle  => [ @tables, @sequences ],
+    pg      => [ @tables, @sequences ],
+    default => [ @tables ],
+ );
+
+Also add an SPOPS class to C<conf/spops_book_category.ini>:
+
+ [book_category]
+ class           = OpenInteract2::BookCategory
+ isa             = 
+ field           = 
+ field_discover  = yes
+ id_field        = category_id
+ increment_field = yes
+ sequence_name   = book_category_seq
+ is_secure       = no
+ no_insert       = category_id
+ no_update       = category_id
+ base_table      = book_category
+ name            = category
+ object_name     = Book Category
+ 
+ [book_category display]
+ ACTION = lookups
+ TASK   = 
+
+=head2 Setup lookup action
+
+And here's the interesting part -- to add simple editing functionality
+to your lookup table you can just add the following action to
+C<conf/action.ini>:
+
+ [book_category]
+ action_type  = lookup
+ object_key   = book_category
+ title        = Book Categories
+ field_list   = category
+ label_list   = Category
+ size_list    = 25
+ order        = category
+ url_none     = yes
+
+The 'action_type' setting is the important one. OI2 references a list
+of action types in the server configuration (key:
+'action_type'). Think of these as parent actions to yours -- all they
+require is configuration and you're set. In this case you need to set:
+
+=over 4
+
+=item B<object_key>
+
+SPOPS name of your object.
+
+=item B<title>
+
+Title of the values to edit.
+
+=item B<field_list>
+
+List of fields you want to edit. (We've only got one.)
+
+=item B<label_list>
+
+List of labels for each of the fields in C<field_list>, in the same
+order.
+
+=item B<size_list>
+
+Size of text fields to edit for each of the fields in C<field_list>,
+in the same order.
+
+=item B<order>
+
+Field/ORDER-BY clause used to retrieve the data.
+
+=back
+
+See L<OpenInteract2::App::Lookup> for more information and additional
+options you can set.
+
+Add these files to your C<MANIFEST>, modify your C<Changes> and
+C<package.ini> and update your site. You can install the SQL
+structures like this (assuming C<OPENINTERACT2> environment variable
+is set to your website):
+
+ $ oi2_manage install_sql_structure --package=book \
+           --file=book_category.sql --file=book_category_sequence.sql
+
+Back in the original tuturial we ran the 'install_sql' management
+task. That's really just a wrapper around three separate tasks:
+'install_sql_structure', 'install_sql_data' and
+'install_sql_security'. Additionally, since we don't want to try to
+reinstall our 'book.sql' we're giving it an argument to limit the
+files it will operate on.
+
+Once you restart your server go to the 'Lookup Tables' link in your
+'Admin Tools' box. (Or just go to the '/lookups/' URL.) You'll see
+'Book Categories' there. Click on the link and you'll see a set of
+text entry fields, one per table row.
+
+Each entry will become a new category, so enter a few and click
+'Save'. You'll get a status message with your entries and get taken
+back to the initial lookup tables page. Click on 'Book Categories'
+again and you'll see your categories. You can now add, edit and remove
+at will.
+
+=head2 Add field to table
+
+So now we need to add our category our table of books. Using whatever
+database tool you're comfortable with add the following definition to
+the 'book' table:
+
+  category_id  int null
+
+For instance, when I use PostgreSQL I just do:
+
+ psql> ALTER TABLE book ADD category_id INT NULL;
+
+When you restart the server all your 'book' objects will have the new
+property 'category_id'. Since we set 'field_discover' to 'yes' in the
+previous tutorial we didn't need to tell SPOPS or OI2 about it.
+
+But we still can't assign the category from our book editing form...
+
+=head2 Source values for field from lookup
+
+What we want to do is present a list of all the available categories
+to the user when she's editing a book. But how do we do that?
+Remember, we're using one of the Common actions and didn't actually
+write any code to do inserts and updates.
+
+Fortunately the Common actions have a callback just for this. It's
+always named "customize" -- "_display_add_customize",
+"_display_form_customize", etc.
+
+So in our action C<OpenInteract2/Action/Book.pm> we'll implement these
+callbacks. This is very similar to how we added our list of publishers
+to the search form but instead of plain strings as the source we're
+using objects:
+
+So add the following method:
+
+ sub _add_categories {
+     my ( $self, $template_params ) = @_;
+     $template_params->{categories} =
+         OpenInteract2::BookCategory->fetch_group({ order => 'category' });
+ }
+
+And reference it from your callbacks:
+
+ sub _display_add_customize {
+     my ( $self, $template_params ) = @_;
+     $self->_add_categories( $template_params );
+ }
+
+ sub _display_form_customize {
+     my ( $self, $template_params ) = @_;
+     $self->_add_categories( $template_params );
+ }
+
+Then add a reference to those categories in your data editing form:
+
+ [%- count = count + 1 -%]
+ [% INCLUDE label_form_select_row( label       = 'Category'
+                                   name        = 'category_id',
+                                   picked      = book.category,
+                                   list        = categories,
+                                   value_field = 'category_id',
+                                   label_field = 'category',
+                                   first_label = '---Categories---' ) -%]
+
+Assuming you have the following categrories:
+
+  category_id  category
+  ---------------------
+  1            Self-Help
+  2            Perl
+  3            Regular Expressions
+  4            Vegetarian Cooking 
+
+You'll see something like this -- remember that we sorted the
+categories by 'category' when we assigned them to the template
+parameters:
+
+ <tr>
+   <td><b>Category</b></td>
+   <td><select name="category_id">
+          <option value="">---Categories---</option>
+          <option value="2">Perl</option>
+          <option value="3">Regular Expressions</option>
+          <option value="1">Self-Help</option>
+          <option value="4">Vegetarian Cooking</option>
+      </select>
+   </td>
+ </tr>
+
+=head2 Add fields to action configuration
+
+Finally, while we didn't have to add the field to our SPOPS
+configuration we do have to add it to our actions. (Common action
+configurations don't have an field discovery feature yet.) Add to your
+C<conf/action.ini> under '[book]' these keys and values:
+
+ c_update_fields = category_id
+ c_add_fields    = category_id
+
+After you do so you should be able to add and update your books with
+new categories. Give it a whirl!
+
+=head1 ACTIONS: A TEMPLATE CAN BE AN ACTION
+
+=head2 Another action type: template_only
+
+Another way to create an action without any code is to point it
+directly at a template. This is very useful for embeddable
+components. For instance, many actions come with a 'box' that has
+pointers to common actions. Say we wanted to create a 'Book Actions
+Box' that had links like 'Search', 'Add' and (when you're on a book
+record), 'Edit' and 'Remove'.
+
+We'll go backwards first this time, defining the action first. In your
+C<conf/action.ini> add the following:
+
+ [book_box]
+ action_type  = template_only
+ template     = book::toolbox
+ title        = Book Tools
+ url_none     = yes
+
+We can now reference 'book_box' just like any other action. But first
+we need to create a simple template in C<template/toolbox.tmpl>:
+
+ [%- search_url = OI.make_url( ACTION = 'book', TASK = 'search' );
+     add_url    = OI.make_url( ACTION = 'book', TASK = 'display_add' ); -%]
+ - <a href="[% search_url %]">Search</a> <br />
+ - <a href="[% add_url %]">Add</a> <br />
+ [% IF book -%]
+   [%- edit_url   = OI.make_url( ACTION = 'book', TASK = 'display_form',
+                                 book_id = book.id );
+       remove_url = OI.make_url( ACTION = 'book', TASK = 'remove',
+                                 book_id = book.id ) -%]
+ - <a href="[% search_url %]">Edit</a> <br />
+ - <a href="[% add_url %]">Remove</a><br />
+ [% END %]
+
+We're done. Just add the new file to your C<MANIFEST> and install.
+
+You can execute the content from within a template too. For instance,
+just add the following to any template:
+
+ [% OI.action_execute( 'book_box' ) %]
+
+Once it's processed you'll see your content. You do something similar
+when you place the action content in a box:
+
+ [% OI.box_add( 'book_box' ) %]
+
+The 'box_add' method stores the action away for execution later (by
+another action, L<OpenInteract2::Action::Box>). But since we've
+wrapped our template as an action we can now treat it like every other
+component.
+
+It's also worth mentioning that we can still reference the template
+with Template Toolkit directives, like:
+
+ [% INCLUDE book::toolbox %]
+
+The only differences are that when we call C<OI.action_execute()> we
+go through the action's security checks as well as use its cached
+content if available. The C<INCLUDE> call does not do this extra work
+so it's a little faster to process. It's up to you whether the speed
+is worth it. (And you can always change between the two, so a decision
+won't be permanent.)
+
+=head1 ACTIONS: ADDING VALIDATION TO COMMON TASKS
+
+=head1 ACTIONS: USING MULTIPLE TABLES WITH COMMON SEARCHING
+
+=head2 Another table with searchable information
+
+Our book empire is growing. We now have multiple locations where our
+books are stored and we need to track which books are stored in which
+locations.
+
+For our purposes we'll assume a C<location> table like this:
+
+ CREATE TABLE location (
+   location_id      %%INCREMENT%%,
+   name             varchar(50) not null,
+   city             varchar(25) null,
+   state            varchar(2) null,
+   primary key( location_id )
+ )
+
+And we'll also assume that we're getting a feed of these data from our
+shipping company, so we don't need to create code to edit the data.
+
+For the sake of this exercise we'll also assume we don't need to
+manipulate individual 'location' records. Since the search mechanism
+relies entirely on database tables and joins we don't require that all
+tables are mapped to SPOPS objects.
+
+Our main reason we want the additional table is for searching -- so we
+can find all books in a particular location, or all books with 'Food'
+in their title in a particular city.
+
+=head2 Create a link table
+
+Since there can be the same book at many different locations, and many
+different books at a single location, we have a many-to-many
+relationship. For this we need a separate table (aka, 'join table') to
+hold the linking data. It'll look like this:
+
+ CREATE TABLE book_at_location (
+   book_id          %%INCREMENT_TYPE%% not null,
+   location_id      %%INCREMENT_TYPE%% not null,
+   primary key( book_id, location_id )
+ )
+
+If you want you can add information specific to this link to the table
+(count, date last book received, etc.). For our purposes here it
+doesn't matter.
+
+=head2 Feed the search from your form
+
+We want to be able to search by location name, city and state. First
+we'll add the fields to the search form -- in
+C<template/search_form.tmpl> add:
+
+   [% INCLUDE label_form_text_row( label = 'Location',
+                                   name  = 'loc.name', size  = 30 ) %]
+ 
+   [% INCLUDE label_form_text_row( label = 'City',
+                                   name  = 'loc.city', size  = 30 ) %]
+ 
+   [% INCLUDE label_form_text_row( label = 'State',
+                                   name  = 'loc.state', size  = 5 ) %]
+
+Note that we prefixed the field names from our 'location' table
+with 'loc.'. That's because we need to need to be able to tell our
+action for which fields we should join to another table.
+
+The string 'loc' doesn't mean anything. It just needs to be consistent
+between your form field declarations and the configuration we're about
+to do.
+
+=head2 Configuring the search
+
+In your C<conf/action.ini> you'll need to add these fields to your
+C<c_search_fields*> listings. We'll assume the location name and city
+are 'LIKE' matches while the state is an exact match. So under 'book'
+add:
+
+ c_search_fields_like  = loc.name
+ c_search_fields_like  = loc.city
+ c_search_fields_exact = loc.state
+
+Note that we kept the 'loc.' prefix on all fields.
+
+Next, we need to tell OI2 how to match up our book records with these
+'loc.' fields. We do that with the parameter
+C<c_search_table_links>. It will look like this:
+
+ [book c_search_table_links]
+ loc = book.book_id
+ loc = book_at_location.book_id
+ loc = book_at_location.location_id
+ loc = location.location_id
+
+The 'loc' field matches our prefix and its values represent (in pairs)
+how tables are joined. OI will step through these parameters and
+construct a SQL JOIN clause like this:
+
+ WHERE ...
+       AND book.book_id = book_at_location.book_id
+       AND book_at_location.location_id = location.location_id
+
+It will only generate this join if any of the fields with a 'loc'
+prefix are searched. So if a user just searches for a book title OI2
+will put together a query like this:
+
+ WHERE book.title LIKE '%Charlotte%'
+
+But if a user searches for a book title in a particular city this
+query will change:
+
+ WHERE book.title LIKE '%Charlotte%'
+       AND location.city LIKE '%burgh%'
+       AND book.book_id = book_at_location.book_id
+       AND book_at_location.location_id = location.location_id
+
+Once you've made these changes you're ready to search!
+
+=head1 ACTIONS: SECURING AN ACTION
+
+=head2 What is action security?
+
+There are two layers of security in OpenInteract. The first, action
+security, is the most widely used and determines who can do what in
+your application. Action security can be segmented by task. So you may
+have certain tasks within an action that all users can do (such as
+search and view items) but other tasks only users of a particular
+group can do (such as create, modify and remove items).
+
+Security is always specified by group. While the underlying mechanism
+for storing and retrieving security can be used with individual users
+it's strongly discouraged.
+
+=head2 Configure your action
+
+Assigning security to your action is very simple -- all the changes
+are in your action's configuration file.
+
+First, you need to tell OI2 that your action is secure with the
+'is_secure' key:
+
+ [book]
+ class     = OpenInteract2::Action::Book
+ is_secure = yes
+
+If this is set to anything but 'yes' the action processor will ignore
+any security settings. (In L<OpenInteract2::Manual::Tutorial> we had
+this set to 'no'.)
+
+Now you need to define the security required for your action. You have
+three options to choose from: 'NONE', 'READ' and 'WRITE'. (There's a
+fourth option, 'SUMMARY', but it's rarely used.) These levels are
+additive so if a user has 'WRITE' permission she also has
+'READ'. Also, note that if you don't specify a requirement we assume
+'WRITE'.
+
+If you want a single security requirement for all tasks in our book
+action then the job is easy:
+
+ [book]
+ class     = OpenInteract2::Action::Book
+ is_secure = yes
+ security  = WRITE
+
+However, many times you'll want to have separate requirements for
+separate tasks. For instance, in our book action we want everyone to
+be able to search and display book records. But maybe we only want
+groups with WRITE permission to the action to modify the book
+records. So we might have:
+
+ [book security]
+ DEFAULT      = WRITE
+ search       = READ
+ search_form  = READ
+ display      = READ
+
+Here we have a new key, 'DEFAULT'. This is a special task name that
+acts as a catch-all: every task not explicitly gets this security. Of
+course, since a task not listed gets 'WRITE' security anyway this is
+technically redundant. But it better to communicate your intentions
+explicitly.
+
+That's it -- restart the server and your action will now be
+secured. Of course, you need to assign security to groups.
+
+=head2 Assigning security
+
+Assigning security to actions is typically done through the website --
+click on the 'Security' link from the 'Admin Tools' box, or just go to
+the '/security/' URL.
+
+You can also modify action security through a management task
+L<OpenInteract2::Manage::Website::CreateSecurityForAction>, or using
+C<oi2_manage>:
+
+ oi2_manage secure_action --action=book --scope=group --scope_id=5
+
+=head1 SPOPS: ADDING OBJECT BEHAVIORS
+
+=head2 Define the class
+
+SPOPS objects provide simple persistence behavior. But you may want
+them to have other types of behavior as well. The recommended way of
+doing this is to create your class and have it subclass the generated
+SPOPS class.
+
+A typical use of this is to encapsulate common queries. Say you have a
+'recipe' object:
+
+ [recipe]
+ class = OpenInteract2::Recipe
+ ...
+
+After using it for a while you find that you're one of your standard
+queries is to find recipes with a particular ingredient posted in the
+last month. It's executed from multiple actions so it makes sense to
+have this query live in the same object that actually retrieves the
+objects. To hold it you'd create something like this:
+
+ package OpenInteract2::Recipe;
+ 
+ use strict;
+ @OpenInteract2::Recipe::ISA = qw( OpenInteract2::RecipePersist );
+ 
+ sub by_ingredient_in_last_month {
+     my ( $class, $ingredient ) = @_;
+     my $where = qq{
+         ingredient LIKE ? '
+           AND date_part( 'epoch', CURRENT_DATETIME ) - date_part( 'epoch', posted_on ) <= 25920000
+     };
+     return $class->fetch_group({
+         where => $where,
+         value => [ $ingredient ],
+     });
+ }
+
+Hey, where did that C<OpenInteract2::RecipePersist> come from?
+
+=head2 Add to declaration
+
+The last step is to change the name of your generated class. This is
+so people can use the name they'd expect to see
+('OpenInteract2::Recipe' for a 'recipe' object). Changing this is simple:
+
+ OLD:
+ [recipe]
+ class = OpenInteract2::Recipe
+ ...
+ 
+ NEW:
+ [recipe]
+ class = OpenInteract2::RecipePersist
+ ...
+
+One other task: when we want to get the object class name from the
+context (using C<lookup_object()>) we don't want to get
+'OpenInteract2::RecipePersist'. So we need to alias the class:
+
+ [recipe]
+ class = OpenInteract2::RecipePersist
+ alias_class = OpenInteract2::Recipe
+ ...
+
+So now when we get the class name like this we'll get the right thing:
+
+ my $recipe_class = CTX->lookup_object( 'recipe' );
+ my $recent_recipes =
+     $recipe_class->by_ingredient_in_last_month( 'ketchup' );
+ print "Stuff you've made recently:\n";
+ foreach my $recipe ( @{ $recent_recipes } ) {
+     print "    ", $recipe->name, "\n";
+ }
+
+=head2 Using security
+
+First: are you sure you need per-object security? Checking security
+can add significant overhead to object retrieval, so if your security
+requirements can be met by application security instead you should use
+it.
+
+So if you need it, adding security is as simple as setting 'is_secure'
+to 'yes' in your object configuration:
+
+ [myobject]
+ class = OpenInteract2::Myobject
+ ...
+ is_secure = yes
+
+This will add L<SPOPS::Secure> to your class's C<@ISA> and
+automatically ensure that users have READ security to retrieve an
+object and WRITE security to store or remove it.
+
+That leaves a gap: how do we know what the security should be to
+create an object? You cover this with the 'creation_security'
+configuration section. It looks like this:
+
+ [myobject creation_security]
+ user  = WRITE
+ group = site_admin_group:WRITE
+ world = READ
+
+This means that we create a security object for the user who creates
+the object as WRITE, one for the 'site_admin_group' as WRITE, and one
+for the world as READ. You can skip a scope if you like -- if you only
+want users in the 'public' group to be able to see your object you'd
+use:
+
+ [myobject creation_security]
+ group = public_group:READ
+
+The 'site_admin_group' and 'public_group' used above is the name of
+any group found in your server configuration's 'default_objects'
+configuration section. That section typically looks like this:
+
+ [default_objects]
+ superuser        = 1
+ supergroup       = 1
+ theme            = 1
+ public_group = 2
+ site_admin_group = 3
+
+The 'groupname:PERMISSION' is a syntax enhancement: when the server
+starts up we lookup 'groupname' in 'default_objects' and substitute
+that group's ID. So with the above definitions when you create a new
+'myobject' we'll also create a security object giving WRITE permission
+to group with ID 3.
+
+=head1 MISC
+
+=head2 Using Multiple Datasources
+
+OI2 can support multiple datasources. Most applications do not have
+need for this, but some may need to present legacy data alongside
+current data.
+
+OI2 ships with a single configured DBI datasource called
+'main'. Assuming a configuration for PostgreSQL it looks like this:
+
+ [datasource main]
+ type     = DBI
+ dbi_type = Pg
+ dsn      = dbname=current_data
+ username = pguser
+ password = pgpass
+
+Say we have a MySQL database with legacy data. We'd just add it to the
+configuration file like this:
+
+ [datasource main]
+ type     = DBI
+ dbi_type = Pg
+ dsn      = dbname=current_data
+ username = pguser
+ password = pgpass
+ 
+ [datasource legacy]
+ type     = DBI
+ dbi_type = mysql
+ dsn      = database=legacy
+ username = mysqluser
+ password = mysqlpass
+
+We can reference the datasource in code through the context and use it
+as a straight DBI handle:
+
+ my $dbh = CTX->datasource( 'legacy' );
+ my $sql = "SELECT count(*) FROM old_table WHERE foo = ?";
+ my ( $sth );
+ eval {
+     $sth = $dbh->prepare( $sql );
+     $sth->execute( $foo );
+ };
+ my ( $count ) = $sth->fetchrow_array;
+
+We can also use the datasource to back our SPOPS objects. Currently,
+the easiest way to associate an SPOPS class with a specific datasource
+is through its configuration.
+
+Assuming we had a read-only SPOPS object declaration for old invoices:
+
+ [legacy_invoice]
+ class           = OpenInteract2::LegacyInvoice
+ isa             = SPOPS::Tool::ReadOnly
+ field           = 
+ field_discover  = yes
+ id_field        = invoice_id
+ is_secure       = no
+ base_table      = invoice_old
+ name            = invoice_num
+ object_name     = Invoice
+
+we'd just add a 'datasource' key with the name of our legacy datasource:
+
+ [legacy_invoice]
+ class           = OpenInteract2::LegacyInvoice
+ isa             = SPOPS::Tool::ReadOnly
+ datasource      = legacy
+ ...
+
+And that's it. You can use it just like any other SPOPS class:
+
+ my $customer_id = $request->param( 'customer_id' );
+ my $invoices = OpenInteract2::LegacyInvoice->fetch_group({
+     where => 'customer_id = ?',
+     value => $customer_id,
+     order => 'invoice_date DESC'
+ });
+ foreach my $inv ( @{ $invoices } ) {
+     print "Date: $inv->{invoice_date} ($inv->{num_items})\n";
+ }
+
+SPOPS will pull the data from the separate database, but when you're
+accessing the data you won't know (or care) where it's from.
+
+This means it's also easy to swap datasources behind the scenes -- for
+instance, to point to a backup database server if the main one goes
+down.
+
+=head1 SEE ALSO
+
+L<OpenInteract2::Manual::Management|OpenInteract2::Manual::Management> - Creating management tasks
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003-2004 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

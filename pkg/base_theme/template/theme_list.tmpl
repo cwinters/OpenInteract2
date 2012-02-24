@@ -1,0 +1,36 @@
+[%- OI.page_title( MSG( 'base_theme.list.title' ) );
+    DEFAULT theme = OI.theme_properties; -%]
+
+<div align="center">
+
+[% PROCESS error_message;
+   PROCESS status_message; %]
+
+<h2>[% MSG( 'base_theme.list.title' ) %]</h2>
+
+<p>
+[% MSG( 'base_theme.list.summary' ) %]
+</p>
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row(
+      label_keys = [ 'base_theme.info.label.title',
+                     'base_theme.info.label.description',
+                     'base_theme.info.label.credit', ] 
+) -%]
+[% FOREACH item = theme_list %]
+  [% edit_url = OI.make_url( ACTION   = 'theme',
+                             TASK     = 'display_form',
+                             theme_id = item.theme_id ) -%]
+  <tr [% PROCESS row_color( count = loop.count ) %]>
+    <td align="center"><a href="[% edit_url %]">[% item.title %]</a></td>
+    <td>[% item.description %]</td>
+    <td>[% item.credit %]</td>
+  </tr>
+[% END %]
+
+[% INCLUDE table_bordered_end -%]
+
+</div>
+

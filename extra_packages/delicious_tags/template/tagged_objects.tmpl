@@ -1,0 +1,4 @@
+[% FOREACH info = tag_info;
+       item_url = OI.make_url( BASE = info.url, do_not_escape = 1 ) %]
+o <span class="taggedObject">[% info.object_type %]: <a href="[% item_url %]">[% info.name %]</a></span><br />
+[% END %]

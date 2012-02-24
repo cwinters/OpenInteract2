@@ -1,0 +1,14 @@
+[%- OI.box_add( 'all_tags_box' ); 
+    PROCESS error_message %]
+
+<div class="demarcatePage">
+
+<h2>Objects by Tag</h2>
+
+<p><b>Tag:</b> [% tag %]</p>
+
+<p>
+[% INCLUDE object_tags::tagged_objects %]
+</p>
+
+</div>

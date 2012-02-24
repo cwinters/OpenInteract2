@@ -1,0 +1,22 @@
+Revision history for OpenInteract package fruit.
+
+1.00  Wed Apr 23 17:29:05 EDT 2003
+
+      Update for OI2
+
+0.09  Thu Oct 25 09:02:04 EDT 2001
+
+      Added security data install, plus renamed the initial data file.
+
+0.08  Thu Oct 25 08:53:03 EDT 2001
+
+      Updated to work with OI 1.30
+
+0.07  Sun Nov 19 11:40:03 2000
+
+      Changes to reflect the example documentation
+
+0.01  Thu Nov  9 10:16:12 2000
+
+      Package skeleton created by oi_manage
+

@@ -1,0 +1,15 @@
+Changes
+MANIFEST
+MANIFEST.SKIP
+package.ini
+conf/action.ini
+data/install_security.dat
+msg/lookup-messages-en.msg
+OpenInteract2/Action/LookupEdit.pm
+OpenInteract2/App/Lookup.pm
+OpenInteract2/SQLInstall/Lookup.pm
+template/lookup_classes.tmpl
+template/lookup_field.tmpl
+template/lookup_listing.tmpl
+template/lookup_listing_columns.tmpl
+template/lookup_partitions.tmpl

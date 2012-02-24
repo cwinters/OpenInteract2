@@ -1,0 +1,68 @@
+[%- title = MSG( 'obj_activity.search_form.title' );
+    OI.page_title( title );
+    DEFAULT theme = OI.theme_properties;
+    SET count     = 0; -%]
+
+[%- PROCESS error_message -%]
+
+<div align="center">
+
+<h2>[% title %]</h2>
+
+<p>[% MSG( 'obj_activity.search_form.summary' ) %]</p>
+
+[% PROCESS form_begin( ACTION = 'objectactivity'
+                       TASK   = 'search',
+                       method = 'GET',
+                       name   = 'activity_search' ) -%]
+
+[% INCLUDE table_bordered_begin( width = '75%' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_login_row( label_key = 'obj_activity.info.user',
+                                   name      = 'action_by',
+                                   valign    = 'top', size  = 5 ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_date_row( label_key = 'obj_activity.info.date'
+                                  name      = 'action_on',
+                                  is_blank  = 1 ) %]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_row_begin( label_key = 'obj_activity.info.date_range' ) -%]
+  <td>[% INCLUDE date_select( field_prefix = 'action_on_start',
+                              is_blank = 1 ) -%] -<br>
+      [% INCLUDE date_select( field_prefix = 'action_on_end',
+                              is_blank = 1 ) -%]</td>
+  </tr>
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_select_row( label_key   = 'obj_activity.info.action',
+				                    name        = 'action',
+				                    first_label = MSG( 'obj_activity.search_form.actions_first' ),
+				                    value_list  = [ 'create', 'update', 'remove' ],
+				                    label_list  = [ 'Create', 'Update', 'Remove' ],
+                                    plain = 1 ) %]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_select_row( label_key   = 'obj_activity.info.type',
+				                    name        = 'class',
+				                    first_label = MSG( 'obj_activity.search_form.types_first' ),
+				                    value_list  = class_list, 
+				                    label_list  = class_name_list,
+                                    plain = 1 ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label_key = 'obj_activity.info.id',
+                                  name      = 'object_id' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE form_submit_row( value_key = 'global.button.search',
+                              reset = 1,
+                              reset_label_key = 'global.button.reset' ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+</div>

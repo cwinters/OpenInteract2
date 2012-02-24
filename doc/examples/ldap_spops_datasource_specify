@@ -1,0 +1,4 @@
+[myequipment]
+class      = My::Equipment
+datasource = equipment
+...

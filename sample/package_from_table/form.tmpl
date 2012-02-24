@@ -1,0 +1,77 @@
+[% TAGS star %]
+[%# This OpenInteract2 file was generated
+      by:    [* invocation *]
+      on:    [* date *]
+      from:  [* source_template *]
+      using: OpenInteract2 version [* oi2_version *] %]
+[%-
+   is_saved        = object.id;
+   title           = ( is_saved )
+                       ? MSG( '[* package_name *].title_update' )
+                       : MSG( '[* package_name *].title_create' );
+   OI.page_title( title );
+   DEFAULT theme   = OI.theme_properties;
+-%]
+
+[%-
+   PROCESS error_message;
+   PROCESS status_message;
+-%]
+
+<div align="center">
+
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+<h2>[% title %]</h2>
+
+[% PROCESS form_begin( ACTION = '[* package_name *]',
+                       TASK   = task,
+                       method = 'POST',
+                       name   = '[* package_name *]_form' ) -%]
+
+[% INCLUDE table_bordered_begin %]
+[%- count = 0; valign = 'top' -%]
+
+[* FOREACH field = fields -*]
+
+[*- IF field.name == key_field -*]
+[% INCLUDE form_hidden( name = '[* key_field *]', value = object.id ) %]
+[*- NEXT; END -*]
+
+[%- count = count + 1 -%]
+
+[*-
+   label_key   = "${package_name}.${field.name}_title";
+   is_required = field.is_nullable ? 'no' : 'yes';
+-*]
+
+[* IF field.is_text OR field.is_number -*]
+[% INCLUDE label_form_text_row( label_key   = '[* label_key *]',
+                                name        = '[* field.name *]',
+                                is_required = '[* is_required *]',
+                                value       = object.[* field.name *],
+                                size        = 20,  ) -%]
+
+[* ELSIF field.is_date OR field.is_datetime -*]
+[% INCLUDE label_form_date_row( label_key    = '[* label_key *]',
+                                name         = '[* field.name *]',
+                                is_required  = '[* is_required *]',
+                                date_object  = object.[* field.name *],
+                                is_blank     = 'yes',
+                                field_prefix = '[* field.name *]' ); -%]
+
+[* ELSIF field.is_boolean -*]
+[% INCLUDE label_form_checkbox_row( label_key   = '[* label_key *]',
+                                    name        = '[* field.name *]',
+                                    value       = 'TRUE',
+                                    is_checked  = OI.as_boolean( object.[* field.name *] ) ) -%]
+[* END -*]
+[* END -*]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value_key = 'global.button.modify' ) %]
+  
+[% INCLUDE table_bordered_end %]
+
+[% PROCESS form_end %]
+
+</div>

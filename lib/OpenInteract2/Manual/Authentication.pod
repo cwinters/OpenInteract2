@@ -1,0 +1,21 @@
+=head1 NAME
+
+OpenInteract2::Manual::Authentication - Recognizing users and groups in OpenInteract2
+
+=head1 SYNOPSIS
+
+This part of the OpenInteract manual describes how to setup
+authentication in OpenInteract, including actions you might want to
+take whenever a user logs in for the first time.
+
+=head1 DESCRIPTION
+
+Coming soon!
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

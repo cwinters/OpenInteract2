@@ -1,0 +1,467 @@
+#!/usr/bin/perl
+
+# $Id: oi2_manage,v 1.36 2005/10/22 21:57:17 lachoy Exp $
+
+use strict;
+use Cwd                   qw( cwd );
+use Data::Dumper          qw( Dumper );
+use File::Spec::Functions qw( rel2abs );
+use Getopt::Long          qw( GetOptions );
+use Log::Log4perl         qw( :levels );
+use OpenInteract2::Log;
+use OpenInteract2::Manage qw( SYSTEM_PACKAGES );
+use Text::Wrap;
+
+$Text::Wrap::columns = 70;
+
+my $VERSION = sprintf("%d.%02d", q$Revision: 1.36 $ =~ /(\d+)\.(\d+)/);
+
+# Legitimate commands; anything not listed here will be kicked out and
+# the 'usage' stuff displayed
+
+my %VALID_COMMANDS = map { $_ => 1 }
+                     ( 'list_tasks',
+                       'task_info',
+                       'system_packages',
+                       OpenInteract2::Manage->valid_tasks );
+
+# These are aliases people might type by accident instead of the
+# proper command; add as necessary (alias on the left, correct command
+# on right)
+
+my %ALIASES = (
+    input_template   => 'install_template',
+    install_website  => 'create_website',
+    test_database    => 'test_db',
+    install_oi       => 'install',
+    action_list      => 'list_actions',
+    object_list      => 'list_objects',
+    upgrade_oi       => 'upgrade',
+    list_task        => 'list_tasks',
+    list_command     => 'list_tasks',
+    list_commands    => 'list_tasks',
+    initial_packages => 'system_packages',
+    create_skeleton  => 'create_package',
+    export           => 'export_package',
+);
+
+my $DEV_LIST  = 'openinteract-dev@lists.sourceforge.net';
+my $HELP_LIST = 'openinteract-help@lists.sourceforge.net';
+
+my ( $OPT_help, $OPT_debug, $OPT_man, $OPT_verbose, $OPT_task );
+
+{
+    my $invocation = join( ' ', $0, @ARGV );
+    my @opt_defs = OpenInteract2::Manage->all_parameters_long_options;
+    push @opt_defs, 'help|?', 'debug+', 'man', 'verbose', 'task=s';
+    my %OPT = ( help => \$OPT_help, debug  => \$OPT_debug,
+                man  => \$OPT_man,  status => \$OPT_verbose,
+                task => \$OPT_task );
+    GetOptions( \%OPT, @opt_defs );
+
+    if ( $OPT_help ) {
+        show_help();
+        exit(0);
+    }
+
+    # Ensure the original invocation is preserved for the management
+    # tasks
+
+    $OPT{invocation} = $invocation;
+
+    # Do this before initializing the log so we can use the existing
+    # category levels
+
+    if ( ! $OPT{website_dir} and $ENV{OPENINTERACT2} ) {
+        $OPT{website_dir} = $ENV{OPENINTERACT2};
+    }
+
+    # Previously we re-used the log for the website if it was
+    # available, but that's too confusing b/c of permission issues and
+    # the fact that you could be mingling your oi2_manage messages
+    # with your live website
+
+    my $log = OpenInteract2::Log->init_file( 'oi2_manage.log' );
+
+    my $log_level = ( $OPT_debug ) ? $DEBUG : $WARN;
+    $log->level( $log_level );
+
+    # Grab the command
+
+    my $task_name = lc shift @ARGV;
+
+    # ...allow dashes instead of underscores: 'install-package' to be
+    # used for 'install_package'
+
+    $task_name =~ s/\-/_/g;
+
+    # ...allow aliasing and let the user know so she can change her
+    # behavior.
+
+    if ( $ALIASES{ $task_name } ) {
+        $log->debug( "Aliasing '$task_name' -> '$ALIASES{ $task_name }'" );
+        $task_name = $ALIASES{ $task_name };
+    }
+
+    # ...if after aliasing the task doesn't exist in the list of valid
+    # commands, print the basic help page
+
+    unless ( $VALID_COMMANDS{ $task_name } ) {
+        outl( "Task '$task_name' is not a valid task. ",
+              "Valid tasks are:" );
+        show_tasks();
+        exit(1);
+    }
+
+    # Do any help/non-Manage tasks here
+
+    if ( $task_name eq 'list_tasks' ) {
+        outl( "Tasks available:" );
+        out();
+        show_tasks();
+        exit(0);
+    }
+
+    elsif ( $task_name eq 'system_packages' ) {
+        outl( "Packages shipped with OpenInteract2:" );
+        out( "  $_" ) for ( sort @{ SYSTEM_PACKAGES() } );
+        exit(0);
+    }
+
+    elsif ( $task_name eq 'task_info' ) {
+        eval { show_task_info() };
+        if ( $@ ) {
+            outl( $@ );
+            exit(1);
+        }
+        exit(0);
+    }
+
+    # directory munging...
+    foreach my $dir_type ( qw( website_dir package_dir source_dir ) ) {
+        next unless defined $OPT{ $dir_type };
+        $OPT{ $dir_type } =~ s/^~/$ENV{HOME}/;
+        $OPT{ $dir_type } = rel2abs( $OPT{ $dir_type } );
+        $OPT{ $dir_type } =~ s/[\\|\/]+$//;
+    }
+
+    # delete our own entries...
+    delete @OPT{ qw( help man verbose task ) };
+
+    # derefrence the debug entry
+    $OPT{debug} = $OPT_debug;
+
+    my $task = eval { OpenInteract2::Manage->new( $task_name, \%OPT ) };
+    if ( $@ ) {
+        outl( "Task '$task_name' not recognized" );
+        out( "Error returned: $@" );
+        exit(1);
+    }
+    $log->debug( "Contents of task:\n", Dumper( $task ) );
+    $log->debug( show_parameter_contents( $task ) );
+
+    if ( $OPT_verbose ) {
+        $task->add_observer( \&status_observer );
+        $log->debug( "Added status observer" );
+    }
+    $task->add_observer( \&progress_observer );
+    $log->debug( "Added normal progress observer" );
+    eval { $task->execute };
+    if ( $@ ) {
+        my $task_error = $@;
+        $log->error( "Caught exception during task execution: $task_error" );
+        $log->error( "Contents of task:\n", Dumper( $task ) );
+        foreach my $step ( 0..10 ) {
+            my ( $pkg, $file, $line, $sub ) = caller( $step );
+            next unless ( $pkg );
+            $log->error( "Call $step: $pkg, $file, $line, $sub" );
+        }
+        outl( 'Caught exception during task execution.' );
+        if ( ref $task_error and $task_error->isa( 'OpenInteract2::Exception::Parameter' ) ) {
+            outl( show_parameter_error( $task_error ) );
+        }
+        else {
+            outl( "$task_error\n" );
+        }
+        exit(1);
+    }
+
+    my @new_status = $task->merge_status_by_action();
+
+    foreach my $action_status ( @new_status ) {
+        warn "ACTION: $action_status->{action}\n";
+        foreach my $item_status ( @{ $action_status->{status} } ) {
+            if ( $item_status->{is_ok} eq 'yes' ) {
+                # TODO: replace hack when we fix progress/summarization features
+                if ( $item_status->{filename} and $item_status->{filename} !~ /^OIPKG/ ) {
+                    warn "    OK:     $item_status->{filename}\n";
+                    if ( $item_status->{message} ) {
+                        warn "            $item_status->{message}\n";
+                    }
+                }
+                else {
+                    warn "    OK:     $item_status->{message}\n";
+                }
+            }
+            else {
+                $item_status->{message} ||= 'Weird: no message set on failure';
+                if ( $item_status->{filename} ) {
+                    warn "    FAILED: $item_status->{filename}\n",
+                         "            $item_status->{message}\n";
+                }
+                else {
+                    warn "    FAILED: $item_status->{message}\n";
+                }
+            }
+        }
+        warn "\n";
+    }
+
+}
+
+sub show_help {
+    my $task_desc = OpenInteract2::Manage->valid_tasks_description;
+
+    # '+2' for the 'list_tasks' and 'task_info' pseudo tasks...
+    my $num_tasks = scalar( keys %{ $task_desc } ) + 2;
+
+    print <<SUMMARY;
+oi2_manage: Create and manage OpenInteract2 websites and packages
+
+Usage: oi2_manage taskname [options]
+
+Supported environment variables: 
+   OPENINTERACT2: Website directory (use in place of '--website_dir')
+
+Quick pointers:
+
+ \$ oi2_manage list_tasks
+       -- list all tasks you can run ($num_tasks available)
+ \$ oi2_manage task_info --task=taskname
+       -- information about a particular task, including parameters
+ \$ oi2_manage create_website --website_dir=/path
+       -- create a new website
+ \$ oi2_manage list_actions --website_dir=/path
+       -- list the actions in an existing website
+ \$ oi2_manage create_package --package=myapp
+       --create a new package
+
+Learn more:
+
+ \$ perldoc oi2_manage
+ \$ perldoc OpenInteract2::Manual
+SUMMARY
+}
+
+sub show_tasks {
+    my $task_desc = OpenInteract2::Manage->valid_tasks_description;
+
+    # Add our own...
+    $task_desc->{list_tasks} = "List all available tasks";
+    $task_desc->{task_info}  = "Get details about a particular task";
+
+    foreach my $task ( sort keys %{ $task_desc } ) {
+        out( $task );
+        out( wrap( '    ', '    ', $task_desc->{ $task } ) );
+    }
+}
+
+sub show_task_info {
+    unless ( $OPT_task ) {
+        die "The 'task' parameter is required\n";
+    }
+    my $task_desc_all = OpenInteract2::Manage->valid_tasks_description;
+    my $task_desc = $task_desc_all->{ $OPT_task };
+    unless ( $task_desc ) {
+        die "Task '$OPT_task' is not valid. Please run 'list_tasks' ",
+            "to see what tasks are available.\n";
+    }
+    out( "TASK: $OPT_task" );
+    out( wrap( '   ', '   ', $task_desc ) );
+    out();
+    my $task = eval { OpenInteract2::Manage->new( $OPT_task ) };
+    if ( $@ ) {
+        die "Failed to create management task. Error: $@\n";
+    }
+    my $params = $task->task_parameters;
+    my @required = grep { $_->{is_required} eq 'yes' } values %{ $params };
+    my @optional = grep { $_->{is_required} ne 'yes' } values %{ $params };
+
+    out( "Required parameters: " );
+    out();
+    _display_param_info( @required );
+    out();
+    out( "Optional parameters: " );
+    out();
+    _display_param_info( @optional );
+}
+
+sub _display_param_info {
+    my ( @params ) = @_;
+    if ( scalar @params > 0 ) {
+        foreach my $info ( @params ) {
+            out( "  * $info->{name} " );
+            out( wrap( '    ',  '    ',
+                       $info->{description} ) );
+        }
+    }
+    else {
+        out( "  None" );
+    }
+}
+
+sub show_parameter_error {
+    my ( $err ) = @_;
+    my $out = "One or more parameters failed task checks. Task not executed.\n".
+              "Parameter failures:\n\n";
+    my $failed = $err->parameter_fail || {};
+    while ( my ( $field, $fail ) = each %{ $failed } ) {
+        my @failures = ( ref $fail eq 'ARRAY' ) ? @{ $fail } : ( $fail );
+        foreach my $failure ( @failures ) {
+            $out .= sprintf( "%-20s-> %s\n", $field, $failure );
+        }
+    }
+    return $out;
+}
+
+sub show_parameter_contents {
+    my ( $task ) = @_;
+    my @out = ( 'Parameters being set in task:' );
+    my $params = $task->param;
+    while ( my ( $name, $value ) = each %{ $params } ) {
+        my $val = ( ref $value eq 'ARRAY' )
+                    ? join( ', ', @{ $value } )
+                    : $value;
+        push @out, sprintf( '%-20s -> %s', $name, $val );
+    }
+    return join( "\n", @out ), "\n";
+}
+
+
+sub out {
+    warn join( '', @_ ), "\n";
+}
+
+sub outl {
+    my ( @msg ) = @_;
+    unshift @msg, '[oi2_manage]: ';
+    out( @msg )
+}
+
+sub progress_observer {
+    my ( $task, $type, $message, $params ) = @_;
+    return unless ( $type eq 'progress' );
+    warn "PROGRESS: $message\n";
+    if ( defined $params->{long} and $params->{long} eq 'yes' ) {
+        warn " ... this may take a while ...\n";
+    }
+}
+
+sub status_observer {
+    my ( $task, $type, $status ) = @_;
+    return unless ( $type eq 'status' );
+    $status->{action} ||= "unknown";
+    $status->{message} ||= "unknown";
+    my $show_ok   = ( $status->{is_ok} eq 'yes' )
+                      ? 'OK' : 'FAILED';
+    my $show_file = ( $status->{filename} )
+                      ? "-- $status->{filename} " : '';
+    warn "STATUS: $status->{action} $show_file-- ",
+         "$show_ok \n  $status->{message}\n";
+}
+
+__END__
+
+=head1 NAME
+
+oi2_manage - Command-line interface to OpenInteract management tasks
+
+=head1 SYNOPSIS
+
+ oi2_manage [task] [options]
+
+To see all tasks:
+
+ $ oi2_manage list_tasks
+
+See options and their description for a particular task:
+
+ $ oi2_manage task_info --task=foo
+
+Common options:
+
+ --website_dir  - Directory of website (can use 'OPENINTERACT2' env instead)
+ --source_dir   - Directory of OI2 source (at least pkg/ and sample/ dirs)
+ --package      - One or more packages to operate on
+ --package_dir  - Directory for package
+ --package_file - Package distribution file (eg, 'base_page-2.51.zip')
+ --status       - View more numerous status messages instead of progress messages
+ --debug        - Turn debugging on
+
+Example: Install a website:
+
+ $ cd /opt/OpenInteract-2.05
+ $ oi2_manage create_website --website_dir=/home/httpd/mysite
+
+Example: Install a package to a website using C<OPENINTERACT2> env
+instead of C<--website_dir>:
+
+ $ export OPENINTERACT2=/home/httpd/mysite
+ $ oi2_manage install_package --package_file=/path/to/mypackage_1.00.zip
+
+Example: Export a package
+
+ $ cd /path/to/my/package
+ $ oi2_manage export_package
+
+Example: Check a package
+
+ $ cd /path/to/my/package
+ $ oi2_manage check_package
+
+Example: Create the skeleton for a new package
+
+ $ cd /path/to/my/workdir
+ $ oi2_manage create_package --package=foopkg --source_dir=/opt/OpenInteract-2.05
+
+=head1 DESCRIPTION
+
+This is the command-line interface to the
+L<OpenInteract2::Manage|OpenInteract2::Manage> module and all of its
+associated tasks. Since this is a simple shell around the management
+tasks it doesn't list all the tasks. (The docs here and the tasks
+would soon get out of sync.) Instead, just run:
+
+ oi2_manage list_tasks
+
+And you'll get a list of tasks with a brief description for
+each. Guaranteed to be up-to-date.
+
+You can find the optional and required parameters for a particular
+task with:
+
+ oi2_manage task_info --task=create_website
+
+Note that all progress and status messages are sent to STDERR, so if
+you have a task that outputs data to STDOUT you might wish to do
+something like the following to separate them out. Here we send the
+progress/status messages to the dustbin:
+
+ oi2_manage export_data --spops=user --format=xml 2>/dev/null
+
+=head1 SEE ALSO
+
+L<OpenInteract2::Manual::Management|OpenInteract2::Manual::Management>
+
+L<OpenInteract2::Manage|OpenInteract2::Manage>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

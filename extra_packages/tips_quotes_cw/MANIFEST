@@ -1,0 +1,13 @@
+Changes
+MANIFEST
+MANIFEST.SKIP
+package.ini
+conf/action.ini
+OpenInteract2/JHIQuote.pm
+OpenInteract2/LarryWallQuote.pm
+OpenInteract2/MJDAdvice.pm
+OpenInteract2/PPTip.pm
+OpenInteract2/QuotePlugin.pm
+OpenInteract2/RandomQuote.pm
+OpenInteract2/ShaolinPrinciples.pm
+OpenInteract2/App/TipsQuotesCw.pm

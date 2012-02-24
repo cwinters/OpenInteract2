@@ -1,0 +1,27 @@
+README: OpenInteract Test Suite
+========================================
+
+One of the aims with the 2.x version of OpenInteract is to have a full
+test suite for all available features. To make this happen we need to
+have a full working website. Any test script can create one on demand
+using 'install_website()' or 'initialize_context()', which creates a
+website and installs all SQL data into a SQLite database created on
+the fly. (Yes, this means you need SQLite installed to run the tests.)
+
+Since this is a heavyweight operation we try to keep the site around
+for all tests by checking the timestamp on a file created in the same
+directory as the site. If the timestamp is older than a set amount
+(currently 15 minutes) we re-create the site.
+
+In utils.pl are a number of routines to help with testing. You can
+initialize a Context object, find a particular file in the test site,
+and more.
+
+All files used by tests (e.g., sample configurations, files with known
+content types and lengths, etc.) should be in 'use/', which you can
+retrieve using:
+
+  get_use_file( $filename, 'file' )
+
+========================================
+$Id: README,v 1.3 2003/04/25 19:22:49 lachoy Exp $

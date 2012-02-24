@@ -1,0 +1,36 @@
+[%- OI.page_title( "Search Classifieds" );
+    DEFAULT theme = OI.theme_properties;
+    SET count     = 0;
+    OI.box_add( 'classified_tools_box' ); -%]
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center">
+
+<h2>Search Classified Ads</h2>
+
+<p align="left">Enter criteria below to search classified ads. The
+more criteria you enter, the more restrictive your search and the
+fewer results you will retrieve.</p>
+
+[% PROCESS form_begin( ACTION = 'classified',
+                       TASK   = 'search',
+                       method = 'GET',
+                       name   = 'classified_search' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '75%' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Keywords', name = 'keyword' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_date_row( label = 'Posted After Date', name = 'posted_after' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE form_submit_row( value = 'Search' ) -%]
+
+[% INCLUDE table_bordered_end() -%]
+
+[% PROCESS form_end %]
+
+</div>

@@ -1,0 +1,127 @@
+Revision history for OpenInteract package whats_new.
+
+2.13  Wed Sep 21 23:35:19 EDT 2005
+
+      Use URL params where possible; remove object security from 'new'
+      objects, relying on application security instead; ensure we
+      don't double-add the same object to the lis
+
+2.12  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.11  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.10  Sat Dec  4 12:52:09 EST 2004
+
+      Move errors to l10n file; use status/error shortcuts
+
+2.09  Sun Jun 20 00:10:03 EDT 2004
+
+      Modify the DateTime calls to use the CTX->create_date()
+
+2.08  Sat Jun 12 16:54:24 EDT 2004
+
+      Update conf/action.ini and conf/spops_whats_new.ini to use new
+      multivalue configuration syntax; add debugging.
+
+2.07  Mon Jun  7 00:58:14 EDT 2004
+
+      Change 'is_active' to 'active'
+
+2.06  Sun Jun  6 23:53:43 EDT 2004
+
+      Fix migration to modify the class and url fields of the
+      'whats_new' table.
+
+2.05  Sun Jun  6 23:48:48 EDT 2004
+
+      Fix wrong property in conf/action.ini
+
+2.04  Wed Feb 25 10:54:16 EST 2004
+
+      Fix OI2::SQLInstall::WhatsNew to refer to the right SPOPS class.
+
+2.03  Mon Feb 16 12:33:53 EST 2004
+
+      Pull text out of templates into message files.
+
+2.02  Mon Feb  9 23:08:45 EST 2004
+
+      struct/whats_new.sql =~ s/datetime/%DATETIME%/
+
+2.01  Mon Nov 24 17:33:06 EST 2003
+
+      Fix security import type.
+
+2.00  Mon Oct 20 00:28:30 EDT 2003
+
+      Convert to OI 2.x, rename from 'new_items' to 'whats_new'.
+
+1.24  Sun Apr  6 22:51:38 EDT 2003
+
+      Force ->id into scalar context.
+
+1.23  Mon Feb 17 15:54:59 EST 2003
+
+      Fix URL to remove item in templates/news_form.tmpl
+
+1.22  Thu Jan  9 00:22:43 EST 2003
+
+      Don't check 'is_add' AND 'is_saved()' -- SPOPS 0.73+ will never
+      save a new item otherwise
+
+1.21  Sun Sep  8 11:26:53 EDT 2002
+
+      Fix the Postgres date checking clause.
+
+1.20  Sun Sep  8 11:05:14 EDT 2002
+
+      Get rid of template/*.meta files; add sequence/generator
+      definition and Oracle table definition; other small changes.
+
+1.19  Tue Dec  4 00:26:31 EST 2001
+
+1.18  Tue Dec  4 00:14:54 EST 2001
+
+1.17  Mon Dec  3 23:42:08 EST 2001
+
+1.16  Mon Dec  3 23:10:22 EST 2001
+
+1.15  Mon Dec  3 23:01:36 EST 2001
+
+1.14  Mon Dec  3 22:59:31 EST 2001
+
+1.13  Mon Dec  3 22:46:06 EST 2001
+
+1.12  Sat Dec  1 20:46:33 EST 2001
+
+      Tons of changes -- update to use OI::CommonHandler, update templates...
+
+1.11  Wed Jun  6 02:17:39 EDT 2001
+
+      Changed return from 'ruleset_add()' in OpenInteract/NewTrack.pm
+      to the package as a result of modified SPOPS API.
+
+1.10  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.09  Mon May 28 00:01:01 EDT 2001
+
+      More cleanup -- and added 'INSTALL' document to eliminate any
+      version difficulties.
+
+1.08  Thu May 10 23:29:17 EDT 2001
+
+      Cleaned up -- changed the fieldname from 'oid' to 'object_id'
+      and the information in the file
+      'data/install_security.dat'. Also cleaned the handler to reflect
+      the (modified) coding standards.
+
+1.07  Thu Dec 28 08:45:41 EST 2000
+
+      Added changelog and made small changes throughout package.

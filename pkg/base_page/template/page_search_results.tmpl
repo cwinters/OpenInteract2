@@ -1,0 +1,25 @@
+[%- DEFAULT theme = OI.theme_properties;
+    OI.page_title( 'Page Search Results' ); -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2 align="left">Pages</h2>
+
+[% IF iterator AND iterator.has_next -%]
+
+<p>Following are the pages that match your criteria.</p>
+
+[% PROCESS base_page::page_list -%]
+
+[% ELSE -%]
+
+<p align="left">No pages matching your criteria are currently in
+the database.</p>
+
+[% END -%]
+
+</div>
+

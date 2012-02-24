@@ -1,0 +1,7 @@
+[% MSG( 'object_tags.label.tags' ) %] 
+[% FOREACH tag_info = tag_and_count;
+        tagged_objects_url = OI.make_url( ACTION = 'tags',
+                                          TASK   = 'show_tagged_objects',
+                                          tag    = tag_info.0 ); %]
+<a href="[% tagged_objects_url %]">[% tag_info.0 %]</a> 
+[% END -%]

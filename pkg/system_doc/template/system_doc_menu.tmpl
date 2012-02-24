@@ -1,0 +1,22 @@
+[% OI.page_title( MSG( 'sys_doc.menu.page_title' ) );
+   oi_man_url = OI.make_url( ACTION = 'systemdoc',
+                             TASK   = 'display',
+                             module = 'OpenInteract2::Manual' );
+   spops_man_url = OI.make_url( ACTION = 'systemdoc',
+                                TASK   = 'display',
+                                module = 'SPOPS::Manual' );
+   tt_man_url = OI.make_url( ACTION = 'systemdoc',
+                             TASK   = 'display',
+                             module = 'Template::Manual' );
+   module_url = OI.make_url( ACTION = 'systemdoc',
+                             TASK   = 'module_list' ); -%]
+
+<div class="demarcatePage">
+
+<h2>[% MSG( 'sys_doc.menu.title' ) %]</h2>
+
+<p>[% MSG( 'sys_doc.menu.starting', oi_man_url, spops_man_url, tt_man_url ) %]</p>
+
+<p>[% MSG( 'sys_doc.menu.module', module_url ) %]</p>
+
+</div>

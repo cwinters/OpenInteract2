@@ -1,0 +1,2 @@
+$ dbinit -p 4096 $DBNAME
+$ dbsrv9 ${DBNAME}.db

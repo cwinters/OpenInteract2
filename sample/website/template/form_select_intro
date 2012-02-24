@@ -1,0 +1,3 @@
+[%- param_multiple = ( is_multiple ) ? 'MULTIPLE' : '';
+    param_size     = ( size ) ? "SIZE='$size'" : ''; -%]
+<select name="[% name %]" [% param_multiple %] [% param_size %]>

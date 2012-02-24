@@ -1,0 +1,9 @@
+<span class="commentPoster">
+[%- IF comment.poster_url -%]
+<a href="[% comment.poster_url %]">[% comment.poster_name %]</a>
+[%- ELSIF comment.poster_email -%]
+<a href="mailto:[% comment.poster_email %]">[% comment.poster_name -%]</a>
+[%- ELSE -%]
+[%- comment.poster_name -%]
+[%- END -%]
+</span>

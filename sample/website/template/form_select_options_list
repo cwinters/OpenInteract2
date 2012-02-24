@@ -1,0 +1,3 @@
+[%- FOREACH item = list -%]
+   [%- INCLUDE form_select_option -%]
+[%- END -%]

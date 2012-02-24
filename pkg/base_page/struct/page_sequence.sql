@@ -1,0 +1,1 @@
+CREATE SEQUENCE oi_page_seq

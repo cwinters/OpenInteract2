@@ -1,0 +1,25 @@
+=head1 NAME
+
+OpenInteract2 - Pure-perl extensible application server
+
+=head1 DESCRIPTION
+
+OpenInteract is a web application server written in Perl. It
+features integrated data persistence, security, user and group
+management, plus an easy way to create and distribute fully
+database-independent applications.
+
+=head1 SYNOPSIS
+
+This is a stub so you can find documentation quicker. Please check out
+L<OpenInteract2::Manual|OpenInteract2::Manual> for the overview and
+L<OpenInteract2::Manual::Changes|OpenInteract2::Manual::Changes> for
+the changes between versions.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2003-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

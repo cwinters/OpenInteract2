@@ -1,0 +1,247 @@
+Revision history for OpenInteract package base_template.
+
+3.19  Mon Oct 17 21:33:22 EDT 2005
+
+      Fix typo of incorrect error key when updating template.
+
+3.18  Thu Sep 22 00:05:27 EDT 2005
+
+      Hardwire 'OI2::SiteTemplate' class name into
+      OI2::Action::SiteTemplate to get rid of intermittent errors...
+
+3.17  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+3.16  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+3.15  Sat Dec  4 00:28:45 EST 2004
+
+      Move errors to l10n file; use status/error shortcuts
+
+3.14  Sun Nov 28 01:38:51 EST 2004
+
+      Don't send templates named '_anonymous_' to box.
+
+3.13  Wed Nov 24 10:01:32 EST 2004
+
+      Add check in OI2::SiteTemplate->_lookup_package_template_dir to
+      ensure we get a valid package from the repository.
+
+3.12  Tue Jul 13 23:19:13 EDT 2004
+
+      OIN-61: fix OI2::Action::TemplatesUsedBox to have more
+      documentation and pull the controller from the right place.
+
+3.11  Sat May 22 10:57:06 EDT 2004
+
+      'response' is no longer an action property, get it instead from
+      CTX.
+
+3.10  Wed Feb 18 00:02:02 EST 2004
+
+      It usually helps when you include the messages file in the
+      MANIFEST...
+
+3.09  Fri Feb 13 00:42:24 EST 2004
+
+      Pull out all template text and put in message file
+
+3.08  Tue Feb 10 22:26:36 EST 2004
+
+3.07  Mon Feb  9 23:03:15 EST 2004
+
+3.06  Sun Dec 14 22:59:19 EST 2003
+
+      Simple config/method name changes
+
+3.05  Wed Sep  3 21:14:06 EDT 2003
+
+      Fairly cosmetic modifications to OI2::SiteTemplate (debugging
+      info, etc.)
+
+3.04  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+3.03  Wed Aug 27 11:44:17 EDT 2003
+
+      Remove 'CTX->template_class' calls in favor of
+      "CTX->lookup_class( 'template' )"
+
+3.02  Thu Jul  3 01:49:55 EDT 2003
+
+      Fix definition of 'is_saved' on editing form
+
+3.01  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+3.00  Tue Mar 25 08:03:22 EST 2003
+
+      Initial OI2 conversion.
+
+2.23  Mon Feb 17 15:42:30 EST 2003
+
+      Small documentation updates.
+
+2.22  Sun Nov 24 14:34:28 EST 2002
+
+      Fix variable naming issue resulting in -w warning in
+      OpenInteract/SiteTemplate.pm. Fixes SF Bug #640692.
+
+2.21  Sun Aug 25 13:22:10 EDT 2002
+
+      Change OI versions 1.42+ to 1.50+
+
+2.20  Sun Aug 25 12:09:18 EDT 2002
+
+2.19  Sun Aug 25 11:09:27 EDT 2002
+
+      Add script/migrate_to_filesystem.pl; template tweaks
+
+2.18  Sat Aug 24 19:41:05 EDT 2002
+
+2.17  Sat Aug 24 19:38:37 EDT 2002
+
+      Fix action.conf for templates_used_box
+
+2.16  Sat Aug 24 19:35:56 EDT 2002
+
+      Moved templates_used_box and function from base_box package.
+
+2.15  Sat Aug 24 18:39:36 EDT 2002
+
+2.01..2.14  
+
+2.00  Sat Aug 24 17:49:53 EDT 2002
+
+      Massive changes: templates are only stored in the
+      filesystem. The SiteTemplate object is not an SPOPS object and
+      has the smarts to fetch/store itself to the proper directory
+      (package dir or sitewide template package dir).
+
+1.31  Sun May  5 11:12:32 EDT 2002
+
+      Fix struct/template_oracle.sql to use 'clob' instead of 'long'
+
+1.30  Thu May  2 01:58:17 EDT 2002
+
+      Add InterBase-specific tables
+
+1.29  Sat Apr 13 12:45:37 EDT 2002
+
+      Use SPOPS::Utility directly to generate a random code in
+      OI/Handler/SiteTemplate.pm
+
+1.28  Tue Apr  2 00:18:35 EST 2002
+
+      Add Oracle-specific table definition, plus sequence for both
+      PostgreSQL and Oracle.
+
+1.27  Wed Aug 15 09:42:27 EDT 2001
+
+      Change <object>.html_(en|de)code to OI.html_(en|de)code.
+
+1.26  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.25  Mon Aug 13 11:26:12 EDT 2001
+
+      Modified template(s) with <!-- TEMPLATE SCRIPT --> key to have
+      normal <script>...</script> tags.
+
+1.24  Sun Aug 12 11:17:21 EDT 2001
+
+      Modify data/install_security.dat to use new
+      'transform_default_to_id' action.
+
+1.23  Sat Aug 11 17:36:51 EDT 2001
+
+      Changed conf/spops.conf->isa from OpenInteract::SPOPS to
+      OpenInteract::SPOPS::DBI
+
+1.22  Tue Jul 31 11:29:31 EDT 2001
+
+      The OI/Handler/SiteTemplate->show() can now create a template
+      not only based on the 'template_id' passed in via GET/POST, but
+      also via 'template_name', which should be in 'package::name'
+      format.
+
+1.21  Mon Jul 30 08:21:48 EDT 2001
+
+      Allow you to pass in parameters (in addition to the order-params
+      $package and $name) to 'fetch_by_name' in OI/SiteTemplate.pm.
+
+1.20  Fri Jul 27 09:28:43 EDT 2001
+
+      Added field 'last_update' to table which contains a 'time'
+      integer so we can do proper caching/updating with the Template
+      Toolkit provider.
+
+1.19  Wed Jul 25 08:13:51 EDT 2001
+
+      Added 'parse_name' to OpenInteract/SiteTemplate.pm so we can use
+      'package::name' template names consistently.
+
+1.18  Fri Jul 13 00:27:15 EDT 2001
+
+      Modify Handler/SiteTemplate->listing, as well as its template,
+      to use an iterator.
+
+1.17  Tue Jun  5 09:38:44 EDT 2001
+
+      Use the 'column_group' key in the 'fetch_group()' call.
+
+1.16  Tue Jun  5 09:22:42 EDT 2001
+
+      Added 'column_group' key to 'conf/spops.perl' for
+      non-memory-clogging listings.
+
+1.15  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.14  Wed Mar 28 07:32:24 EST 2001
+
+      Cleaned up the handler.
+
+1.13  Tue Mar 13 07:20:31 EST 2001
+
+      Changed security level data: 'oid' -> 'object_id'
+
+1.12  Sun Mar  4 16:04:01 EST 2001
+
+      Changed security level data: 'level' -> 'security_level'
+
+1.11  Tue Feb 20 08:06:11 EST 2001
+
+      Modified conf/spops.perl to reflect SPOPS changes.
+
+1.10  Wed Feb  7 07:45:35 EST 2001
+
+      Fixed SQL to declare 'package' to be NOT NULL to satisfy the
+      UNIQUE requirement.
+
+1.09  Wed Jan 31 21:13:13 EST 2001
+
+      Cleanup, and make the template listing a little nicer -- still
+      needs some serious work, but at least it should be easier on the
+      eyes.
+
+1.08  Mon Jan 15 01:19:43 EST 2001
+
+      Added debugging helper to OpenInteract/SiteTemplate.pm --
+      whenever you find more than one that matches the name/package
+      you pass in, we let you know which one is being returned.
+
+1.07  Tue Jan  9 07:48:26 EST 2001
+
+      Added documentation to OpenInteract::SiteTemplate along with the
+      main package. Added Changelog. Removed old 'script/' files that
+      dumped/installed templates to the db, since oi_manage does this
+      now.

@@ -1,0 +1,6 @@
+$theme = [
+  { import_type => 'object',
+    spops_class => 'OpenInteract2::Theme',
+    field_order => [ qw/ theme_id title description parent credit / ] },
+  [ 1,'main','Your basic, parent of all themes. Main.',0,'OpenInteract Developers <info@openinteract.org>' ],
+];

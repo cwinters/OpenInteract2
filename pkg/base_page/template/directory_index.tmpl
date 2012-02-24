@@ -1,0 +1,102 @@
+[% OI.page_title( "Directory index: $this_dir" ) %]
+<style type="text/css">
+td { font-size: 12px; }
+a  { text-decoration: none; }
+</style>
+
+[% BLOCK dir_row -%]
+[%- dir_url = OI.make_url( BASE = "$this_dir/$dir" ) -%]
+<tr valign="top" align="left" [% PROCESS row_color %]>
+  <td align="right" width="10%"><a href="[% dir_url %]"><img src="/images/icons/folder.gif"
+                                                 border="0" alt="Subdirectory [% dir %]"></a></td>
+  <td align="left" colspan="4"><a href="[% dir_url %]">[% dir %]</a></td>
+</tr>
+[% END -%]
+
+[% BLOCK page_row -%]
+[%- content_type = page.mime_type;
+    mime_object  = mime.$content_type;
+    image_src    = mime_object.image_source || default_image;
+    page_url     = OI.make_url( BASE = page.location );
+    rename_url   = OI.make_url( ACTION   = 'page',
+                                TASK     = 'specify_rename',
+                                location = page.location );
+    remove_url   = OI.make_url( ACTION   = 'page',
+                                TASK     = 'remove',
+                                location = page.location ); -%]
+<tr valign="top" align="left" [% PROCESS row_color %]>
+  <td align="right" width="10%"><a href="[% page_url %]"><img src="[% image_src %]"
+                                                              border="0" alt="icon"></a></td>
+  <td align="left"><a href="[% page_url %]">[% page.filename_only %]</a></td>
+  <td align="left">[% page.title %]&nbsp;</td>
+  <td align="right" nowrap="nowrap">[% OI.byte_format( page.size ) %]</td>
+  <td align="right"><a href="[% rename_url %]">rename</a><br>
+                    <a href="[% remove_url %]">delete</a></td>
+</tr>
+[% END -%]
+
+[%- PROCESS base_page::page_common_js -%]
+
+[%- PROCESS error_message;
+    PROCESS status_message; -%]
+
+<div align="center">
+
+[% INCLUDE table_bordered_begin( table_width = "90%" ) -%]
+
+[%- IF security_level >= OI.security_level.write -%]
+<tr>
+  <td colspan="5" align="right">
+        [%- file_create_url = OI.make_url( ACTION    = 'page',
+                                           TASK      = 'display_add',
+                                           location  = "$this_dir/",
+                                           form_type = 'simple' );
+            dir_create_url = OI.make_url( ACTION = 'page',
+                                          TASK   = 'specify_subdirectory',
+                                          parent_directory = "$this_dir/");
+            dir_remove_url = OI.make_url( ACTION    = 'page',
+                                          TASK      = 'remove_directory',
+                                          directory = "$this_dir/");
+            help_url   = "javascript:show_page_help( 'upload' )"; -%]
+        <a href="[% file_create_url %]">Add file here</a> | 
+        <a href="[% dir_create_url %]">Add subdirectory here</a> | 
+        <a href="[% dir_remove_url %]">Remove this directory</a> |
+        <a href="[% help_url %]">help</a>
+  </td>
+</tr>
+[% END -%]
+<tr>
+  <td colspan="5">Directory: [% dir_trim( this_dir ) %]</td>
+</tr>
+
+[% count = 1 -%]
+
+[% IF has_parent %]
+[% parent_url = OI.make_url( BASE = has_parent ); -%]
+<tr valign="top" align="left" [% PROCESS row_color %]>
+  <td align="right" width="10%"><a href="[% parent_url %]"><img src="/images/icons/back.gif"
+                                                    border="0" alt="parent"></a></td>
+  <td align="left" colspan="4"><a href="[% parent_url %]">[% has_parent %]</a></td>
+</tr>
+[%- count = count + 1 -%]
+[% END -%]
+
+[% IF dir_list.size == 0 AND NOT iterator.has_next -%]
+<tr [% PROCESS row_color %]>
+  <td colspan="5" align="center">No files or directories.</td>
+</tr>
+[% END -%]
+
+[% FOREACH dir = dir_list -%]
+   [% PROCESS dir_row -%]
+   [%- count = count + 1 -%]
+[% END -%]
+
+[% WHILE ( page = iterator.get_next ) -%]
+   [% PROCESS page_row -%]
+   [%- count = count + 1 -%]
+[% END -%]
+
+[% PROCESS table_bordered_end -%]
+
+</div>

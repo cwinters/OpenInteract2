@@ -1,0 +1,251 @@
+=head1 NAME
+
+OpenInteract2::Manual::Packages - Managing code, data, structures and templates for distributable applications
+
+=head1 SYNOPSIS
+
+This document describes the packaging system in OpenInteract2.
+
+=head1 INTRODUCTION
+
+A package is all the code, SQL structures, configuration information,
+initial data and security settings, documentation and anything else
+necessary to define an OpenInteract2 application. A single large
+application may actually comprise multiple packages, but each package
+generally defines some feature scope within it.
+
+In OpenInteract2, packages implement the actual application
+functionality while the core framework handles the storage interface
+(e.g., putting your objects in a database), dispatches URL requests to
+your objects, security, authentication and authorization, session
+management and lots of other features.
+
+An application usually defines persistent objects that keep state from
+request to request and server shutdown to server shutdown. It also
+needs to define how the objects are to be manipulated, which users can
+access them and how functionality is exposed to the user (by way of a
+URL-to-action mapping).
+
+OpenInteract2 comes with tools to install, uninstall and query
+packages currently installed to a website. This greatly simplifies the
+task of creating, testing and distributing your application.
+
+You can also bundle a package up in a CPAN-friendly distribution and
+use Perl's built-in tools to install the package to your Perl
+installation as well as to your website.
+
+=head1 PACKAGE CONTENTS
+
+What goes into a package? In general, you will find:
+
+=over 4
+
+=item *
+
+B<Perl module code>: This can include action code (normally found
+under C<OpenInteract2::Action>), SPOPS object code (under
+C<OpenInteract2>) and installation code (under
+C<OpenInteract2::SQLInstall>), along with normal Perl routines and
+objects used to support these activities.
+
+=item *
+
+B<Configuration>: Files in the C<conf/> directory: C<action.ini>
+configures the package's actions and one or more C<spops*.ini> files
+define persistent objects. Both of these file types are discussed
+further below.
+
+=item *
+
+B<Templates>: Graphical interface to package functionality. Normally
+these are HTML files interspersed with template processing commands
+which makes the data the package manages visible to the user.
+
+=item *
+
+B<Installation information>: This includes the C<package.conf> file
+along with the SQL installation class, normally found under
+C<OpenInteract2::SQLInstall>.
+
+=item *
+
+B<Package data structures and data>: These are used by the SQL
+installation class to install tables (found in C<struct/> and any
+initial and security data C<data/> needed by the package.
+
+=item *
+
+B<Documentation>: The 'create_skeleton' command of C<oi2_manage> will
+create a preliminary POD file for you which documents your package in
+C<doc/>. You are strongly encouraged to fill in the blanks and add
+meaningful detail along with any other necessary files to let people
+know what functionality your package provides.
+
+=back
+
+=head1 HOW DO I CREATE A PACKAGE?
+
+The C<oi2_manage> script included with OpenInteract2 will create a
+basic package skeleton for you. Here's an example:
+
+ $ oi2_manage create_package \
+        --package=mypackage \
+        --source_dir=/path/to/OI2-source
+
+which creates the following directories and files:
+ 
+ mypackage                                       # Main directory
+ mypackage/package.conf                          # Basic package configuration (name, ...)
+ mypackage/MANIFEST                              # List of files in package
+ mypackage/MANIFEST.SKIP                         # Regexes to skip when creating MANIFEST
+ mypackage/conf                                  # Configuration directory
+ mypackage/conf/spops.ini                        # Persistent object(s) configuration
+ mypackage/conf/action.ini                       # Action(s) configuration
+ mypackage/data                                  # Package data/security directory
+ mypackage/doc                                   # Documentation directory
+ mypackage/doc/mypackage.pod                     # Starter documentation
+ mypackage/struct                                # Package table definition directory
+ mypackage/template                              # Template directory
+ mypackage/template/sample.tmpl                  # Sample Template Toolkit template
+ mypackage/script                                # Tools program directory
+ mypackage/html                                  # Static html directory
+ mypackage/html/images                           # Image directory
+ mypackage/OpenInteract2                         # Object hierarchy directory
+ mypackage/OpenInteract2/Action                  # Action implementation directory
+ mypackage/OpenInteract2/Action/Mypackage.pm     # Sample action with 'hello' and 'list' tasks
+ mypackage/OpenInteract2/SQLInstall              # Structure/data installation directory
+ mypackage/OpenInteract2/SQLInstall/Mypackage.pm # Sample structure/data installation
+
+For what files you'll most likely edit, check out the
+L<OpenInteract2::Manual::Tutorial|OpenInteract2::Manual::Tutorial>.
+
+=head1 WHAT'S IN A PACKAGE OBJECT?
+
+Now that you've created a package already, you've seen most of its
+contents. (The ones you care about, anyway.) However, each package is
+a L<Openinteract2::Package|Openinteract2::Package> object -- a simple
+Perl object that's able to lookup files, create itself, install itself
+to a website and more
+
+Here are some sample usages, cribbed from the
+L<OpenInteract2::Package|OpenInteract2::Package> documentation:
+
+ # Read information about a package distribution
+ 
+ my $package = OpenInteract2::Package->new({
+     package_file => '/home/cwinters/pkg/mynewpackage-1.02.zip'
+ });
+ my $config = $package->config;
+ print "Package ", $package->name, " ", $package->version, "\n",
+       "Author ", join( ", ", @{ $config->author } ), "\n";
+ my $files = $package->get_files;
+ foreach my $filename ( @{ $files } ) {
+     print "   File - $filename\n";
+ }
+
+For each website OpenInteract2 maintains a file with the installed
+packages. This is a simple INI file located in
+C<$WEBSITE_DIR/conf/respository.ini>. Each package should only be
+listed once, and the repository only maintains name, version,
+directory and installation date information. The rest is stored in the
+package itself.
+
+You can see what packages are installed to a website using the
+C<oi2_manage> tool:
+
+ $ oi2_manage list_packages --website_dir=$WEBSITE_DIR
+
+Which will give you output like this:
+
+ PROGRESS: Starting task
+ PROGRESS: Task complete
+ ACTION: 
+      OK:     Package base-2.02 in site
+      OK:     Package base_box-2.01 in site
+      OK:     Package base_error-2.02 in site
+      OK:     Package base_group-2.01 in site
+      OK:     Package base_page-2.04 in site
+      OK:     Package base_security-2.01 in site
+      OK:     Package base_template-3.00 in site
+      OK:     Package base_theme-2.01 in site
+      OK:     Package base_user-2.03 in site
+      OK:     Package full_text-2.01 in site
+      OK:     Package news-2.01 in site
+      OK:     Package lookup-2.00 in site
+      OK:     Package object_activity-2.02 in site
+      OK:     Package system_doc-2.00 in site
+
+=head1 HOW OI2 USES PACKAGES
+
+=head2 At Startup
+
+At server startup the each package provides the OI2 server with the
+following data:
+
+=over 4
+
+=item *
+
+B<All Perl modules>. The server will place them in a consolidated
+library directory. This ensures we don't have an C<@INC> with so many
+entries. This directory is called 'tmplib' in any logging messages you
+might see.
+
+=item *
+
+B<Action configuration>. The package tells the server its
+C<action.ini> file. The server reads it in, scrubs and modifies the
+data (in L<OpenInteract2::Config::Initializer>), creates action
+objects from the file's information and asks each one for the URLs it
+will respond to. This becomes the URL-to-action mapping.
+
+=item *
+
+B<SPOPS configuration>. The package lets the server know about its
+C<spops.ini> files. The server reads them in, consolidates all SPOPS
+information, does some scrubbing of the data (in
+L<OpenInteract2::Config::Initializer>) and then whips the classes into
+existence using L<SPOPS::Initialize|SPOPS::Initialize>.
+
+=item *
+
+B<TT2 plugins>. The package lets the server know about any declared
+Template Toolkit plugins. These will be instiantiated at startup and
+made available in the TT environment just like the C<OI> plugin
+is. (See L<OpenInteract::TT2::Plugin> for more on it.)
+
+=item *
+
+B<Observers>. Any observer classes specified in the package
+configuration will be instantiated and registered for use. (See
+L<OpenInteract2::Observer> for more.)
+
+=back
+
+See L<OpenInteract2::Config::Package> for more information about how
+these data are provided.
+
+The L<OpenInteract2::Context|OpenInteract2::Context> object also
+instantiates a L<OpenInteract2::Repository|OpenInteract2::Repository>
+object and stores a copy of all package objects in the website so
+they're always available.
+
+=head2 During a Request
+
+During a request the package's job is generally limited to finding
+files on request -- the package needs to report what documentation
+files it contains to the C<system_doc> package, things like that.
+
+=head1 SEE ALSO
+
+L<OpenInteract2::Package|OpenInteract2::Package>
+
+L<OpenInteract2::Manual::Tutorial|OpenInteract2::Manual::Tutorial>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

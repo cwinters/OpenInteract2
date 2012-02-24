@@ -1,0 +1,6 @@
+[%- DEFAULT size = 20;
+    DEFAULT maxlength = 50; -%]
+[%- field_pre_label -%]
+<input type="text" name="[% name %]" value="[% value %]"
+       size="[% size %]" maxlength="[% maxlength %]">
+[%- field_label -%]

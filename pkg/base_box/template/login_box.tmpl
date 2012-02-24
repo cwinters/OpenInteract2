@@ -1,0 +1,49 @@
+[%- DEFAULT theme      = OI.theme_properties;
+    DEFAULT return_url = OI.return_url;
+    login_config       = OI.server_config.login;
+    forgot_url         = OI.make_url( ACTION = 'forgotpassword' ); -%]
+<div align="center">
+[% PROCESS form_begin( form_url = return_url,
+                       method   = 'POST',
+                       name     = 'login' ) -%]
+
+[%- IF login_config.always_remember -%]
+  [%- submit_colspan = 2 -%]
+  [%- PROCESS form_hidden( name = login_config.remember_field, value = 'yes' ) -%]
+[%- END -%]
+[% MSG( 'login_box.no_account', OI.make_url( ACTION = 'newuser' ) ) %]<br />
+
+<table border="0" cellpadding="2" cellspacing="0">
+[% IF action_messages.login %]
+ <tr bgcolor="[% theme.error_bgcolor %]">
+   <td colspan="2">[% action_messages.login %]</td>
+ </tr>
+[% END %]
+ <tr>
+   <td align="right">[% MSG( 'login_box.name' ) %]</td>
+   <td>[% INCLUDE form_text( name  = login_config.login_field,
+                             size  = 8,
+                             value = login_name ) -%]</td>
+ </tr>
+ <tr>
+   <td align="right">[% MSG( 'login_box.password' ) %]</td>
+   <td>[% INCLUDE form_password( name = login_config.password_field,
+                                 size = 8 ) -%]</td>
+ </tr>
+ <tr>
+   <td align="left">
+[% IF NOT login_config.always_remember -%]
+  [%- IF login_config.remember_field -%]
+       [%- INCLUDE form_checkbox( name  = login_config.remember_field,
+                                  value = 'yes' ) -%] [% MSG( 'login_box.remember' ) %]<br>
+  [% END -%]
+[% END -%]
+   <a href="[% forgot_url %]">[% MSG( 'login_box.forgot' ) %]</a>
+   </td>
+   <td align="right">
+       [%- PROCESS form_submit( value_key = 'login_box.button.login' ) -%]
+   </td>
+ </tr>
+</table>
+[% PROCESS form_end %]
+</div>

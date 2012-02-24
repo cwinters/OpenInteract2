@@ -1,0 +1,310 @@
+#!/usr/bin/perl
+
+# $Id: build_docs,v 1.13 2004/11/30 03:18:04 lachoy Exp $
+
+# build_docs
+#   Build docs from OI2 source and put them into the OI2 source
+#   tree. These docs are included with the OI2 distribution. Also
+#   generate the static docs for the OI2 website.
+
+use strict;
+use lib qw( doc/ );
+
+use Cwd          qw( cwd );
+use Data::Dumper qw( Dumper );
+use ExtUtils::Manifest;
+use File::Basename;
+use File::Copy;
+use File::Find;
+use File::Path;
+use File::Spec::Functions qw( catdir catfile );
+use Getopt::Std;
+use PodView;
+use Pod::POM;
+use Template;
+
+my $VERSION = read_version();
+
+my $CWD = cwd;
+my $BASE_DIR    = '.';
+my $MANUAL_DIR  = 'doc';
+my ( $HTML_DIR );
+my $DEST_DIR    = catdir( $CWD, 'site', 'working' );
+my $DOC_EXT     = $PodView::INTERNAL_DOC_EXT;
+my $LIB_DIR     = catdir( $CWD, 'lib' );
+
+my @LIB_FILES = ();
+my @LIB_NAME_DESC = ();
+
+my ( $DEBUG );
+my ( @MANUAL_FILES );
+
+{
+    my %opts = ();
+    getopt( 'dp', \%opts );
+    $DEBUG = $opts{d};
+    if ( $opts{p} ) {
+        $opts{p} =~ s|/$||;
+        $PodView::INTERNAL_DOC_PATH = $opts{p};
+    }
+    $HTML_DIR = catdir( $CWD, 'site', $PodView::INTERNAL_DOC_PATH );
+
+    $DEBUG && warn "Using directories [CWD: $CWD] [DEST: $DEST_DIR] ",
+                   "[LIB: $LIB_DIR] [HTML: $HTML_DIR]\n";
+
+    # Grab the relevant .pm files from the manifest and extract the
+    # POD from them
+
+    my $file_hash = ExtUtils::Manifest::maniread();
+    @LIB_FILES = grep /^lib/, grep /pm$/, sort keys %{ $file_hash };
+
+    Pod::POM->default_view( 'Pod::POM::View::Pod' )
+                    || die "Cannot set default POD view: $Pod::POM::ERROR\n";
+
+    my $pm_parser = Pod::POM->new( warn => 1 )
+                    || die "Cannot create PM POD parser: $Pod::POM::ERROR\n";
+
+    my @site_pod_files = ();
+PMFILE:
+    foreach my $pm_file ( @LIB_FILES ) {
+        ( $DEBUG > 1 )  && warn "Trying PM '$pm_file'\n";
+
+        my $name = $pm_file;
+        $name =~ s|^lib/||;
+        $name =~ s/\.pm$//;
+        $name =~ s|[/\\]|::|g;
+
+        my $pom = eval {
+            $pm_parser->parse_file( $pm_file )
+                    || die "Cannot parse '$pm_file': ", $pm_parser->error(), "\n";
+        };
+        if ( $@ ) {
+            warn $@;
+            push @LIB_NAME_DESC, { name        => $name,
+                                   description => "Unknown\n\n" };
+            next PMFILE;
+        }
+
+        # Track the module title...
+
+        my @heads = $pom->head1;
+        my $full_desc = $heads[0]->content;
+        $full_desc =~ s/^[^\-]+-\s*//;
+        push @LIB_NAME_DESC, { name        => $name,
+                               description => $full_desc };
+
+        my $relative_pm_file = $pm_file;
+        $relative_pm_file =~ s|^lib[\\/]||;
+        my $dest_pod_file = catfile( $DEST_DIR, $relative_pm_file );
+        $dest_pod_file =~ s/\.pm$/.pod/;
+        check_path( $dest_pod_file );
+        open( MODPOD, '>', $dest_pod_file )
+                    || die "Cannot open '$dest_pod_file': $!";
+        print MODPOD $pom;
+        close( MODPOD );
+        $DEBUG && warn "Extracted POD from '$pm_file' to '$dest_pod_file' ok\n";
+        push @site_pod_files, $dest_pod_file;
+    }
+
+    $DEBUG && warn "Created ", scalar @site_pod_files, " POD files from Perl source\n";
+
+    # Grab the doc/manual files
+
+    find( \&get_doc_files, $MANUAL_DIR );
+    s|^./|| for ( @MANUAL_FILES );
+
+    # Create our template object with our little linenumber filter and
+    # process all the files from doc/ into the site directory
+
+    my $template = Template->new(
+                       INCLUDE_PATH => ".:$MANUAL_DIR",
+                       FILTERS      => {
+                          linenum => [ \&tt_filter_linenum_factory, 1 ],
+                       } );
+
+    # Go through each of the doc files and process it with TT, placing
+    # the output in the SPOPS tree AND in the site generation tree
+
+    my $relocate_dest = $DEST_DIR;
+    $relocate_dest =~ s|\\|/|g;
+    my $relocate_lib  = $LIB_DIR;
+    $relocate_lib  =~ s|\\|/|g;
+
+    foreach my $orig_pod ( @MANUAL_FILES ) {
+        my $new_pod = $orig_pod;
+        $new_pod =~ s|^$MANUAL_DIR[\\/]||;
+        $new_pod = catfile( $DEST_DIR, 'OpenInteract2', $new_pod );
+        check_path( $new_pod );
+        $template->process( $orig_pod,
+                            { get_local_modules => \&tt_get_local_modules },
+                            $new_pod )
+                    || die $template->error();
+        $DEBUG && warn "Created manual file '$new_pod' ok\n";
+        push @site_pod_files, $new_pod;
+        my $source_tree_pod = relocate( $new_pod, $DEST_DIR, $LIB_DIR );
+        check_path( $source_tree_pod );
+        copy( $new_pod, $source_tree_pod )
+                    || die "Failed to copy '$new_pod' -> '$source_tree_pod': $!";
+        $DEBUG && warn "Copied created manual file to '$source_tree_pod' ok\n";
+    }
+
+    # Go through each of the .pod documents and transform it to HTML
+
+    Pod::POM->default_view( 'PodView' )
+                    || die "Cannot set default HTML view: $Pod::POM::ERROR\n";
+    my $parser = Pod::POM->new( warn => 1 )
+                    || die "Cannot create POD parser: $Pod::POM::ERROR\n";
+    foreach my $site_pod_file ( @site_pod_files ) {
+        my $pom = $parser->parse_file( $site_pod_file )
+                    || die $parser->error(), "\n";
+        my $dest_html_file = relocate( $site_pod_file, $DEST_DIR, $HTML_DIR );
+        check_path( $dest_html_file );
+        $dest_html_file =~ s/\.pod$/\.html/;
+        open( SITE, '>', $dest_html_file )
+                    || die "Cannot open '$dest_html_file': $!";
+        my $title = $dest_html_file;
+        $title =~ s|^$HTML_DIR\W||;
+        $title =~ s/$DOC_EXT$//;
+        $title =~ s|[\\/]|::|g;
+        print SITE header( $title ),
+                   $pom,
+                   footer( $VERSION );
+        close( SITE );
+        $DEBUG && warn "Generated HTML from '$site_pod_file' to '$dest_html_file' ok\n";
+    }
+
+    # Finally, create the index page
+
+    my $index_in_file = catfile( $MANUAL_DIR, 'index.html' );
+    open( INDEXIN, '<', $index_in_file )
+                    || die "Cannot read index from '$index_in_file': $!";
+    my $index_out_file = catfile( $HTML_DIR, "index$DOC_EXT" );
+    open( INDEXOUT, '>', $index_out_file )
+                    || die "Cannot open index '$index_out_file' for writing: $!";
+    print INDEXOUT header(), <INDEXIN>, footer( $VERSION );
+    close( INDEXOUT );
+    close( INDEXIN );
+}
+
+sub relocate {
+    my ( $orig_location, $source_dir, $dest_dir ) = @_;
+    $orig_location  =~ s|\\|/|g;
+    $source_dir =~ s|\\|/|g;
+    $dest_dir   =~ s|\\|/|g;
+    my $new_location = $orig_location;
+    $new_location =~ s|^$source_dir|$dest_dir|;
+    if ( $orig_location eq $new_location ) {
+        die "A substitution didn't work property. We were supposed to relocate\n",
+            "   $orig_location\n",
+            "from:\n",
+            "   $source_dir\n",
+            "to:\n",
+            "   $dest_dir\n",
+            "but it didn't work...\n";
+    }
+    return $new_location;
+}
+
+
+sub read_version {
+    open( VER, '<', 'VERSION' ) || die "Cannot open version doc: $!";
+    my $version = <VER>;
+    chomp $version;
+    close( VER );
+    $version =~ s/[^\d\_\.]//g;
+    return $version;
+}
+
+
+sub header {
+    my ( $title ) = @_;
+    if ( $title ) { $title = ": $title" }
+    return qq(<!--#set var="title" value="OpenInteract2 Documentation$title"-->\n),
+           qq(<!--#include virtual="/inc/header.html"-->\n),
+           qq(<div class="pod">\n);
+}
+
+sub footer {
+    my ( $version ) = @_;
+    return qq(<p align="right"><em>Generated from the OpenInteract <strong>$version</strong> source.</em></p>\n),
+           qq(</div>\n),
+           qq(<!--#include virtual="/inc/footer.html"-->\n);
+}
+
+# Used by File::Find to grab the documentation files we want
+
+sub get_doc_files {
+    return unless ( -f $_ );
+    return if ( /~/ );
+    return if ( $File::Find::dir =~ /examples/ );
+    return if ( $File::Find::dir =~ /CVS/ );
+    return unless ( /\.pod$/ );
+    push @MANUAL_FILES, $File::Find::name;
+}
+
+
+# TT filter to add line numbers to a range of text;
+
+sub tt_filter_linenum_factory {
+    my ( $context, $line_num ) = @_;
+    $line_num ||= 1;
+    my $pat = ' %3d: %s';
+    return sub {
+        my $text = shift;
+        my @lines = split( "\n", $text );
+        my @numbered = ();
+        foreach my $line ( @lines ) {
+            push @numbered, sprintf( $pat, $line_num, $line );
+            $line_num++;
+        }
+        return join( "\n", @numbered );
+    }
+}
+
+sub tt_get_local_modules {
+    return \@LIB_NAME_DESC;
+}
+
+# ensure the path is created
+
+sub check_path {
+    my ( $filename ) = @_;
+    my $dir = dirname( $filename );
+    mkpath( $dir );
+}
+
+
+__END__
+
+=head1 NAME
+
+build_docs - Build OpenInteract2 documentation
+
+=head1 SYNOPSIS
+
+ $ cd /path/to/OpenInteract2-source
+ $ ./build_docs
+
+ # add debugging
+ $ ./build_docs -d
+
+ # add a new doc path
+ $ ./build_docs -p /docs/oi2-snapshot
+
+=head1 DESCRIPTION
+
+Builds the OpenInteract2 manual from the CVS source. This version of
+the manual is included with the official OpenInteract2
+distribution. Also render the manual and all perl module documentation
+into HTML.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2001 Chris Winters. All rights reserved.
+
+This library is free software; you can redistribute it and/or modify
+it under the same terms as Perl itself.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

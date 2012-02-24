@@ -1,0 +1,21 @@
+=head1 NAME
+
+OpenInteract2::Manual::Datasource - Datasources in OpenInteract
+
+=head1 SYNOPSIS
+
+This part of the OpenInteract manual describes what a datasource is,
+how to configure it, how SPOPS objects use it how you can access it
+outside of the data objects.
+
+=head1 DESCRIPTION
+
+Coming soon!
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

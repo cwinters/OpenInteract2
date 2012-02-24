@@ -1,0 +1,472 @@
+=head1 NAME
+
+OpenInteract2::Manual::Caching - Storing generated data for later reuse
+
+=head1 DESCRIPTION
+
+Caching can not only provide a dramatic speedup to certain types of
+content, it can mean the difference between scaling when you hit the
+big time and falling on your face. Even much highly dynamic content
+can be cached.
+
+There are two different levels of caching in OpenInteract:
+
+=over 4
+
+=item *
+
+B<Content>: Once a component has been generated with a particular set
+of parameters, we don't want to regenerate it again.
+
+=item *
+
+B<Templates>: Once a template has been parsed we don't want to repeat
+those actions again. This is fairly minor and should be handled by
+whatever templating system you're using. 
+
+=back
+
+=head1 CONTENT CACHING
+
+Content caching is still fairly young in OpenInteract, and it's not
+appropriate (or useful) for all purposes. It's best when used on
+content that:
+
+=over 4
+
+=item *
+
+doesn't have any side-effects, and 
+
+=item *
+
+contain a lot of data and/or
+
+=item *
+
+require a good deal of processing.
+
+=back
+
+=head2 Avoiding Side-Effects
+
+First, you have to ensure that the action producing the content you're
+caching has no side-effects. Otherwise the first invocation will work
+properly the every subsequent one will fail because it does not
+produce the side-effects you're looking for.
+
+Here are some examples of what we mean by side-effects:
+
+=over 4
+
+=item *
+
+The action actually modifies an object. (Hopefully this is obvious!)
+Because the action never gets run the object will never be modified.
+
+=item *
+
+The action increments a counter in a database every time an object is
+viewed. Again, the action will never be run so the counter won't be
+incremented.
+
+=item *
+
+The template used by the action adds a box to the page. Since the
+action isn't run the template isn't invoked and the command to add the
+box won't be executed.
+
+=back
+
+These are poor candidates for caching. You might still be able to
+cache the content with creative action observer uses, but you should
+tread cautiously and understand what you're doing.
+
+=head2 Admins: Another Time Not to Cache
+
+If you're an admin user you frequently see functionality that normal
+users do not see: B<Edit> or B<Remove> links next to an object, etc.
+You do not want to cache this content, since users shouldn't see this
+information. (Normal users modifying the object shouldn't be an issue,
+since security should take care of it.)
+
+As a result, any user defined as an administrator will not view or save
+cached content. "Defined as an administrator" means that a call to the
+following will return true:
+
+ my $is_admin = CTX->request->auth_is_admin;
+
+=head2 Global Configuration
+
+The following keys in your server configuration are used in caching:
+
+=over
+
+=item *
+
+C<cache.use>: If set to true, content caching is enabled; if
+set to false, it is disabled.
+
+=item *
+
+C<cache.cleanup>: If true we delete and recreate the cache directory
+every time the server starts up. This is recommended unless you're
+sure what's being cached and for how long.
+
+=item *
+
+C<cache.class>: Cache implementation to use.  Currently only
+L<OpenInteract2::Cache::File|OpenInteract2::Cache::File> is supported.
+
+=item *
+
+C<cache.directory>: The directory where we put the cached
+content. This is normally C<$WEBSITE_DIR/cache/content>.
+
+=item *
+
+C<cache.default_expire>: number of seconds used for the cached content
+expiration. You can override this on a case-by-case basis.
+
+=item *
+
+C<cache.max_size>: Max size the cache should be allowed to
+grow, in bytes.
+
+=item *
+
+C<cache.directory_depth>: If you find that retrieving cached
+content is slow because of the number of items in a particular
+directory, increase this number.
+
+=back
+
+=head2 Content Caching Requirements
+
+There is really only one requirement for enabling caching. Well,
+two. The first (or zeroth) is that you must subclass
+L<OpenInteract2::Action|OpenInteract2::Action>. You almost certainly
+already do this, so it's not much of a requirement.
+
+The real requirement: caching must be configured in your action using
+the parameter C<cache_param> and, optionally, C<cache_expire>.
+
+We need to ensure that we can uniquely identify each request for
+content. Generally this is done by associating a unique key with each
+different set of dynamic content. We create this unique key by
+combining the task with a number of action parameters and their
+values.
+
+=head2 Creating a Unique Cache Key
+
+For instance, in the 'news' action you have a 'latest' task. This
+brings up the latest n news items. You'd want the cached data to
+reflect this number so you set it in the C<cache_param> section of the
+action. Here's an example:
+
+ [news cache_param]
+ latest     = num_items
+
+Here we've told the caching system to associate content from the
+'latest' task with the variable 'num_items'. So when we get a request:
+
+ /news/latest/?num_items=10
+ 
+We'll create a unique cache key like the following:
+
+ news;latest;num_items=10
+
+and use this to get and set the cached content. (The actual key may
+not look like this, it's just an example.)
+
+You can also associate multiple parameters with a task. For instance,
+say we also used a variable 'country' to further specify which latest
+news items are retrieved:
+
+ [news cache_param]
+ latest     = num_items
+ latest     = country
+
+And a corresponding key might look like:
+
+ news;latest;country=USA;num_items=10
+
+Now the cached content depends on 'num_items' and 'country'. All of
+these requests would cache their content to different places and
+remain totally separate from one another:
+
+ /news/latest/?num_items=10
+ /news/latest/?num_items=15
+ /news/latest/?num_items=10&country=USA
+ /news/latest/?num_items=10&country=France
+ /news/latest/?num_items=15&country=USA
+
+=head2 Controlling Cache Expirations
+
+You can also control when cached content expires using the
+C<cache_expire> section of the action:
+
+ [news cache_expire]
+ latest     = 600
+ display    = 1h
+ home       = 10m
+
+Unadorned values, such as 'latest' are in seconds. You can also use a
+character after the number to indicate minutes (m), hours (h) or days
+(d). Here we've said the content generated by the 'latest' and 'home'
+tasks should be cached for 10 minutes, and the 'display' task for one
+hour. You can manually delete cache entries using the C<clear_cache()>
+action method.
+
+Notice that we included an extra task here, 'home'. It has no
+dependencies on any parameters so we don't need to specify any in
+C<cache_param>.
+
+If you don't list your task in C<cache_expire> content generated by it
+will not be cached unless tell OI you want the same value to be
+applied to all tasks. For this you just assign a single value to
+'cache_expire':
+
+ [news]
+ class = OpenInteract2::Action::News
+ ...
+ cache_expire = 10m
+
+This tells OI to use a cache expiration of 10 minutes for all tasks in
+the 'news' action.
+
+=head2 Specifying Cache Parameters
+
+The C<execute> method of
+L<OpenInteract2::Action|OpenInteract2::Action> takes care of this for
+you. The only aspect you need to be aware of is setting up your
+parameters for the cache key. Before C<execute()> checks the cache it
+makes a call to C<initialize_cache_params()>. This allows you the
+chance to return parameter values that will determine the cache
+key. It's useful to specify values that might be the combination of
+several request parameters (like a date) or a parameter that doesn't
+normally vary by request (like the day of the week).
+
+Much of the time, however, you won't need to set any additional
+parameters. Normally you'll depend on GET/POST parameters passed from
+the user. We already have access to those through the
+L<OpenInteract2::Request> object, so we go ahead and use them if
+necessary.
+
+Additionally there are a couple of implicit parameters you can use to
+segment your cache entries:
+
+=over 4
+
+=item *
+
+B<user_id>: ID of the current user
+
+=item *
+
+B<theme_id>: ID of the current theme
+
+=back
+
+If you specify any of these a reasonable default is supplied.
+
+So to find a value we check, in order and taking the first defined
+value:
+
+=over 4
+
+=item 1.
+
+Return value from C<initialize_cache_params()>
+
+=item 2.
+
+Value of parameter in action
+
+=item 3.
+
+Value of parameter in request
+
+=item 4.
+
+Default value if an implicit parameter.
+
+=back
+
+For instance, in the above example we specified the parameters for the
+'display' task as 'news_id'. If this were passed in via the request
+we'd don't have to change our 'display' task at all to use
+caching. Even if the task is called programmatically by another action
+we won't have to change it since the 'news_id' can be set via the
+action parameter.
+
+Ah, but what happens if someone passes in a news object directly?
+
+ sub _calling_display_task {
+     my ( $self ) = @_;
+     my $fakenews = $self->_create_news_object( type => 'onion' );
+     my $display_action = CTX->lookup_action( 'news' );
+     return $display_action->execute({
+         task => 'display',
+         news => $fakenews
+     });
+ }
+
+Now our automatic parameter discovery won't work. This is where the
+C<initialize_cache_params()> comes in handy. In our 'news' action we
+can have:
+
+ sub initialize_cache_params {
+     my ( $self ) = @_;
+     my %params = ();
+     if ( my $news = $self->param( 'news' ) ) {
+         $params{news_id} = $news->id;
+     }
+     return \%params;
+ }
+
+And everything will work!
+
+=head2 Clearing the Cache
+
+You have the option of clearing the cache whenever you manipulate data.
+For instance, if you edit the title of a news story you do not want the
+old title to appear in the story listing. And if you delete a story and
+mark it as inactive because it's inappropriate, you do not want it in
+your headline listing.
+
+So whenever you modify data, it's normally best to call
+C<clear_cache()>. This method is inherited from
+L<OpenInteract2::Action|OpenInteract2::Action> like the others. Here's
+an example:
+
+ sub update {
+     my ( $self ) = @_;
+     my $request = CTX->request;
+     my $thingy_id = $self->param( 'thingy_id' )
+                     || $request->param( 'thingy_id' );
+     my $thingy = eval {
+         CTX->lookup_object( 'thingy' )->fetch( $thingy_id );
+     };
+     if ( $@ ) { ... }
+     $thingy->{foo} = $request->param( 'foo' );
+     eval { $thingy->save };
+     if ( $@ ) {
+         $self->param_add( error_msg => "Cannot save thingy: $@" );
+         return $self->execute({
+             task   => 'display_form',
+             thingy => $thingy
+         });
+     }
+     else {
+         $self->clear_cache();
+         $self->param_add({ status_msg => "Thingy updated ok" });
+         return $self->execute({ task => 'list' });
+     }
+ }
+
+So when the 'list' method is called after a successful C<update()> on
+the object, the previously cached content will have been deleted and
+the content will be regenerated anew.
+
+=head2 Filtering Cached Content
+
+As mentioned in L<OpenInteract2::Action> under 'Built-In
+Observations', the base action class filters content B<before> it's
+cached. So when you pull up cached content you're seeing the effects
+of those filters.
+
+Action observers also have an opportunity to modify or react to cached
+content. Whenever L<OpenInteract2::Action> gets a cache hit it issues
+an observation 'cache hit'. Your observer can listen for this and
+modify the content (since it's passed as a scalar reference) as
+necessary:
+
+ # Translate all upper-case "PERL" references to "Perl"
+ sub update {
+     my ( $class, $action, $type, $content ) = @_;
+     return unless ( $type eq 'cache hit' );
+     $$content =~ s/PERL/Perl/g;
+ }
+
+=head1 TEMPLATE CACHING
+
+This section discusses what the preferred templating engine (Template
+Toolkit) does and how it's handled in OpenInteract. Your engine may
+handle it differently.
+
+=head2 Caching TT Templates
+
+Instead of parsing a template every time you request it, the Template
+Toolkit (TT) will translate the template to Perl code and, if allowed,
+cache it in memory. Keeping templates in memory will make your website
+much faster.
+
+TT will also save your compiled template to the filesystem. This is
+useful for successive starts of your website -- if the template if
+found in the compile directory TT doesn't need to parse it again, even
+though you've stopped and restarted your server since it was first
+read.
+
+=head2 Configuration
+
+The following keys from your server configuration control caching and
+compiling:
+
+=over 4
+
+=item *
+
+C<content_generator.TT.cache_size>: This is the main parameter, describing
+how many cached templates TT will hold in memory. The only restriction
+on a high value is your memory, so experiment with as high a number as
+possible.
+
+If you set this to 0 then caching will be disabled. This is useful
+when you're doing debugging on your site, but it can make things
+noticably slower if you have lots of requests. (Note: 'lots' means
+'more than a handful'.)
+
+=item *
+
+C<content_generator.TT.cache_expire>: Sets the expiration (in seconds)
+for how long the templates remain cached in memory before they're
+reparsed.
+
+=item *
+
+C<content_generator.TT.compile_dir>: The directory where we store the
+compiled templates in the filesystem. This is normally C<cache/tt>,
+which gets resolved at runtime to C<$WEBSITE_DIR/cache/tt>.
+
+=item *
+
+C<content_generator.TT.compile_ext>: Extension of the file created when the
+template is compiled to the filesystem.
+
+=item *
+
+C<content_generator.TT.compile_cleanup>: If set to a true value, we
+clean out the template compile directory when the Apache server starts
+up.
+
+=back
+
+That's it! You can monitor the process of template caching by setting
+the C<OI2.TEMPLATE> logging key to 'DEBUG':
+
+ Old value:
+  log4perl.logger.OI2.TEMPLATE   = WARN
+ 
+ New value:
+  log4perl.logger.OI2.TEMPLATE   = DEBUG
+
+Be warned: this produces a prodigious amount of messages.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

@@ -1,0 +1,17 @@
+[%########################################
+  label_form_select_row( label, name, list/iterator, value_field, label_field,
+                         picked, first_label, is_multiple, size, field_label )
+     Form row with a label and SELECT item.
+  ########################################-%]
+
+[%- DEFAULT colspan = 2;
+    IF action_messages.$name;
+       color = '#ffffe0';
+    END; -%]  
+[%- INCLUDE label_row_begin( colspan = 1 ) -%]
+[%- INCLUDE data_cell_begin -%][% INCLUDE form_select -%]
+</td></tr>
+[% IF action_messages.$name -%]
+[% INCLUDE label_error_row_extra( color   = color,
+                                  message = action_messages.$name ) -%]
+[% END -%]

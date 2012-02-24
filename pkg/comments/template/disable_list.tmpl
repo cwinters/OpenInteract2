@@ -1,0 +1,61 @@
+[%-
+  title = MSG( 'comments.disable_list.title' );
+  OI.page_title( title );
+-%]
+
+[%-
+  PROCESS error_message;
+  PROCESS status_message;
+-%]
+
+<h2>[% title %]</h2>
+
+[% IF disabled_list.size > 0 %]
+[% INCLUDE table_bordered_begin -%]
+[% INCLUDE header_row( label_keys = [ 
+   'comments.disable.date', 'comments.disable.title',
+   'comments.disable.class', 'comments.disable.id', 'global.label.nbsp',
+] ) -%]
+[% FOREACH item = disabled_list %]
+[% enable_url = OI.make_url( ACTION     = 'comment_admin', TASK = 'enable',
+                             URL_PARAMS = item.id ) %]
+<tr [% PROCESS row_color( count = loop.count ) %]>
+  <td>[% OI.date_format( item.disabled_on, '%Y-%m-%d' ) %]</td>
+  <td>
+    [%- IF item.object_url -%]
+       <a href="[% item.object_url %]">[% item.object_title %]</a>
+    [%- ELSE -%]
+       [% item.object_title %]
+    [%- END -%]
+  </td>
+  <td>[% item.class %]</td>
+  <td>[% item.object_id %]</td>
+  <td><a href="[% enable_url %]">[% MSG( 'comments.disable.enable' ) %]</td>
+</tr>
+[% END %]
+
+[% INCLUDE table_bordered_end -%]
+
+[% ELSE %]
+<p>[% MSG( 'comments.disable_list.no_disabled' ) %]</p>
+[% END %]
+
+<h3>[% MSG( 'comments.disable.form_title' ) %]</h3>
+
+<p>[% MSG( 'comments.disable.form_summary' ) %]</p>
+
+[% INCLUDE form_begin( ACTION = 'comment_admin', TASK = 'disable', method = 'GET' ) %]
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE label_form_text_row( label_key = 'comments.disable.class',
+                                name = 'class', size = '40' ) %]
+
+[% INCLUDE label_form_text_row( label_key = 'comments.disable.id',
+                                name = 'object_id', size = '40' ) %]
+
+[% INCLUDE form_submit_row( value_key = 'comments.disable.disable' ) %]
+
+[% INCLUDE table_bordered_end %]
+
+[% INCLUDE form_end %]

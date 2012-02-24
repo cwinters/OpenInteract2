@@ -1,0 +1,35 @@
+[%- OI.page_title( "Need confirmation for directory removal" );
+    DEFAULT theme = OI.theme_properties -%]
+
+[% PROCESS error_message %]
+[% PROCESS status_message %]
+
+[% IF directory %]
+
+<h2>Confirm Directory Removal</h2>
+
+<p>You have asked to remove directory
+<b><tt>[% directory %]</tt></b>. This 
+will remove the directory along with all its
+subdirectories and files.
+(<a href="[% OI.make_url( BASE = directory ) %]">View directory contents</a>.)</p>
+
+[% PROCESS form_begin( ACTION = 'page',
+                       TASK   = 'remove_directory',
+                       method = 'GET' ) -%]
+<p>Remove directory?
+[% INCLUDE form_submit( name  = 'remove_directory_confirm',
+                        value = 'Yes' ) %]
+[% INCLUDE form_submit( name  = 'remove_directory_confirm',
+                        value = 'No' ) %]
+[% INCLUDE form_hidden( name  = 'directory',
+                        value = directory ) -%]
+</p>
+[% PROCESS form_end %]
+
+[% ELSE -%]
+<h2>Error Confirming Directory Removal</h2>
+
+<p>Parameter error: no directory specified to confirm removal.</p>
+
+[% END -%]

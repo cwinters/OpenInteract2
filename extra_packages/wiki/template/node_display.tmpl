@@ -1,0 +1,33 @@
+[% content %]
+
+[% PROCESS form_begin( ACTION = 'wiki',
+                       TASK   = 'edit',
+                       name   = 'edit' ) %]
+<p align="right">
+ [% PROCESS form_submit( value_key = 'global.edit' ) %]
+</p>
+[% PROCESS form_end %]
+
+[% PROCESS form_begin( ACTION = 'wiki',
+                       TASK   = node,
+                       name   = version ) %]
+<table class="wikiVersionBar">
+<tr><td align="left">
+<b>[% MSG( 'wiki.version' ) %]</b> [% version %] ([% modified %])
+</td>
+<td align="right">
+<b>[% MSG( 'wiki.other_versions' ) %]</b>
+[% IF versions.size <= 0 %]
+ [% MSG( 'wiki.no_other_versions' ) %]
+[% ELSE %]
+ <select name="version">
+[% FOREACH version = versions %]
+  <option value="[% version.version %]">[% version.version %] ([% version.modified.strftime( '%Y-%m-%d %H:%M' ) %])</option>
+[% END %]
+ </select>
+[% END %]
+[% PROCESS form_submit( value_key = 'wiki.view' ) %]
+
+</td></tr>
+</table>
+[% PROCESS form_end %]

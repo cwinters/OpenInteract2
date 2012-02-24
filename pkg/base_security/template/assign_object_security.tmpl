@@ -1,0 +1,97 @@
+[%- OI.page_title( MSG( 'base_security.assign.page_title' ) );
+    DEFAULT scope_size = 8;
+    DEFAULT theme      = OI.theme_properties;
+    DEFAULT sep        = ';';
+    DEFAULT SS         = OI.security_scope;
+    DEFAULT SL         = OI.security_level; -%]
+
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2>[% MSG( 'base_security.assign.title' ) %]</h2>
+
+<p>[% MSG( 'base_security.assign.summary' ) %]</p>
+
+<div align="center">
+
+[% PROCESS form_begin( ACTION = 'security',
+                       TASK   = 'update',
+                       method = 'POST',
+                       name   = 'security_editor' ) -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+  <tr bgcolor="[% theme.even_color %]">
+   <td colspan="2" align="left">
+      [% MSG( 'base_security.assign.label.class' ) %] [% object_class %]
+[% IF type == 'spops' -%]
+      <br />[% MSG( 'base_security.assign.label.id' ) %] [% object_id %]
+[% END -%]
+[% IF object_type -%]
+      <br />[% MSG( 'base_security.assign.label.type' ) %] [% object_type %]
+[% END -%]
+[% IF object_description -%]
+      <br />[% object_description %]
+[% END -%]
+[% IF object_url -%]
+      <br />[% MSG( 'base_security.assign.visit_object', object_url ) %]
+[% END -%]
+   </td>
+  </tr>
+  <tr valign="top" bgcolor="[% theme.odd_color %]">
+    <td>[% INCLUDE show_label( label_key = 'global.security_scope' ) %]</td>
+    <td>
+[%- scope_user = MSG( 'base_security.assign.label.user' );
+    scope_group = MSG( 'base_security.assign.label.group' );
+    level_none  = MSG( 'global.security_level.none' );
+    level_read  = MSG( 'global.security_level.read' );
+    level_write = MSG( 'global.security_level.write' );
+ -%]
+
+<select name="scope" size="[% scope_size %]" multiple>
+[%- FOREACH item = scope_list -%]
+    [%- scope_name = '??' -%]
+    [%- SET scope_name = ''          IF item.scope == SS.world -%]
+    [%- SET scope_name = scope_user  IF item.scope == SS.user  -%]
+    [%- SET scope_name = scope_group IF item.scope == SS.group -%]
+    [%- level_name = '-' -%]
+    [%- SET level_name = level_none  IF item.level == SL.none  -%]
+    [%- SET level_name = level_read  IF item.level == SL.read  -%]
+    [%- SET level_name = level_write IF item.level == SL.write -%]
+    <option value="[% item.scope %][% sep %][% item.scope_id %]">
+            [% scope_name %][% item.name %] ([% level_name %])</option>
+[% END -%] 
+</select><br>
+[% MSG( 'base_security.assign.select_multiple' ) %]
+    </font></td>
+  </tr>
+
+  <tr valign="top" bgcolor="[% theme.even_color %]">
+    <td align="right">
+        [%- INCLUDE show_label( label_key = 'base_security.assign.label.access' ) -%]
+    </td>
+    <td>
+      [% INCLUDE form_radioset( name       = 'level',
+                                value      = [ SL.none, SL.read, SL.write,
+                                               'clear' ],
+                                label      = [ level_none, level_read, level_write,
+                                               MSG( 'global.security_level.clear' ) ],
+                                separator  = ' | ' ) -%]
+    </td>
+  </tr>
+  <tr align="right" bgcolor="[% theme.odd_color %]">
+   <td colspan="2">[% PROCESS form_submit( value = MSG( 'global.button.go' ) ) %]</td>
+  </tr>
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_hidden( name = 'object_id',    value = object_id );
+   PROCESS form_hidden( name = 'type',         value = type );
+   PROCESS form_hidden( name = 'action_name',  value = action_name );
+   PROCESS form_hidden( name = 'spops_name',   value = spops_name );
+-%]
+
+[% PROCESS form_end %]
+
+</div>

@@ -1,0 +1,5 @@
+sample/website/cgi-bin:
+
+This directory holds the OI2 CGI interface. It's copied to
+$WEBSITE_DIR/cgi-bin and never written again. All changes to those
+files installed to the website are manual after installation.

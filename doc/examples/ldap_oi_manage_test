@@ -1,0 +1,1 @@
+$ oi2_manage test_ldap --website_dir=/path/to/mysite

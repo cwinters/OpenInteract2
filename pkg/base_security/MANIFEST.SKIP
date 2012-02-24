@@ -1,0 +1,9 @@
+\bCVS\b
+~$
+^oi2_manage.log$
+\.old$
+\.bak$
+\.backup$
+^MANIFEST\.
+^tmp
+^_

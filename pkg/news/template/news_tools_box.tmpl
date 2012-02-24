@@ -1,0 +1,23 @@
+[%- DEFAULT theme = OI.theme_properties;
+    home_url = OI.make_url( ACTION = 'news', TASK = 'search' ); -%]
+[% theme.bullet %] <a href="[% list_url %]">[% MSG( 'news.box.home' ) %]</a>
+[% IF news and news.tmp_security_level == OI.security_level.write %]
+  [%- edit_url    = OI.make_url( ACTION = 'news',
+                                 TASK   = 'display_form',
+                                 news_id = news.id );
+      remove_url  = OI.make_url( ACTION = 'news',
+                                 TASK   = 'remove',
+                                 news_id = news.id ); -%]
+  <br>[% theme.bullet %] <a href="[% edit_url %]">[% MSG( 'news.box.edit' ) %]</a>
+  <br>[% theme.bullet %] <a href="[% remove_url %]">[% MSG( 'news.box.remove' ) %]</a>
+[% END %]
+[% IF OI.is_admin -%]
+  [%- section_url = OI.make_url( ACTION      = 'lookups',
+                                 TASK        = 'listing',
+                                 lookup_type = 'news_section' );  
+      new_url     = OI.make_url( ACTION = 'news',
+                                 TASK   = 'display_add' ); -%]
+  <br>[% theme.bullet %] <a href="[% new_url %]">[% MSG( 'news.box.create' ) %]</a>
+  <br>[% theme.bullet %] <a href="[% section_url %]">[% MSG( 'news.box.edit_section' ) %]</a>
+[% END -%]
+

@@ -1,0 +1,6 @@
+function confirm_remove( object_type, name, url ) {
+    var msg = [% MSG( 'global_javascript.confirm_remove' ) %]
+    if ( confirm( msg ) ) {
+	    self.location = url;
+    }
+}

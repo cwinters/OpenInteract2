@@ -1,0 +1,14 @@
+[%-
+  title = MSG( 'base_error.daily.title', year, month, day );
+  OI.page_title( title );
+-%]
+
+<h2>[% title %]</h2>
+
+<p>[% MSG( 'base_error.daily.summary', year, month, day, num_errors ) %]</p>
+
+<div align="center">
+
+[% INCLUDE base_error::list %]
+
+</div>

@@ -1,0 +1,28 @@
+[%- OI.page_title( MSG( 'package_listing.page_title' ) );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message -%]
+
+<div align="center">
+
+<h2>[% MSG( 'package_listing.title' ) %]</h2>
+
+<p>[% MSG( 'package_listing.summary' ) %]</p>
+
+<table class="listingTable">
+
+[% PROCESS header_row( [ 'Name', 'Description', 'Actions' ] ) %]
+
+[% FOREACH package = packages -%]
+[%- detail_url = OI.make_url( ACTION = 'package',
+                              TASK   = 'show',
+                              name   = package.name ) -%]
+<tr class="listingRow">
+  <td>[% package.name %]-[% package.version %]</td>  
+  <td>[% package.description %]</td>
+  <td><a href="[% detail_url %]">[% MSG( 'package_listing.label.detail' ) %]</a></td>
+</tr>
+[% END %]
+
+</table>
+
+</div>

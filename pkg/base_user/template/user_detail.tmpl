@@ -1,0 +1,57 @@
+[%- OI.page_title( MSG( 'base_user.detail.page_title' ) );
+    DEFAULT theme = OI.theme_properties -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+[% IF user.id AND user.tmp_security_level >= OI.security_level.write %]
+[%- edit_url = OI.make_url( ACTION      = 'user',
+                            TASK        = 'display_form',
+                            user_id     = user.id ) -%]
+<p align="right">[% MSG( 'base_user.detail.edit_link', edit_url ) %]</p>
+[% END -%]
+
+<h2>[% MSG( 'base_user.detail.title' ) %]</h2>
+
+[% INCLUDE table_bordered_begin( table_width = '50%' ) -%]
+[%- count = 0 -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_user.info.name',
+                           text  = "$user.first_name $user.last_name" ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_user.info.email',
+                           text  = "<a href='mailto:$user.email'>$user.email</a>" ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_user.info.login',
+                           text  = user.login_name ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_user.info.language',
+                           text  = user.language ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_user.info.title',
+                           text  = user.title ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_text_row( label_key = 'base_user.info.notes',
+                           text  = user.notes ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_row_begin( label_key = 'base_user.detail.label.member' ) -%]
+  <td>[% FOREACH group = group_list -%]
+        [%- group_url = OI.make_url( ACTION   = 'group',
+                                     TASK     = 'display',
+                                     group_id = group.id ) -%]
+        [% theme.bullet %] <a href="[% group_url %]">[% group.name %]</a><br>
+      [% END -%]
+</td></tr>
+
+[% INCLUDE table_bordered_end -%]
+
+</div>

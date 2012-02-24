@@ -1,0 +1,22 @@
+<div align="center">
+
+<h1>[% MSG( 'error_not_found.title' ) %]</h1>
+
+<table width="50%" border="0" cellpadding="5" cellspacing="0">
+
+<tr><td align="left">
+[% MSG( 'error_not_found.title' ) %]
+</td></tr>
+
+<tr><td align="right">[% MSG( 'error_not_found.signed' ) %]
+</td></tr>
+
+[% IF err.referer %]
+<tr><td>
+[% MSG( 'error_not_found.referer', err.referer ) %]
+</td></tr>
+[% END %]
+
+</table>
+
+</div>

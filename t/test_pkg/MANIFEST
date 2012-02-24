@@ -1,0 +1,13 @@
+MANIFEST
+MANIFEST.SKIP
+Changes
+package.ini
+conf/action.ini
+conf/spops.ini
+data/fruit-initial-data.dat
+data/install_security.dat
+doc/fruit.pod
+OpenInteract2/Action/Fruit.pm
+OpenInteract2/SQLInstall/Fruit.pm
+struct/create-table-fruit.sql
+template/fruit-display.tmpl

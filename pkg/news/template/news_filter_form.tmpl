@@ -1,0 +1,37 @@
+<!-- BEGIN News filter (news::news_filter_form) -->
+
+<div align="center">
+[% PROCESS form_begin( ACTION = 'news',
+                       TASK   = 'search',
+                       method = 'GET',
+                       name   = 'news_filter' ) -%]
+
+[% PROCESS table_bordered_begin( table_width='50%' ) %]
+
+<tr>
+ <td align="right"><b>[% MSG( 'news.filter.by_section' ) %]</b></td>
+ <td>[% INCLUDE form_select( first_label = MSG( 'news.filter.by_section' ),
+                             name        = 'section',
+                             list        = section_list,
+                             value_field = 'section' ) -%]
+ </td>
+</tr>
+<tr>
+  <td align="right"><b>[% MSG( 'news.filter.by_date' ) %]</b><br>
+     <em>[% MSG( 'news.filter.date_info' ) %]</em></td>
+  <td>[% INCLUDE date_select( is_blank     = 'true',
+                              field_prefix = 'news',
+                              year_value   = 2004,
+                              year_list    = [ 2000..2008 ] ) -%]
+      [% INCLUDE form_submit( name  = 'action',
+                              value = MSG( 'global.button.filter' ) ) %]
+  </td>
+</tr>
+
+[% PROCESS table_bordered_end %]
+
+[% PROCESS form_end %]
+
+</div>
+
+<!-- END News filter (news::news_filter_form) -->

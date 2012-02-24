@@ -1,0 +1,244 @@
+Revision history for OpenInteract package full_text.
+
+2.61  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.60  Sun Feb 27 21:47:57 EST 2005
+
+      Only display the bottom search results navigation if there are
+      more than 20 items on the page.
+
+2.59  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.58  Sat Dec  4 12:52:09 EST 2004
+
+      Move errors to l10n file; use status/error shortcuts
+
+2.57  Sat Sep 25 14:19:21 EDT 2004
+
+      Ensure that 'search_id' is passed to the template; other
+      cosmetic items.
+
+2.56  Tue Jun  8 22:21:21 EDT 2004
+
+      Reflect the variable name changes in tiny_search in the code
+      that calls it.
+
+2.55  Mon Jun  7 22:39:28 EDT 2004
+
+      Small fix for msg (maketext strings start with _1, not _0...)
+
+2.54  Sun Jun  6 23:44:57 EDT 2004
+
+      Change the variables used in 'template/tiny_search.tmpl'
+
+2.53  Sun Jun  6 15:20:38 EDT 2004
+
+      Move more clases to the main distribution, and also modify the
+      data structure returned by the actual indexer
+
+2.52  Sun Jun  6 00:26:27 EDT 2004
+
+      Works for me...
+
+2.51  Sat Jun  5 20:34:58 EDT 2004
+
+      Move OI2::FullTextRules to the main distribution.
+
+2.50  Fri Jun  4 22:48:33 EDT 2004
+
+      Redid the guts of the indexing operations, creating a base class
+      (OI2::FullTextIndexer) that other engines can subclass and
+      implement the relevant pieces.
+
+2.09  Fri Apr  9 08:32:18 EDT 2004
+
+      Fix syntax error in template/search_result.tmpl, thanks to Jason
+      Anderson.
+
+2.08  Mon Feb 16 11:44:45 EST 2004
+
+      Pull template text into message file.
+
+2.07  Sat Oct 18 13:37:51 EDT 2003
+
+      Add note to OI2::SQLInstall::FullText about why we're not
+      migrating index data.
+
+2.06  Wed Sep  3 10:16:16 EDT 2003
+
+      Various changes to get things working.
+
+2.05  Wed Sep  3 07:32:55 EDT 2003
+
+      Fix dumb, dumb error.
+
+2.04  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+2.03  Thu Jul  3 01:14:13 EDT 2003
+
+      Datasource fixes, small doc updates.
+
+2.02  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.01  Wed Apr 16 09:13:45 EDT 2003
+
+      Replicate change to OI2::Action::SiteSearch from 1.x.
+
+2.00  Thu Mar 27 09:13:15 EST 2003
+
+      Initial OI2 conversion.
+
+1.34  Mon Feb 17 16:15:14 EST 2003
+
+      Update package docs.
+
+1.33  Sun Nov 10 10:18:36 EST 2002
+
+      A configured 'fulltext_pre_index_method' will get called before
+      an object is indexed.
+
+1.32  Sun Aug 25 12:05:52 EDT 2002
+
+      Remove template/*.meta
+
+1.31  Tue Apr  2 00:47:28 EST 2002
+
+      Add Oracle-specific table definition.
+
+1.30  Mon Oct 29 09:43:18 EST 2001
+
+      - OI/FullText.pm: don't treat the various methods used in indexing
+      as object methods so we can use OI::FullText in 'rules_from'
+      rather than 'isa'.
+
+      - OI/FullTextIterator.pm: hardcode (temporary!) the datasource
+      name for retrieving object keys
+
+1.29  Mon Oct 29 08:47:06 EST 2001
+
+      Template updates.
+
+1.28  Mon Oct 29 08:18:04 EST 2001
+
+      Enable OpenInteract/FullText.pm to handle scalar refs and
+      filehandles as field values.
+
+1.27  Sun Oct  7 16:25:46 EDT 2001
+
+      Added 'Lingua::Stem' and 'DBI' to 'module'.
+
+1.26  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.25  Sun Jul 15 16:56:05 EDT 2001
+
+      Small changes.
+
+1.24  Sun Jul 15 16:42:52 EDT 2001
+
+      Modify OI/Handler/SiteSearch.pm and OI/FullTextIterator.pm based
+      on API modifications in OpenInteract::ResultsManage.
+
+1.23  Fri Jul 13 09:06:21 EDT 2001
+
+      Template modifications to use the re-search form and the page
+      menu display as BLOCKs.
+
+1.22  Thu Jul 12 22:54:03 EDT 2001
+
+      Small modification to template (don't test .size anymore) and to
+      the handler (be sure to request 'raw' results back).
+
+1.21  Thu Jul 12 19:16:12 EDT 2001
+
+      Small changes to both OI/FullText.pm and OI/FullTextIterator.pm,
+      plus revise the handler (OI/Handler/SiteSearch.pm) to use the
+      new interfaces and information.
+
+1.20  Thu Jul 12 18:06:08 EDT 2001
+
+      Small changes to OpenInteract/FullText.pm and to
+      OpenInteract/FullTextIterator.pm so it can handle results
+      returned by OpenInteract::ResultsManage.
+
+1.19  Thu Jul 12 15:50:10 EDT 2001
+
+      Refine OpenInteract/FullText.pm
+
+1.18  Thu Jul 12 14:13:32 EDT 2001
+
+      First draft of substantial changes to use a new full_text_index
+      table schema (using 'object_key' instead of 'ft_oid') as well as
+      using iterators to return search values and a more sensible data
+      structure that is accessible to the outside so it can be
+      serialized and manipulated without going back to the index.
+
+1.17  Wed Jul 11 19:37:52 EDT 2001
+
+      - Add a template 'no_keywords' to be displayed when the user
+      doesn't give any keywords to be searched.
+
+1.16  Sat Jun  9 15:00:55 EDT 2001
+
+      Use the new 'url_edit' property of the hashref returned from the
+      template method 'object_info' instead of just adding ';edit=1'
+      to the end of the 'url' property. (Static page objects now have
+      better URLs -- none of that location=blah stuff -- and the
+      previous way was messing them up.) Also add a 're-search' box to
+      the search results page.
+
+1.15  Sat Jun  9 14:25:29 EDT 2001
+
+      Updated the 'script/add_objects_to_index.pl' script to batch
+      index objects from the command-line. You can now pass a
+      '--where' clause in to only do certain objects and you get
+      better feedback.
+
+1.14  Wed Jun  6 00:27:01 EDT 2001
+
+      Return the package name from 'ruleset_add' to conform with
+      modified SPOPS API.
+
+1.13  Tue Jun  5 09:36:06 EDT 2001
+
+      Create a default column group in OpenInteract/FullText.pm
+      ('listing') for use when we fetch each object from the
+      information in the index. This way you don't have to retrieve
+      the entire object to display a listing of it. (Usable only with
+      SPOPS 0.40; earlier versions should just ignore the
+      'column_group' argument to 'fetch()')
+
+1.12  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.11  Sun Feb  4 17:31:11 EST 2001
+
+      Ensure that 'fulltext_field' conf/spops.perl configuration
+      information is consistent throughout docs and code. Make sure
+      everything works like it's supposed to.
+
+1.10  Sun Feb  4 14:04:45 EST 2001
+
+      Updated the two command-line scripts found in 'script/' to use
+      the new method of setting up an OpenInteract environment and
+      (despite their size) commented them so other folks might find
+      them useful.
+
+1.09  Wed Jan 31 23:53:12 EST 2001
+
+      Cleanup
+
+1.08  Sat Jan 27 06:31:28 EST 2001
+
+      Modified templates/action table to work with new stuff

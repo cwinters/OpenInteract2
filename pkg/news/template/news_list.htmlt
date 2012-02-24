@@ -1,0 +1,16 @@
+<!--
+  Note: this doesn't have the number of news stories, we have to
+  hardcode the news URL (since we can't call a method) and we can't 
+  display the date (since we can't call a method to format 
+  the DateTime object). Suggestions welcome.
+-->
+<h2>News Entries</h2>
+
+<p>Latest news stories.</p>
+
+<p>
+<TMPL_LOOP NAME="news_list">
+  <a href="/news/display/?news_id=<TMPL_VAR NAME="news_id">"><TMPL_VAR NAME="title"></a> 
+   (<TMPL_VAR NAME="section">)<br>
+</TMPL_LOOP>
+</p>

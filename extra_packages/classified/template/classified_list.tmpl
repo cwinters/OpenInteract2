@@ -1,0 +1,33 @@
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row( labels = [ 'Posted On', 'By', 'Title', 'Deadline', 'Actions'] ) -%]
+
+[% count = 1 -%]
+[% WHILE ( classified = iterator.get_next ) -%]
+  [%- SET poster    = classified.posted_by_user;
+      SET poster_oi = poster.object_description IF poster; 
+      SET view_url  = OI.make_url( ACTION = 'classified',
+                                   TASK   = 'show',
+                                   classified_id = classified.id );
+      SET edit_url  = OI.make_url( ACTION = 'classified',
+                                   TASK   = 'show',
+                                   edit = 1, classified_id = classified.id );
+ -%]
+<tr valign="top" align="center" bgcolor="[% PROCESS row_color %]">
+  <td align="center">[% classified.posted_on %]</font></td>
+  <td align="center">
+  [%- IF poster %]<a href="[% poster_oi.url %]">[% poster.login_name %]</a>
+  [%- ELSE %]public[% END -%]
+  </td>   
+  <td>[% classified.title %]</td>
+  <td align="center">[% classified.deadline %]&nbsp;</td>
+  <td><a href="[% view_url %]">Detail</a>
+  [%- IF classified.tmp_security_level == OI.security_level.write -%]
+   | <a href="[% edit_url %]">Edit</a>
+  [% END -%]    
+  </td>
+</tr>
+   [%- count = count + 1 -%]
+[% END -%]
+
+[% PROCESS table_bordered_end -%]

@@ -1,0 +1,357 @@
+[%- TAGS star -%]
+
+=head1 NAME
+
+OpenInteract2::Manual::Templates - Using the Template Toolkit with OpenInteract2
+
+=head1 SYNOPSIS
+
+This document reviews how the templating system works in
+OpenInteract. Template processing is at the heart of OpenInteract, and
+it is important to understand it well.
+
+This document focuses on web applications and the Template Toolkit. If
+other templating systems get implemented in OpenInteract we'll stick
+pointers in here to those docs.
+
+=head1 WHAT IS A TEMPLATE?
+
+A template is simply HTML combined with directives meant for the
+template processing engine. Here's an example:
+
+ <p>Welcome back 
+   <font color="red">[% OI.login.full_name %]</font>!</p>
+
+When run through the template processing engine with a normal user
+object in the 'OI.login' key, this will result in:
+
+ <p>Welcome back 
+   <font color="red">Charlie Brown</font>!</p>
+
+So the information between the '[%' and ' %]' symbols
+('OI.login.full_name') was replaced by other text depending on the
+user who was viewing the page. If another user viewed the page, she
+might have seen:
+
+ <p>Welcome back 
+   <font color="red">Peppermint Patty</font>!</p>
+
+OpenInteract provides a number of tools for you in every template you
+write (see
+L<OpenInteract2::TT2::Plugin|OpenInteract2::TT2::Plugin>). However,
+you can also provide your templates access to query results from the
+various data stores that SPOPS provides.
+
+=head1 CREATING YOUR OWN TEMPLATE
+
+The general strategy behind OpenInteract applications is a well-known
+one: separate the display of data from how the data are retrieved or
+operated on.
+
+To this end the code behind an OpenInteract application normally just
+retrieves some data using parameters supplied by the user and then
+hands it off to the template. The template doesn't care how the data
+were retrieved -- it just knows what is supposed to be there. The
+template and code enter into a sort of contract -- the template
+expects certain data which both the code and the system provide.
+
+So, let's do an example. Let's say you want to display a list of users
+who have accessed the system in the last n minutes. Your code might
+have a subroutine like this:
+
+ sub list_time_limit {
+     my ( $self ) = @_;
+     my $request = CTX->request;
+     my $time_limit = $self->param( 'time_limit' )
+                      || $request->param( 'time_limit' );
+
+     # This SQL is Sybase-specific, but should be clear
+     my $where = 'datediff( minute, last_access, getdate() ) <= 30';
+
+     # Note: 'fetch_group' returns an arrayref of objects.
+     my $user_class = CTX->lookup_object( 'user' );
+     my $user_list = eval {
+         $user_class->fetch_group({
+             where => $where,
+             order => 'last_access',
+         })
+     };
+     my %params = (
+         user_list  => $user_list,
+         time_limit => $time_limit,
+     );
+     return $self->generate_content(
+                         \%params, { name => 'mypkg::user_list' } );
+ }
+
+(The actual code would have lots of good things like error checking,
+but this is just an example.)
+
+Note that we simply passed a hashref of variables to the method
+C<generate_content()>, which decides what template engine to use and
+passes along some basic information about our action to the
+template. What we did not say was how the variables we passed were to
+be displayed.
+
+And your template might look like:
+
+ 1 : [%- DEFAULT theme = OI.theme_properties -%]
+ 2 : 
+ 3 : <h2>User Listing</h2>
+ 4 :
+ 5 : <p>Users with accesses in the last <b>[% time_limit %]</b> minutes.
+ 6 : 
+ 7 : <table border="0" cellpadding="4">
+ 8 : 
+ 9 : [% PROCESS header_row( [ 'Username', 'Full Name', 'Last Access' ] ) %]
+ 10: 
+ 11: [% FOREACH user_object = user_list %]
+ 12:  <tr align="center" valign="middle">
+ 13:    <td>[% user_object.login_name %]</td>
+ 14:    <td>[% user_object.full_name %]</td>
+ 15:    <td>[% user_object.last_access %]</td>
+ 16:  </tr>
+ 17: [% END %]
+ 18:
+ 19: </table>
+
+There are a few things at work here:
+
+=over 4
+
+=item 1.
+
+We're using the scalar variable 'time_limit'. Since this is a simple
+scalar, we can just refer to it by name in the template as a variable
+(line 5) and the contents of the variable will replace this directive.
+
+=item 2.
+
+We loop through the variable 'user_list' which we passed to the
+template. The FOREACH directive used in the template (line 11) is very
+similar to the C<foreach> loop in perl -- for every thing in the list
+'user_list', we assign that thing to the variable 'user_object' which
+we can then use within the loop.
+
+Within the loop we use both properties of the user object
+('login_name' and 'last_access', lines 12 and 14) and call a method on
+the object ('full_name', line 13).
+
+One of the nice features of the Template Toolkit is that it treats
+objects and hashrefs in much the same way, using the dot notation. So
+'user_object.full_name' could transparently translate to either:
+
+ $user_object->full_name()
+ $user_object->{full_name}
+
+Here we're using the 'user_object' variable (obviously) as an
+object. But we could modify the perl code to instead get all the
+information about the user and combine it with other information into
+a hashref and feed it to the same template. If we were to do this, we
+would not have to modify B<a single line> of our template.
+
+=item 3.
+
+We access the OpenInteract2 plugin ('OI') and find the theme properties
+from it ('OI.theme_properties', line 1). These get assigned to a
+variable so we can use it multiple times throughout the template
+rather than calling the plugin every time.
+
+Note that we did not explicitly pass the plugin into the template via
+the variable hashref, as we did in this example with the variables
+'time_limit' and 'user_list'. Think of the 'OI' plugin as part of the
+template environment. You can use it to access information about the
+current user, the theme being used, various text manipulation
+routines, and more. We talk about it more below, but the plugin is
+well-documented in
+L<OpenInteract2::TT2::Plugin|OpenInteract2::TT2::Plugin>.
+
+=back
+
+Now, what if we wanted to change the display of the data? We could
+replace the 'user_list' template with the following:
+
+ <h2>User Listing</h2>
+ 
+ <p>Users with accesses in the last <b>[% time_limit %]</b> minutes.
+ 
+ <ul>
+ [% FOREACH user_object = user_list %]
+  <li>[% user_object.full_name %] ([% user_object.login_name %])
+       accessed the system at [% user_object.last_access %]</li>
+ [% END %]
+ </ul>
+
+If we did this, we would not have to change B<a single line> of our
+back-end code, since the "contract" between the action task and
+template hasn't changed. This contract specifies that the task will
+provide a list of user objects and a time limit to the template. Even
+though the template uses these data somewhat differently now, the code
+is isolated from this change and indeed never cares about it.
+
+Similarly, our content output could be a PDF instead of an HTML
+page. Instead of calling the template processing engine, we pass the
+data off to a separate process which formats it according to various
+rules and creates a PDF to send to the user. Again, the backend code
+does not need to be modified at all. We just need to change the action
+configuration to specify this new method of generating content and
+create whatever PDF-specific methods are to be used.
+
+=head1 CREATING YOUR OWN TEMPLATE PLUGIN
+
+As noted above you can declare one or more plugins supported by your
+package with the following syntax:
+
+ template_plugin   MyPlugin    OpenInteract2::TT2Plugin::MyPlugin
+ template_plugin   OtherPlugin OpenInteract2::TT2Plugin::OtherPlugin
+
+(The class name is arbitrary, you do not need to put it under a
+particular namespace to work. Just don't use
+L<OpenInteract2::TT2::Plugin|OpenInteract2::TT2::Plugin> since that's
+already taken!)
+
+Package plugins created in this matter are made available in the
+default template namespace under the plugin name -- 'MyPlugin' and
+'OtherPlugin' above. This means you don't have to use a 'USE'
+statement to bring in your plugin, it's just there. For instance:
+
+ [% MyPlugin.my_action( 'foo', 'bar' ) %]
+
+Note that this assumes your plugin is stateless -- if not you will
+need to call 'USE' with the necessary initialization data and
+manipulate the return value as necessary.
+
+Previously you needed to set this up in a customized variable
+handler. That handler is still available but it is not necessary for
+exposing your plugins.
+
+One word of caution: name your plugin carefully! It's best to pick
+something fairly unique and name it in ALL CAPS to prevent colliding
+with a name the user might pass to the template.
+
+If you're creating an application comprised of two or more packages
+the best tactic is to consolidate all application actions under a
+single plugin rather than have one per package. And since your
+application will be named something fairly unique you probably won't
+have to worry about naming collisions.
+
+To see what plugins are instantiated and available run the
+C<list_plugins> method on the plugin shipped with OpenInteract:
+
+ Plugins available: 
+ <ul>
+   [% plugins = OI.show_all_plugins %] 
+   [% FOREACH plugin_name = plugins.keys.sort %]
+   <li>[% plugin_name %]: [% plugins.$plugin_name %]
+   [% END %]
+ </ul>
+
+=head1 HOW DOES IT WORK
+
+If you're curious about this, then you first need to understand how
+OpenInteract actions work. See
+L<OpenInteract2::Action|OpenInteract2::Action> for more information.
+
+=head2 Content Generators
+
+OpenInteract2 can support multiple types of templating engines, also
+known as content generators. Each action specifies (in its metadata)
+the templating engine that will process the data generated by the
+action into usable content. This type can also be modified
+programmatically by the action code itself.
+
+The templating engines are setup in the server configuration using the
+'content_generator' key. OpenInteract comes with at least three
+content generators configured for you: 'TT' (Template Toolkit),
+'HTMLTemplate' (HTML::Template) and 'TextTemplate' (Text::Template).
+
+In practice, many sites will only have one content generator and one
+template processor for the web content. But you might want to use a
+different content generator when you're creating customized emails or
+something similar.
+
+=head2 Action code shields itself from content generator
+
+As we mentioned above your action code has no direct contact with a
+content generator. The action method C<generate_content()> takes care
+of this, choosing a generator and passing the given parameters (plus
+one or two others) to the engine. This provides another means for us
+to modify the content generated by the action without ever modifying
+the action itself -- very useful. (Filters are an example of this.)
+
+In addition to that the action doesn't even need to specify the
+B<template source>. We can declare that as well by adding the
+following to our action configuration:
+
+ [userlist template_source]
+ list_time_limit = mypkg::user_list
+
+The handler now doesn't even need to pass a template source, so the
+C<return> can be modified like this:
+
+     my %params = (
+         user_list  => $user_list,
+         time_limit => $time_limit,
+     );
+     return $self->generate_content( \%params );
+
+Now we can use the same action code with multiple template
+sources. For instance, we could create a heavily table-driven site
+that most people will see and one that uses very little layout for
+visually impaired folks. Further, we'll assume that the actions for
+visually impaired folks begin with a 'v_', so our action configuration
+might look like:
+
+ [timelimit]
+ class  = OpenInteract2::Action::UserList
+ method = list_time_limit
+ template_source = mypkg::userlist_normal
+ 
+ [v_timelimit]
+ class  = OpenInteract2::Action::UserList
+ method = list_time_limit
+ template_source = mypkg::userlist_plain
+
+=head2 Loading templates
+
+Package templates are located in one or two places:
+
+=over 4
+
+=item *
+
+The package C<template/> directory. These are the templates shipped
+with the package. When you upgrade the package you get whatever
+templates are distributed with the upgrade.
+
+=item *
+
+The site C<template/packagename/> directory. These are templates
+edited by you that will persist package upgrades. When you edit a
+template with the browser interface it will automatically save your
+modified templates here.
+
+=back
+
+The
+L<OpenInteract2::TT2::Provider|OpenInteract2::TT2::Provider>
+and L<OpenInteract2::SiteTemplate|OpenInteract2::SiteTemplate> classes
+take care of making the loading process transparent. So all you need
+to do is request a template with the 'package-name::template-name'
+syntax and the rest is done for you.
+
+=head1 SEE ALSO
+
+L<OpenInteract2::TT2::Plugin|OpenInteract2::TT2::Plugin>
+ 
+L<Template|Template>
+
+L<Template::Manual|Template::Manual>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2001-2004 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>Chris@cwinters.comE<gt>

@@ -1,0 +1,3 @@
+<tr bgcolor="[% color %]">
+  <td colspan="2">[% message %]</td>
+</tr>

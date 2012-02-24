@@ -1,0 +1,16 @@
+sample/apache2:
+
+The files here are used as templates for Apache 2.x configurations
+when creating a new website. They're copied into $WEBSITE_DIR/conf
+when creating a new website and then never modified programmatically
+again. Further changes to the installed files are all manual and done
+by your or your friendly sysadmin.
+
+TODO: Support for Apache2/mod_perl2 may be sketchy. It's a fairly new
+addition (2004-Feb) so if you have ideas about how these files or any
+of the interfaces (Apache2:: or OI2::Request::Apache2,
+OI2::Response::Apache2) please email the openinteract-dev mailing list
+or me personally (chris@cwinters.com).
+
+NOTE: If you add a file here be sure to add an entry in FILES so we
+know it should be copied over to the new website when it's created.

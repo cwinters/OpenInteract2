@@ -1,0 +1,28 @@
+[% IF error_list.size > 0 -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row( label_keys = [
+    'base_error.time', 'base_error.category', 'base_error.message',
+] ) -%]
+
+[%- count = 0 -%]
+[% FOREACH item = error_list -%]
+  [%- show_date_id = item.id | uri;
+      view_url = OI.make_url( ACTION  = 'error_browser', TASK = 'display',
+                              date_id = show_date_id ) -%]
+  <tr [% PROCESS row_color %]>
+    <td><a href="[% view_url %]">[% OI.date_format( item.time ) %]</a></td>
+    <td>[% item.category %]</td>
+    <td>[% item.message %]&nbsp;</td>
+  </tr>
+  [%- count = count + 1 -%]
+[% END %]
+
+[% INCLUDE table_bordered_end -%]
+
+[% ELSE -%]
+
+<p>[% MSG( 'base_error.no_errors' ) %]</p>
+
+[% END -%]

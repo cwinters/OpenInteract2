@@ -1,0 +1,37 @@
+[%- OI.page_title( MSG( 'news.detail.page_title', news.title ) );
+    OI.box_add( 'news_archive_monthly' );
+    OI.box_add( 'all_tags_box' );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message;
+    PROCESS status_message; -%]
+
+[%- previous     = news.previous_in_list;
+    next         = news.next_in_list;
+    previous_url = ( previous )
+                     ? OI.make_url( ACTION = 'news',
+                                    TASK   = 'display',
+                                    news_id = previous.id ) : '';
+    next_url     = ( next )
+                     ? OI.make_url( ACTION = 'news',
+                                    TASK   = 'display',
+                                    news_id = next.id ) : '';
+    main_url     = OI.make_url( ACTION = 'news' ); -%]
+<p align="center">
+[% IF previous -%]
+&lt;&lt; <a href="[% previous_url %]">[% previous.title %]</a> |
+[% END -%]
+<a href="[% main_url %]">[% MSG( 'news.detail.main_link' ) %]</a>
+[% IF next -%]
+| <a href="[% next_url %]">[% next.title %]</a> &gt;&gt;
+[% END -%]
+</p>
+
+[% INCLUDE news::news_item -%]
+
+<div class="commentsUnderContent">
+
+<h2>[% MSG( 'news.detail.comments' ) %]</h2>
+
+[% OI.action_execute( 'show_comment_by_object', object = news ) %]
+
+</div> <!-- commentsUnderContent -->

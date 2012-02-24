@@ -1,0 +1,55 @@
+[% OI.page_title( MSG( 'base_security.hierarchy.page_title' ) );
+   DEFAULT theme = OI.theme_properties; -%]
+
+[% IF object_class AND object_id -%]
+
+<h2>[% MSG( 'base_security.hierarchy.title' ) %]</h2>
+
+<p>[% MSG( 'base_security.hierarchy.summary' ) %]</p>
+
+<div align="center">
+
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row(
+       label_keys = [ 'base_security.hierarchy.label.id',
+                      'base_security.hierarchy.label.security',
+                      'base_security.hierarchy.label.action' ]
+) -%]
+
+[% FOREACH item = check_list -%]
+  [%- is_defined = ( item.security_defined ) 
+                     ? MSG( 'base_security.hierarchy.label.is_defined' )
+                     : MSG( 'base_security.hierarchy.label.not_defined' );
+      edit_url  = OI.make_url( ACTION       = 'security',
+                               TASK         = 'display',
+                               spops_name   = spops_name,
+                               object_id    = item.object_id,
+                               drilldown    = 1 );
+      clear_url = OI.make_url( ACTION       = 'security',
+                               TASK         = 'update',
+                               spops_name   = spops_name,
+                               object_id    = item.object_id,
+                               level        = 'clear',
+                               scope        = 'all' ) -%]
+  <tr align="center" valign="middle" [% PROCESS row_color( count = loop.count ) %]>
+     <td align="left">[% item.object_id %]</td>
+     <td>[% is_defined %]</td>
+     <td><a href="[% edit_url %]">Edit</a>
+         [% IF item.security_defined AND item.object_id != ROOT_OBJECT_NAME -%]
+           | <a href="[% clear_url %]">Clear</a>
+         [% END -%]
+     </td>
+  </tr>
+[% END -%]
+
+[% PROCESS table_bordered_end -%]
+
+</div>
+
+[% ELSE -%]
+<h2>[% MSG( 'base_security.hierarchy.failure.title' ) %]</h2>
+
+<p align="left">[% MSG( 'base_security.hierarchy.failure.title' ) %]</p>
+
+[% END -%]

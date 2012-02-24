@@ -1,0 +1,26 @@
+[% PROCESS error_message %]
+
+<div class="demarcatePage">
+
+<h1>[% MSG( 'comments.detail.title' ) %]</h1>
+
+[% IF comment %]
+
+[% PROCESS comments::comment %]
+
+[%- summary = comment.get_summary -%]
+<p class="commentObject">
+[%- object_title = PROCESS comments::comment_object(
+        url   = summary.object_url
+        title = summary.object_title
+    );
+    MSG( 'comments.info.object', object_title ); -%]
+</p>
+
+[% ELSE -%]
+
+<p class="commentNone">[% MSG( 'comments.no_comment' ) %]</p>
+
+[% END -%]
+
+</div>

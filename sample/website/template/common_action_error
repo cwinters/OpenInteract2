@@ -1,0 +1,12 @@
+[%- IF NOT error_msg;
+    error_msg = OI.action.param( 'error_msg' ) || OI.request.message( 'error_msg' );
+    END -%]
+
+<h1>[% MSG( 'c_a_error.title' ) %]</h1>
+
+<p>[% MSG( 'c_a_error.summary' ) %]</p>
+
+[% FOREACH msg = error_msg -%]
+<p class="errorMessage">[% msg %]</p>
+[% END %]
+

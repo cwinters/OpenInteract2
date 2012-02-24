@@ -1,0 +1,1 @@
+CREATE GENERATOR oi_comment_notify_seq

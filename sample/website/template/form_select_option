@@ -1,0 +1,7 @@
+[%- UNLESS plain -%]
+  [%- SET use_label_field = label_field || value_field;
+      SET value           = item.$value_field;
+      SET label           = item.$use_label_field; -%]
+[%- END -%]
+[%- SET is_picked = ( value == picked ) ? ' SELECTED' : '' -%] 
+<option value="[% value %]"[% is_picked %]>[% label %]</option>

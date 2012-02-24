@@ -1,0 +1,7 @@
+[%- DEFAULT method = 'POST';
+    DEFAULT form_url = OI.make_url( ACTION = ACTION, TASK = TASK,
+                                    BASE = BASE, URL_PARAMS = URL_PARAMS ); -%]
+<form action="[% form_url %]" method="[% method %]"
+      [%- IF onsubmit %] onsubmit="[% onsubmit %]"[% END -%]
+      [%- IF name %] name="[% name %]"[% END -%]
+      [%- IF upload == 'yes' %]enctype="multipart/form-data"[% END %]>

@@ -1,0 +1,30 @@
+[% OI.page_title( 'All Fruit in Store' ); %]
+[% PROCESS error_message %]
+
+<h1>Fruit in Store</h1>
+
+<p>This is what is in the store right now:</p>
+
+<div align="center">
+
+[% INCLUDE table_bordered_begin( table_width = '50%' ) -%]
+
+[% INCLUDE header_row( labels = [ 'Item', 'Description', 'Price (in local units)' ] ) -%]
+
+[% FOREACH fruit = fruits_in_store -%]
+<tr valign="top" bgcolor="[% PROCESS row_color( count = loop.count ) %]">
+  <td>[% fruit.name %]</td>
+  <td>[% fruit.taste %]</td>
+  <td>[% fruit.price %]</td>
+</tr>
+[% END -%]
+
+[% INCLUDE table_bordered_end -%]
+
+</div>
+
+<p align="right">Thank you for looking at our modest fruit
+assortment!<br>
+The Management</p>
+
+

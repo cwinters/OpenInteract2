@@ -1,0 +1,53 @@
+[%- DEFAULT theme = OI.theme_properties;
+    SET count     = 0;
+    OI.page_title( 'Search Pages' ); -%]
+
+<div align="center">
+
+[%- PROCESS error_message;
+    PROCESS status_message; -%]
+
+<h2>Search Pages</h2>
+
+<p align="left">Enter criteria below to search pages on the
+system. The more criteria you enter, the more restrictive your search
+and the fewer results you will retrieve.</p>
+
+[% PROCESS form_begin( ACTION = 'page',
+                       TASK   = 'search',
+                       method = 'GET',
+                       name   = 'page_search' ) %]
+
+[% INCLUDE table_bordered_begin( table_width = '75%' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Title',
+                                  name  = 'title' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Author',
+                                  name  = 'author' ) -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE label_form_text_row( label = 'Keywords',
+                                  name  = 'keyword' ) -%]
+
+[% IF OI.is_admin -%]
+  [% INCLUDE label_form_text_row( label = 'Using Template',
+                                  color = theme.admin_color,
+                                  name  = 'main_template' ) -%]
+
+  [% INCLUDE label_form_radio_row( label = 'Active?',
+                                   color = theme.admin_color,
+                                   name  = 'is_active',
+                                   list  = [ 'yes', 'no' ] ) -%]
+[% END -%]
+
+  [%- count = count + 1 -%]
+  [% INCLUDE form_submit_row( value = 'Search' ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+</div>

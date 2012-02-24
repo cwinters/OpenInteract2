@@ -1,0 +1,63 @@
+[%- DEFAULT theme = OI.theme_properties;
+    is_saved = page_directory.id;
+    title = ( is_saved )
+              ? "Edit Handler for Directory: $page_directory.directory"
+              : "Create New Directory Handler";
+    OI.page_title( title );  -%]
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center">
+
+[% task = ( is_saved ) ? 'update' : 'add' -%]
+[% PROCESS form_begin( ACTION = 'pagedirectory',
+                       TASK   = task,
+                       method = 'POST',
+                       name   = 'page' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '60%' ) -%]
+[%- count = 0; valign = "top" -%]
+
+[% IF is_saved -%]
+  [%- remove_url = OI.make_url( ACTION    = 'pagedirectory',
+                                TASK      = 'remove',
+                                directory = page_directory.id ) -%]
+<tr bgcolor="[% theme.bgcolor %]"><td align="right" colspan="2">
+  <a href="[% remove_url %]"><b>Remove</b></a> this directory handler 
+</td></tr>
+[% END -%]
+
+[% INCLUDE label_row( color = theme.head_bgcolor,
+                      label = title ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Directory', 
+                                name = 'directory', value = page_directory.directory,
+                                size = 30, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_select_row( label       = 'Action',
+                                  name        = 'action',
+                                  first_label = 'Available directory handlers',
+                                  picked      = page_directory.action,
+                                  value_list  = action_list,
+                                  plain       = 1 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_checkbox_row( label = 'Subdirectories inherit?',
+                                    name  = 'subdirs_inherit',
+                                    value = 'yes',
+                                    picked = page_directory.subdirs_inherit ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = 'Modify' ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[%- PROCESS form_hidden( name  = 'old_directory',
+                         value = page_directory.id ) -%]
+
+[% PROCESS form_end %]
+
+</div>

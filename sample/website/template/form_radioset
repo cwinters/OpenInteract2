@@ -1,0 +1,7 @@
+[% FOREACH val = value;
+   idx = loop.count - 1;
+   this_label = ( label.$idx ) ? label.$idx : val;
+   PROCESS form_radio( name   = name,
+                       value  = val,
+                       picked = picked ) %] [% this_label %] [% separator %]
+[%- END %]

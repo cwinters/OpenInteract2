@@ -1,0 +1,14 @@
+<h2>News Entries</h2>
+
+<p>Latest <b>{ scalar @news_list }</b> news stories.</p>
+
+<p>
+{ foreach my $news ( @news_list ) {
+     my $detail_url = OpenInteract2::URL->create_from_action( 
+                           'news', 'display', { news_id => $news->id } );
+     $OUT .= qq|<a href="$detail_url">$news->{title}</a> | .
+             qq|($news->{section}) | . $news->posted_on->strftime( '%b %d %I:%M %p' ) .
+             qq|<br>\n|;
+  }
+}
+</p>

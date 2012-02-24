@@ -1,0 +1,77 @@
+[% MACRO label_text_two_row BLOCK -%]
+  <tr><td bgcolor="[% theme.even_color %]">
+      <b>[% label %]</b>
+  </td></tr>
+  <tr><td>
+      [% text %]
+  </td></tr>
+[% END -%]
+
+[%- OI.page_title( "Classified Detail" );
+    OI.box_add( 'classified_tools_box', object = classified, view = 'static' );
+    DEFAULT theme = OI.theme_properties -%]
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<div align="center">
+
+<h2>Classified Ad: [% classified.title %]</h2>
+
+[% INCLUDE table_bordered_begin( table_width = '80%', border_width = 1 ) -%]
+
+  <tr><td bgcolor="[% theme.border_color %]">
+    <font size="+1" color="[% theme.label_font_color %]"><b>[% classified.title %]</b></font>
+  </td></tr>
+
+  <tr><td>
+[% posted_user = classified.posted_by_user %]
+    <b>Posted on [% classified.posted_on %]</b>
+by 
+[%- IF posted_user %]<b><a href="/User/show/?user_id=[% posted_user.user_id %]">[% posted_user.login_name %]</a></b>
+[%- ELSE %]<b>public</b>[% END -%] 
+
+  </td></tr>
+
+  <tr><td>
+    [% classified.description %]
+  </td></tr>
+
+[% IF classified.deadline %]
+  [% label_text_two_row( label = 'Deadline',
+                         text  = classified.deadline ) -%]
+[% END %]
+
+[% IF classified.required_skills %]
+  [% label_text_two_row( label = 'Required Skills',
+                         text  = classified.required_skills ) -%]
+[% END %]
+
+[% IF classified.recommended_skills %]
+  [% label_text_two_row( label = 'Recommended Skills',
+                         text  = classified.recommended_skills ) -%]
+[% END %]
+
+[% IF classified.location %]
+  [% label_text_two_row( label = 'Location',
+                         text  = classified.location ) -%]
+[% END %]
+
+[% IF classified.application_info %]
+  [% label_text_two_row( label = 'Appliction Information',
+                         text  = classified.application_info ) -%]
+[% END %]
+
+  <tr><td bgcolor="[% theme.even_color %]">
+    <b>Contact Information</b>
+  </td></tr>
+  <tr><td>
+    [% IF classified.contact %][% classified.contact %]<br>[% END -%]
+    [% IF classified.organization %][% classified.organization %]<br>[% END -%]
+    [% IF classified.phone %]Ph: [% classified.phone %]<br>[% END -%]
+    [% IF classified.fax %]Fax: [% classified.fax %]<br>[% END -%]
+    [% IF classified.email %]E-mail: <a href="mailto:[% classified.email %]">[% classified.email %]</a><br>[% END -%]
+    [% IF classified.url %]Web: <a href="[% classified.url %]">[% classified.url %]</a><br>[% END -%]
+  </td></tr>
+
+[% PROCESS table_bordered_end -%]

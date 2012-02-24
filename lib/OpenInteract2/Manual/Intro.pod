@@ -1,0 +1,178 @@
+=head1 NAME
+
+OpenInteract2::Manual::Intro - Quick introduction to OpenInteract2
+
+=head1 SYNOPSIS
+
+This part of the manual has pointers to the major pieces of
+OpenInteract2.
+
+=head1 WHAT IS IT?
+
+OpenInteract2 is an extensible application server that includes
+everything you need to quickly build robust applications. It includes:
+
+=over 4
+
+=item *
+
+A robust system of components that can access your data just about any
+way that you can think up and present the data in reusable templates.
+
+=item *
+
+A very flexible separation of presentation and data access: you can
+use one template for accessing data from different sources (e.g., a
+listing of users from the system, from an LDAP server, from an NT/SMB
+authentication controller, etc.) or you can use one set of data to
+fill multiple templates.
+
+=item *
+
+A consistent security mechanism allowing you to control security for
+users and groups not only at the task level, but also at the
+individual data object level.
+
+=item *
+
+A simple user and group-management system that allows users to create
+their own accounts and an administrator to assign them to one or more
+groups.
+
+=item *
+
+A convenient packaging system that makes it simple for developers to
+distribute code, data schemas, configuration, initial data and all
+other information necessary for an application. It also makes the
+installation and upgrading processes very straightforward and simple.
+
+=item *
+
+An integrated, database-independent method for distributing data
+necessary for a package. You should be able to install any package on
+any database that's been tested with OpenInteract.
+
+=item *
+
+The ability to deploy an OpenInteract2 application server as a
+standalone service, inside an Apache/mod_perl server, or even accessed
+as a CGI process. And it's easy to extend OI2 to use additional
+interfaces.
+
+=back
+
+=head1 CONCEPTS
+
+For more information about these concepts see
+L<OpenInteract2::Manual::Architecture>.
+
+=head2 Context
+
+Holds all application configuration information and provides a central
+lookup mechanism. This is a singleton (there's only one in the system
+at any time) and can be imported from the L<OpenInteract2::Context>
+class since it's used fairly often.
+
+=head2 Adapter
+
+This is the tool that sits between your interface (e.g.,
+Apache/mod_perl, CGI, etc.) and the OpenInteract server. The adapter
+translates parameters from the user, information about the request
+(hostname, URL, referer, cookies, etc.) and other data into the
+relevant L<OpenInteract2::Request> subclass.
+
+Once the OpenInteract cycle is complete it translates OpenInteract
+data (content, headers, etc.) into a response to send back to the user
+via the relevant L<OpenInteract2::Response> subclass. For an example
+see L<Apache::OpenInteract2>.
+
+=head2 Controller
+
+Once the adapter has created the request and response it hands off the
+processing to the L<OpenInteract2::Controller> object. This reads the
+URL and asks a set of small objects called action resolvers to create
+an B<Action> from the URL. Once that action is created it executes the
+action which generates the primary content for the request. The
+controller places that content in a larger content scope so you can
+control common graphical elements (sidebars, menus, etc.) from one
+place.
+
+=head2 Action
+
+Actions are the core of OpenInteract2. Each action provides a discrete
+set of functionality. What "discrete set" means is up to the
+developer, but typically this is a set of CRUDS (Create - Remove -
+Update - Display - Search) operations on a class of objects.
+
+Each action is represented by zero or more URLs, and each operation is
+typically specified by a B<task> referenced in that URL. So if I
+created a 'news' action my URLs might look like:
+
+ /news/search/
+ /news/create/
+ /news/update/
+ /news/remove/
+
+Every task returns some sort of content, generally by passing data to
+a B<Content Generator> which marries it with a template. See
+L<OpenInteract2::Action> for much more information.
+
+=head2 Content Generator
+
+As mentioned above tasks in an Action return content. They normally
+generate that content by assembling a set of data and passing that
+data off to a content generator. A content generator is a wrapper
+around some sort of templating system, such as the L<Template
+Toolkit|Template>, L<HTML::Template> or L<Text::Template> or even your
+own homegrown system. (Admit it, you've written your own.)
+
+Each action is associated with a content generator. And you can even
+associate an action with multiple content generators so you can settle
+a bet as to which templating system is easiest to use.
+
+=head1 CONFIGURATION FILES
+
+These are the major configuration files at the server level. Each
+package has its own configuration files -- see
+L<OpenInteract2::Manual::Packages> for more information about
+packages, and L<OpenInteract2::Manual::QuickStart> for how to modify
+some of these files to get a server started quickly.
+
+B<server configuration> - C<conf/server.ini>
+
+This is the main OpenInteract2 configuration file. No matter what
+interface you use you will need to modify this file. It holds the
+global debugging level, deployment URL, email addresses, directory
+layouts, database connection data, session information along with lots
+of other items. Much of it you don't need to edit, but it's useful to
+give it a once-over so you're familiar with it.
+
+B<logging configuration> - C<conf/log4perl.conf>
+
+This controls logging for the application server. Here you can
+determine the logging level for the whole server or discrete parts of
+it, which logfiles get written, when/if they're rolled over, etc. See
+L<OpenInteract2::Manual::Logging> for a quick intro to logging and
+read up about L<Log::Log4perl> for details.
+
+B<interface configuration: Apache> - C<conf/httpd_modperl_solo.conf>
+
+This describes a virtual host configuration for running the server
+inside Apache/mod_perl without a front-end proxy server. It's useful
+for development but in real life you'd probably want the proxy server
+(see C<conf/httpd_static.conf> for a proxy configuration and
+C<conf/httpd_modperl.conf> for the corresponding proxied backend
+configuration). See L<OpenInteract2::Manual::AdminApache> for more.
+
+B<interface configuration: standalone> - C<conf/oi2_daemon.ini>
+
+Just a few directives to tell the standalone web server what host and
+port to run on.
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

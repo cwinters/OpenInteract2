@@ -1,0 +1,80 @@
+[% DEFAULT theme = OI.theme_properties;
+   PROCESS error_message;
+   PROCESS status_message;
+   task  = whats_new.is_saved ? 'update' : 'add';
+   title = whats_new.is_saved 
+           ? MSG( 'whats_new.form.title_update' )
+           : MSG( 'whats_new.form.title_new' );
+   OI.page_title( title );
+  remove_url = OI.make_url( ACTION = 'new', TASK = 'remove',
+                            URL_PARAMS = whats_new.id ) -%]
+<p align="right">
+ [% MSG( 'whats_new.form.remove_link', remove_url ) %]
+</p>
+
+<div align="center">
+
+<h2>[% title %]</h2>
+
+[% PROCESS form_begin( ACTION = 'new', TASK = task,
+                       name = 'new', method = 'POST' ) %]
+
+[% INCLUDE table_bordered_begin -%]
+[% count = 0; valign = 'top' -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'whats_new.info.type',
+                                is_required = 1,
+                                name        = 'listing_type',
+                                value       = whats_new.listing_type,
+                                size = 20 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'whats_new.info.description',
+                                is_required = 1,
+                                name        = 'title',
+                                value       = whats_new.title,
+                                size = 40, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key   = 'whats_new.info.url',
+                                is_required = 1,
+                                name        = 'url',
+                                value       = whats_new.url,
+                                size = 40, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[%- post_date_string = whats_new.posted_on || 'now';
+    post_date_object = OI.date_into_object( post_date_string ) -%]
+[% INCLUDE label_form_date_row( label_key   = 'whats_new.info.posted_on',
+                                name        = 'posted_on',
+                                date_object = post_date_object ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'whats_new.info.class',
+                                name      = 'class',
+                                value     = whats_new.class,
+                                size = 40, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'whats_new.info.object_id',
+                                name = 'object_id',
+                                value = whats_new.object_id,
+                                size = 40, maxlength = 150 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_checkbox_row( label_key = 'whats_new.info.active',
+                                    name = 'active', value = 'yes',
+                                    picked = whats_new.active,
+                                    field_label = MSG( 'global.label.yes' ) ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value_key = 'global.button.modify' ) -%]
+
+[% PROCESS table_bordered_end -%]  
+
+[% INCLUDE form_hidden( name = 'new_id', value = whats_new.id ) -%]
+
+[% PROCESS form_end %]
+
+</div>

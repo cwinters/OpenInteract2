@@ -1,0 +1,155 @@
+BUILDING OPENINTERACT2 FROM CVS
+=========================
+
+This document tells you how to build OpenInteract2 from CVS. It should
+only be available from the CVS checkout, not distributed in the
+by-version distribution.
+
+Quick Start
+---------------
+
+ > cd /path/to/OpenInteract2-CVS
+ > ./build_all
+ > perl Makefile.PL   or   perl Build.PL
+ > make               or   ./Build
+ > make test          or   ./Build test
+ > make install       or   ./Build install
+
+
+Building OpenInteract
+---------------
+
+The normal procedure for building OpenInteract into a distribution is
+the same for just about every Perl module:
+
+ > cd /path/to/OpenInteract2-CVS
+ > perl Makefile.PL   or  perl Build.PL
+ > make               or  ./Build
+ > make test          or  ./Build test
+ > make install       or  ./Build install
+
+But you'll run into three problems building from CVS vs. from a
+distribution. The first is related to packages, the second to inlined
+resource files used to build packages and websites and the third to
+documentation.
+
+All three of these are run by the 'build_all' shell script, but if you
+want to learn more read on.
+
+
+Problem: Packages
+---------------
+
+When you check OpenInteract out from CVS you get all the packages
+distributed with OpenInteract in their respective directories. But
+they're not in the distribution (.zip) format that the next step
+('build_bricks') expects.
+
+To build the packages for incorporating into the bricks (also
+necessary for testing), just run:
+
+ > cd /path/to/OpenInteract-CVS/pkg
+ > ./export_all
+
+This will result in a number of messages from the 'oi2_manage export_package' 
+command to let you know whether there are too many or too few files in 
+each package and the filename of the package written out.
+
+After running the command, you should have a number of .zip files in
+the pkg/ directory which are used in the next step.
+
+
+Problem: Bricks
+---------------
+
+A 'brick' is a set of resources used when creating a new website or
+package. Previously we packaged these in a 'sample' directory, but
+they're now in classes created at build-time. The first time you
+checkout OI2 from CVS these will not be built, so use the
+'build_bricks' script to do this:
+
+ > cd /path/to/OpenInteract2-CVS
+ > perl build_bricks
+
+This should output something like:
+
+  Generated lib/OpenInteract2/Brick/Daemon.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/Package.pm with 8 inlined files
+  Generated lib/OpenInteract2/Brick/Widgets.pm with 57 inlined files
+  Generated lib/OpenInteract2/Brick/Apache.pm with 5 inlined files
+  Generated lib/OpenInteract2/Brick/Messages.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/CGI.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/WebsiteConfig.pm with 6 inlined files
+  Generated lib/OpenInteract2/Brick/PackageCPAN.pm with 4 inlined files
+  Generated lib/OpenInteract2/Brick/Apache2.pm with 2 inlined files
+  Generated lib/OpenInteract2/Brick/AppBase.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseBox.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseError.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseGroup.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBasePage.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseSecurity.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseTemplate.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseTheme.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppBaseUser.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppComments.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppFullText.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppLookup.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppNews.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppObjectActivity.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppSystemDoc.pm with 1 inlined files
+  Generated lib/OpenInteract2/Brick/AppWhatsNew.pm with 1 inlined files
+
+Now you can go ahead and build the distribution and test it out
+yourself!
+
+
+Problem: Docs
+---------------
+
+The OI2::Manual namespace is generated using the 'build_docs' command:
+
+ > cd /path/to/OpenInteract-CVS
+ > ./build_docs (or 'perl build docs')
+
+This also generates the docs for the OI website -- see the newly
+created 'site/docs' for the HTML documentation. Note that it has SSI
+directives embedded in it, but that's easy to work around if you need
+to...
+
+
+Problem: SPOPS
+---------------
+
+You may also need to checkout the sources for SPOPS checked out and
+make them available. SPOPS is fairly stable but sometimes there are
+changes made to the OpenInteract2 source that depend on changes made
+to the SPOPS source at or around the same time. The SPOPS version OI2
+depends on will be in the Build.PL/Makefile.PL.
+
+If you want to build SPOPS and install it the procedures are very
+standard:
+
+ > cd /path/to/SPOPS-CVS
+ > ./build_docs
+ > perl Makefile.PL
+ > make
+ > make test     # (optional, but recommended)
+ > make install
+
+You can also just make the SPOPS source available to your OI2
+processes using the normal 'PERL5LIB' variable:
+
+ > export PERL5LIB=$PERL5LIB:/path/to/SPOPS-CVS
+ > oi2_daemon --website_dir=/path/to/mywesite
+
+Questions?
+---------------
+
+E-mail the openinteract-dev mailing list for help. See:
+
+ http://sourceforge.net/mail/?group_id=16810
+
+for more info about the mailing list.
+
+=========================
+$Id: BUILDING_FROM_CVS,v 1.6 2005/02/08 16:34:21 lachoy Exp $

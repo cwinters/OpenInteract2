@@ -1,0 +1,17 @@
+<div align="center">
+
+<h1>[% MSG( 'error_forbidden.title' ) %]</h1>
+
+<table width="50%" border="0" cellpadding="5" cellspacing="0">
+
+<tr><td align="left">
+[% MSG( 'error_forbidden_summary',  admin_email ) %]
+</td></tr>
+
+<tr><td align="right">
+[% MSG( 'error_forbidden.signed' ) %]
+</td></tr>
+
+</table>
+
+</div>

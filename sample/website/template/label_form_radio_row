@@ -1,0 +1,19 @@
+[%########################################
+  label_form_radio_row( label, name, list, picked )
+     Row with a radio button + label for each item in list.
+  ########################################-%]
+
+[%- DEFAULT colspan = 2;
+    IF action_messages.$name;
+       color = '#ffffe0';
+    END; -%]  
+[%- INCLUDE label_row_begin( colspan = 1 ) -%]
+[%- INCLUDE data_cell_begin() -%]
+  [% FOREACH value = list -%]
+     [%- INCLUDE form_radio %] [% value %][% UNLESS loop.last %] | [% END -%]
+  [% END -%]
+</td></tr>
+[% IF action_messages.$name -%]
+[% INCLUDE label_error_row_extra( color   = color,
+                                  message = action_messages.$name ) -%]
+[% END -%]

@@ -1,0 +1,199 @@
+=head1 NAME
+
+OpenInteract2::Manual::AdminDatabase - Setting up databases for use with OpenInteract2
+
+=head1 DESCRIPTION
+
+OpenInteract2 is designed to work with one or more relational database
+systems (RDBMS). Thanks to SPOPS, it can be flexible about which one
+it uses. But you still need to do some initial setup work to ensure
+your database is prepared.
+
+This document describes the different procedures necessary to use
+OpenInteract2 with the databases it supports. It does not cover
+setting up the various RDBMS packages themselves and assumes you have
+a database server up and running.
+
+In the discussion below we use a few variables. These will, of course,
+depend on your DBMS.
+
+=over 4
+
+=item *
+
+C<$ADMINUSER>: A user with sufficient administrative rights to create
+a database
+
+=item *
+
+C<$ADMINPASSWORD>: The password for C<$ADMINUSER>
+
+=item *
+
+C<$DBNAME>: The name you give your database.
+
+=item *
+
+C<$WEBUSER>: The user that is going to access this database via
+OpenInteract. This user must be able to create and drop tables as well
+as modify data within those tables.
+
+=item *
+
+C<$WEBPASSWORD>: The password for C<$WEBUSER>
+
+=back
+
+The following also assumes that the command-line utilities executed
+(e.g., 'mysql', 'psql', 'isql') are installed and on your PATH. If
+not, setup your PATH so they're accessible for executing or ask your
+friendly local DBA to do this for you.
+
+=head1 MySQL
+
+To create a database, run the following command:
+
+  $ mysqladmin --user=$ADMINUSER --password=$ADMINPASSWORD create $DBNAME
+
+
+Once the database is created, ensure that the non-administrative user
+you've chosen to use with OpenInteract has full access to it. The
+following will create a new user with access to your database:
+
+  $ mysql --user=$ADMINUSER --password=$ADMINPASSWORD $DBNAME
+  mysql> GRANT ALL ON $DBNAME.* TO $WEBUSER@localhost 
+  mysql> IDENTIFIED BY '$WEBPASSWORD'\g
+  
+
+
+You will probably also need to give this user permission to use the 'mysql'
+database:
+
+  mysql> GRANT SELECT ON mysql.* TO $WEBUSER@localhost 
+  mysql> IDENTIFIED BY '$WEBPASSWORD'\g
+  
+
+
+Once you're done with these statements, leave the mysql shell and reload the grant tables:
+
+  $ mysqladmin --user=$ADMINUSER --password=$ADMINPASSWORD reload
+  
+
+
+=head1 PostgreSQL
+
+To create a database, run the following command as the C<postgres> (or
+equivalent) user:
+
+  $ createdb $DBNAME
+  
+
+
+Once you've created the database, you can create a user:
+
+  $ psql $DBNAME
+  psql> create user $WEBUSER 
+  psql> with password '$WEBPASSWORD' nocreatedb nocreateuser\g
+
+
+=head1 Sybase ASE
+
+(coming)
+
+=head1 iAnywhere Solutions (Sybase) ASA
+
+There are two methods for most adminstrative tasks ASA: GUI (Sybase
+Central) or command-line.  Sybase Central offers the "ease of use" of
+a GUI.  Command-line tools offer the ability to I<script> commands,
+making administrative tasks reproducible, configurable and version
+controlable.
+
+=head2 Command-line tools
+
+To create a database file and start up an engine on that new database:
+
+  $ dbinit -p 4096 $DBNAME
+  $ dbsrv9 ${DBNAME}.db
+
+
+Once the database is created, create the non-administrative user
+you've chosen to use with OpenInteract:
+
+  $ dbisql -nogui -c "UID=DBA;PWD=SQL;ENG=$DBNAME"
+  dba> GRANT CONNECT TO $WEBUSER IDENTIFIED BY '$WEBPASSWORD';
+  dba> QUIT;
+
+
+=head2 Notes
+
+=over 4
+
+=item *
+
+4096 is the recommended page size for most common database uses; 2048
+is the default. See the online ASA docs for more information on the
+I<dbinit> utility.
+
+=item *
+
+By default, ASA is a I<case-preserving> database.  This means that
+character data comparisons are case-insensitive, but that character
+data is stored exactly as given.
+
+=item *
+
+A database engine can be started using the Network Server (C<dbsrv9>)
+or the Personal Server (C<dbeng9>).  Both programs use the same
+engine, but C<dbeng9> is limited to a maximum of 10 concurrent
+connections and only allows network connections from localhost.  See
+the online ASA docs for more information on the I<dbeng9> and
+I<dbsrv9> commands.
+
+=item *
+
+C<dbisql> is a GUI application by default.  If running in a non-GUI
+environment or if you want to simply call it from a script and avoid
+the overhead of window creation, use the C<-nogui> option.
+
+=item *
+
+You can call C<dbisql> in batch mode, giving it a SQL command that
+will execute after which DBISQL will terminate:
+
+  $ dbisql -nogui -c "UID=DBA;PWD=SQL;ENG=$DBNAME" my_sql_commands.sql
+  $ dbisql -nogui -c "UID=DBA;PWD=SQL;ENG=$DBNAME" "SELECT * FROM SYSTABLE;OUTPUT TO '/tmp/systable.out' FORMAT ASCII;"
+
+
+=item *
+
+It is B<strongly> advised that you change the default DBA account password
+before making the database available to others:
+
+  $ dbisql -nogui -c "UID=DBA;PWD=SQL;ENG=$DBNAME" grant connect to DBA identified by 'My New Password';
+
+=item *
+
+ASA is a full-featured SQL database engine.  It is B<not> derivative
+of ASE.  See L<http://www.ianywhere.com/> for more information.
+
+=back
+
+=head2 GUI (Sybase Central)
+
+(coming)
+
+=head1 MS SQL Server
+
+(coming)
+
+=head1 Oracle
+
+(coming)
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

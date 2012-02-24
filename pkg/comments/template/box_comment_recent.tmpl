@@ -1,0 +1,20 @@
+[% IF error %]
+
+<p>[% error %]</p>
+
+[% ELSIF comments.size == 0 -%]
+
+  <p>[% MSG( 'comments.no_comments' ) %]</p>
+
+[% ELSE -%]
+
+  <ul class="listInBox">
+  [% FOREACH comment = comments;
+      object_url = comment.get_summary.object_url;
+      post_date  = OI.date_format( comment.posted_on, '%d-%b %H:%M' ); -%]
+   <li><a href="[% object_url %]">[% comment.subject %]</a>
+       on [% post_date %]</li>
+  [% END %]
+  </ul>
+
+[% END -%]

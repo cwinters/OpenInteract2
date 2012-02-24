@@ -1,0 +1,191 @@
+Revision history for OpenInteract package system_doc.
+
+2.12  Tue Oct 18 16:15:53 EDT 2005
+
+      Use Pod::Perldoc to find POD to display, and don't display
+      anything unless a recent (~2002) version of Pod::Perldoc is
+      installed; also ensure that our POD viewer won't die with
+      certain '=over=' constructions.
+
+2.11  Fri Sep 23 00:09:40 EDT 2005
+
+      OIN-156: Be able to display OI2::Manual::*, OI2::App::*,
+      SPOPS::Manual::*, Template::Manual::* along with the other
+      modules in the list
+
+2.10  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class; as a result
+      also remove the code related to displaying package
+      documentation.
+
+2.09  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.08  Sat Dec  4 12:52:09 EST 2004
+
+      Move errors to l10n file; use status/error shortcuts; do some
+      refactoring to make the display method shorter and more
+      readable.
+
+2.07  Tue Jun  8 23:43:58 EDT 2004
+
+      Fix module listing to fit on a normal page
+
+2.06  Tue Jun  8 20:44:46 EDT 2004
+
+      Give the world 'read' rights to the documentation reader.
+
+2.05  Mon Feb 16 12:33:53 EST 2004
+
+      Pull text out of templates into message files.
+
+2.04  Fri Sep  5 10:30:40 EDT 2003
+
+      Doc updates, small.
+
+2.03  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+2.02  Mon Jul  7 23:30:24 EDT 2003
+
+      Better handle errors when displaying pod thru Pod::POM; add
+      error message widget to template/doc_display; add more debugging
+      to doc display. (Thanks to Greg Fenton for pointing out display
+      error.)
+
+2.01  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.00  Wed Mar 26 17:08:05 EST 2003
+
+      Initial OI2 conversion.
+
+1.33  Mon Feb 17 16:27:32 EST 2003
+
+      Very small package doc updates.
+
+1.32  Sun Aug 25 13:17:05 EDT 2002
+
+      Add items in data/page.dat from new documentation added.
+
+1.31  Sun Aug 25 13:08:25 EDT 2002
+
+      PodView tweaks
+
+1.30  Sun Aug 25 12:16:10 EDT 2002
+
+      Removed all template/*.meta files.
+
+1.29  Fri Dec 21 08:09:20 EST 2001
+
+      Added /oi_docs/templates.html to data/page.dat (Thanks to Bill
+      Moseley <moseley@hank.org> for pointing out the absence.)
+
+1.28  Wed Nov 28 08:35:24 EST 2001
+
+      Update data for installed OI::Page objects (data/page.dat) to
+      reflect new structure.
+
+1.27  Sun Oct 28 22:33:02 EST 2001
+
+      Modifed installed security to use new OI::Page object. Also
+      added OI::Page records (titles, etc.) for the HTML system docs.
+
+1.26  Wed Oct 17 00:48:45 EDT 2001
+
+      Change CONFIG->{website_name} --> CONFIG->{server_info}{website_name}
+
+1.25  Sun Oct  7 16:36:00 EDT 2001
+
+      Add 'module' declaration in package.conf
+
+1.24  Sat Aug 25 11:20:02 EDT 2001
+
+      Tweak the rule for ordered lists in OpenInteract::PodView
+
+1.23  Fri Aug 24 17:06:12 EDT 2001
+
+      Update the Pod::POM display rules in OpenInteract::PodView and add docs.
+
+1.22  Tue Aug 21 21:20:24 EDT 2001
+
+      Updated the handler to use Pod::POM so we can put our own links
+      in for other modules.
+
+1.21  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.20  Sun Aug 12 11:17:21 EDT 2001
+
+      Modify data/install_security.dat to use new
+      'transform_default_to_id' action.
+
+1.19  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.18  Mon Apr  2 01:06:58 EDT 2001
+
+      Added docs in 'doc/package.pod' and cleaned up
+      OpenInteract/Handler/SystemDoc.pm to work with the "new"
+      PackageRepository object. Also moved the security settings for
+      '/oi_docs' to this module out of 'static_page'.
+
+1.17  Tue Mar 13 07:20:31 EST 2001
+
+      Changed security level data: 'oid' -> 'object_id'
+
+1.16  Sun Mar  4 16:04:01 EST 2001
+
+      Changed security level data: 'level' -> 'security_level'
+
+1.15  Thu Feb  1 00:08:46 EST 2001
+
+      Cleanup in general.
+
+1.14  Mon Jan 15 23:50:23 EST 2001
+
+      Cleaned up the handler a bit.
+
+1.13  Mon Jan 15 23:06:25 EST 2001
+
+      Fixed html error in the menu template.
+
+1.12  Mon Jan  1 23:21:42 EST 2001
+
+      Updated menu template to display the link to '/oi_docs', which
+      should be available on system startup to have all the OI
+      tutorial/handholding docs.
+
+1.11  Sun Nov 26 17:14:27 EST 2000
+
+      Fixed listing of modules and cleaned up the template a little so
+      that we don't have dangling unclosed rows.
+
+1.10  Sun Nov 26 16:00:34 EST 2000
+
+      Again: try to fix the module_list() routine; separate
+      modification made so that your application's handlers and
+      modules should appear in the list with the OI/SPOPS stuff.
+
+1.09  Sun Nov 26 12:56:49 EST 2000
+
+      Fixed the Handler/SystemDoc/module_list() routine (hopefully) to
+      be able to do the general Perl modules.
+
+1.08  Wed Nov 22 00:58:56 EST 2000
+
+      Fixed security specifications in data/install_security.dat
+      (using old class name for handler, which resulted in the
+      system_documentation not being visible when you first install
+      the systme)
+
+1.00  Created (some time ago)
+
+      Package skeleton created by oi_manage

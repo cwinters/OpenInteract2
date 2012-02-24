@@ -1,0 +1,37 @@
+[%- OI.page_title( MSG( 'package_detail.page_title' ) );
+    DEFAULT theme = OI.theme_properties;
+    PROCESS error_message -%]
+
+<div align="center">
+[% list_url = OI.make_url( ACTION = 'package', TASK = 'listing' ) -%]
+<p>[% MSG( 'package_detail.back_listing', list_url ) %]</p>
+
+<h1>[% MSG( 'package_detail.title' ) %]</h1>
+
+<table border="0">
+<tr>
+ <td>[% MSG( 'package_detail.label.package' ) %]</td>
+ <td>[% pkg.name %] - [% pkg.version %]</td>
+</tr>
+<tr>
+ <td>[% MSG( 'package_detail.label.install_date' ) %]</td>
+ <td>[% pkg.installed_date %]</td>
+</tr>
+<tr>
+ <td>[% MSG( 'package_detail.label.author' ) %]</td>
+ <td>[% pkg.config.author.join( ', ' ) %]</td>
+</tr>
+<tr>
+ <td>[% MSG( 'package_detail.label.website' ) %]</td>
+ <td>[% IF pkg.url %]<a href="[% pkg.url %]">[% pkg.url %]</a>
+     [%- ELSE %][% MSG( 'global.not_available' ) %]
+     [%- END %]
+ </td>
+</tr>
+<tr>
+ <td>[% MSG( 'package_detail.label.dependencies' ) %]</td>
+ <td>[% pkg.config.module.join( ', ' ) %]</td>
+</tr>
+</table>
+
+</div>

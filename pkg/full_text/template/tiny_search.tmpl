@@ -1,0 +1,26 @@
+[%- DEFAULT form_name    = 'tiny_search';
+    DEFAULT field_name   = 'keywords';
+    DEFAULT button_label = MSG( 'global.button.search' ); -%]
+
+[%- IF search_title -%]
+<h2>[% search_title %]</h2>
+[%- END -%]
+
+[%- IF search_description -%]
+<p>[% search_description %]</p>
+[%- END -%]
+
+<div align="center">
+[% PROCESS form_begin( ACTION = 'search',
+                       method = 'GET',
+                       name   = form_name ) -%]
+<p>
+ [%- PROCESS form_text( name  = field_name,
+                        value = keywords,
+                        size  = 20 ); 
+     PROCESS form_submit( value = button_label,
+                          name  = 'search_button' ) -%]
+</p>
+
+[% PROCESS form_end %]
+</div>

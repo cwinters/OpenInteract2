@@ -1,0 +1,41 @@
+[%- OI.page_title( MSG( 'base_user.new_form.page_title' ) );
+    DEFAULT theme = OI.theme_properties;
+    OI.box_remove( 'login_box' ); -%]
+
+[% PROCESS error_message -%]
+
+<div align="center">
+
+<h2>[% MSG( 'base_user.new_form.page_title' ) %]</h2>
+[% PROCESS form_begin( ACTION = 'newuser',
+                       TASK   = 'add',
+                       method = 'POST',
+                       name   = 'newuser' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '75%' ) -%]
+
+ <tr><td align="left" colspan="2">
+   <p>[% MSG( 'base_user.new_form.howto_intro' ) %]<br>
+    [% theme.bullet %] [% MSG( 'base_user.new_form.howto_login' ) %]<br>
+    [% theme.bullet %] a [% MSG( 'base_user.new_form.howto_email' ) %]
+
+   <p></p>
+
+ </td></tr>
+
+[%- count = 1 -%]
+[% INCLUDE label_form_text_row( label =  MSG( 'base_user.new_form.label.login' ),
+                                name  = 'requested_login',
+                                value = requested_login ) -%]
+
+[% INCLUDE label_form_text_row( label = MSG( 'base_user.new_form.label.email' ),
+                                name  = 'working_email',
+                                value = working_email ) -%]
+
+[% INCLUDE form_submit_row( value = MSG( 'global.button.go' ) ) -%]
+
+[% INCLUDE table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+</div>

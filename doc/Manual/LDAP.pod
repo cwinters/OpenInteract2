@@ -1,0 +1,259 @@
+=head1 NAME
+
+OpenInteract2::Manual::LDAP - OpenInteract and LDAP
+
+=head1 SYNOPSIS
+
+Discussion of how you can use LDAP with OpenInteract.
+
+=head1 DESCRIPTION
+
+With SPOPS 0.50+, you can now use LDAP not only as a datastore for
+your objects, but also for authenticating users and determining group
+membership. This document explains how.
+
+If you're thinking about using LDAP for user authentication and group
+membership, B<PLEASE READ THIS DOCUMENT FULLY> before you install and
+use OpenInteract. Otherwise you may have some work to undo (like
+dropping and readding tables) and actions like schema changes can
+become more difficult.
+
+=head2 The Pieces
+
+=over 4
+
+=item *
+
+L<SPOPS::LDAP|SPOPS::LDAP> provides the serialization logic and
+behavior
+
+=item *
+
+L<OpenInteract2::Datasource::LDAP|OpenInteract2::Datasource::LDAP>
+provides centralized connection management
+
+=item *
+
+L<OpenInteract2::SPOPS::LDAP|OpenInteract2::SPOPS::LDAP> will be the
+parent of any OI LDAP data object class as it provides common
+behaviors. (This is done autmatically in OI2.)
+
+=back
+
+Additionally, two packages (base_group and base_user) offer options
+for storing users and groups in LDAP and doing authentication from
+there. See below for more.
+
+=head2 Overall Configuration
+
+First, install L<SPOPS|SPOPS> version 0.86 or higher and run its tests
+to ensure that the LDAP portion (L<SPOPS::LDAP|SPOPS::LDAP>) is
+functioning properly with your LDAP server.
+
+Next, make the following modifications to the server configuration
+file:
+
+=over 4
+
+=item *
+
+Add relevant connection information as a datasource. The
+'datasource.main_ldap' section is already defined for you as a
+template. The usual suspects -- host, port, base DN -- are there, and
+you can provide a standard bind DN and password as well. (Examples
+below.)
+
+=item *
+
+Set the key C<datasource_config.ldap> to the connection to be used
+when an LDAP object doesn't specify a datasource. By default we define
+the datasource 'main_ldap' so this is also set to 'main_ldap'. If you
+define a different datasource name in the previous step you should set
+it here as well.
+
+=back
+
+You can test your connection information from C<oi2_manage>:
+
+[% INCLUDE examples/ldap_oi_manage_test | indent(1) %]
+
+This will go through each of the defined datasources and try to
+connect and bind given the information in the server configuration
+file.
+
+=head2 User/Group Storage and Authentication
+
+Storing users and groups for use in OpenInteract authentication makes
+things a little trickier. This is supported but still in its infancy,
+so you might scare up a few gotchas here and there.
+
+You should only need to do the following:
+
+=over 4
+
+=item *
+
+Modify the SPOPS configuration files for both users
+(C<base_user-x.xx/conf/spops_user.ini>) and groups
+(C<base_group-x.xx/conf/spops_group.ini>) or use and tweak the ones
+supplied under the same path but named C<ldap_spops_user.ini> and
+C<ldap_spops_group.ini>.
+
+=item *
+
+Change the key C<login.crypt_password> to '0' (LDAP takes care of this
+for you)
+
+=item *
+
+Modify the server configuration file to set the values for both the
+C<id.user_type> and C<id.group_type> keys to 'char'. Do this before
+installing OpenInteract since these keys inform the datatypes of other
+tables, such as C<sys_error> which stores errors.
+
+=item *
+
+Modify the server configuration file to set the values for the system
+users and groups. You can map these to existing users or create new
+ones. The keys you'll need to modify are:
+
+ default_objects.superuser
+ default_objects.supergroup
+ default_objects.public_group
+ default_objects.site_admin_group<
+
+See the discussion about 'Object Security' below for more information
+about this.
+
+=item *
+
+Note that the 'sasl' key in the relevant LDAP datasource configuration
+section has not yet been tested, primarily because we need to setup a
+development server that has SASL/CRAM-MD5 support properly compiled
+in.
+
+=back
+
+If you're having issues authenticating, try the following simple
+script, setting the variables to appropriate values:
+
+[% INCLUDE examples/ldap_auth_test_script | linenum %]
+
+=head1 OBJECT SECURITY
+
+=head2 Security for Existing Data
+
+You might be using LDAP because you have a directory of
+existing information. If you are doing this, then you need to
+tell OpenInteract about the security for the objects already in
+the system.
+
+The C<base_security> package has a script for automating this
+fairly common action. You'll need to run the script
+C<create_object_security.pl> found in that package. Here's a sample:
+
+[% INCLUDE examples/ldap_create_existing_security | linenum %]
+
+You will have to modify 'site admin' to the ID of your site admin
+group -- whatever you set in the 'default_objects.site_admin_group'
+key of your server configuration.
+
+These commands will create entries in the security table so
+that the 'world' security for all users and groups is 'read' and
+that the site admin group has read/write privileges to all users
+and groups.
+
+Run the script with the parameter '--help' to get more
+information about how to run it.
+
+=head2 Object Creation Security
+
+As opposed to OI 1.x you should not need to modify the entry in
+'creation_security' for every secured SPOPS object. Instead of
+hardcoding object IDs you can list a key pointing to the
+'default_objects' area of the server configuration. For instance,
+you'll often see a creation security policy declared like this:
+
+[% INCLUDE examples/ldap_declare_object_security | linenum %]
+
+The 'site_admin_group' gets replaced at server startup by the server
+configuration entry 'default_objects.site_admin_group'. So no matter
+whether you use LDAP or DBI you just need to change that value and
+restart.
+
+=head1 EXAMPLES
+
+=head2 Server Configuration
+
+The following defines two connections: 'main_ldap' and
+'auth_ldap'. The first describes a connection using an anonymous bind,
+while the second specifies a bind DN and password. The second also
+uses a different port than the first.
+
+[% INCLUDE examples/ldap_define_datasource | linenum %]
+
+=head2 Object Configuration
+
+Here's a sample configuration, from the 'base_user' package. One
+important thing to note: you B<do not> need to use a full DN for
+C<ldap_base_dn> --
+L<OpenInteract2::SPOPS::LDAP|OpenInteract2::SPOPS::LDAP> overrides the
+method C<base_dn()> and prepends the value from C<ldap_base_dn> to the
+value from C<base_dn> in your datasource.
+
+So if we were to use the example below with the 'main' datasource, the
+base DN of these objects would be:
+
+[% INCLUDE examples/ldap_base_dn_calc | linenum %]
+
+If you're using multiple datasources, C<ldap_base_dn> needs to be a
+hashref with the keys as datasources and the values as the partial
+base DN for that datasource. See
+L<SPOPS::LDAP::MultiDatasource|SPOPS::LDAP::MultiDatasource> for more
+information.
+
+[% INCLUDE examples/ldap_spops_base_dn_multiple_ds | linenum %]
+
+=head1 MULTIPLE DATASOURCES
+
+You can use multiple datasources in two different ways
+
+=over 4
+
+=item *
+
+Use multiple datasources for the same class. This enables you to
+search for an entry once and have the search get executed on multiple
+directories. Read about how this works and how you set it up in
+L<SPOPS::LDAP::MultiDatasource|SPOPS::LDAP::MultiDatasource>
+
+=item *
+
+Use a single datasource per class but have multiple directories
+available. For instance, you might run one LDAP directory for all
+equipment in your organization and another for all employees and
+groups.
+
+For this, you simply need to configure all datasources in your server
+configuration, then tell each SPOPS class which datasource it should
+use. To tell a class, you need to use the C<datasource> key in its
+configuration:
+
+[% INCLUDE examples/ldap_spops_datasource_specify | linenum %]
+
+This class would use the connection information stored under the key
+'equipment' in your server configuration.
+
+There are other configuration details to be aware of -- please see
+L<SPOPS::LDAP::MultiDatasource|SPOPS::LDAP::MultiDatasource> for more
+infromation.
+
+=back
+
+=head1 COPYRIGHT
+
+Copyright (c) 2001-2004 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>Chris@cwinters.comE<gt>

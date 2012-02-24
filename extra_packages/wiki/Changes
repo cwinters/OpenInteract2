@@ -1,0 +1,12 @@
+Revision history for OpenInteract2 package wiki.
+
+0.02  Sun Mar  6 11:35:46 EST 2005
+
+      Move to new package format.
+
+0.01  Wed Jun  2 17:29:36 2004
+
+      Package skeleton created by OpenInteract2::Package - add initial
+      wiki implementation with formatter, action, action parameters
+      and templates.
+

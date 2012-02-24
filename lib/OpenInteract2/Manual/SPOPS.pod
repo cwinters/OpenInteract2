@@ -1,0 +1,230 @@
+=head1 NAME
+
+OpenInteract2::Manual::SPOPS - Controlling interations between OpenInteract2 and SPOPS
+
+=head1 SYNOPSIS
+
+This part of the OpenInteract manual describes how OpenInteract2 uses
+SPOPS and the additional features you can set.
+
+=head1 SPOPS SUBCLASS NAMING
+
+Unlike OI 1.x, you no longer have to name L<SPOPS::DBI|SPOPS::DBI>,
+L<SPOPS::LDAP|SPOPS::LDAP>, or any other implementation-specific
+subclass in the 'isa' key of your configuration. Instead, you just
+need to tell OI2 what datasource you're using for the object -- if you
+don't specify one then you're using the default, which is normally
+'main'. You specify the default datasource in the server
+configuration:
+
+ [datasource_config]
+ spops         = main
+ system        = main
+ manager       = OpenInteract2::DatasourceManager
+
+At startup time OI2 will rewrite the 'isa' key in every SPOPS object
+declaration to have the proper entries in it for your datasource. This
+means your objects will never get out of sync and eliminates a major
+hassle with OI 1.x. Here's an example. Say you have the following
+datasource declared in your server configuration:
+
+ [datasource main]
+ type = DBI
+ spops = SPOPS::DBI::Pg
+ ...
+
+The declaration for a simple object might look like this:
+
+ [news_section]
+ class              = OpenInteract2::NewsSection
+ isa                = 
+ field              = 
+ field_discover     = yes
+ id_field           = news_section_id
+ no_insert          = news_section_id
+ increment_field    = yes
+ sequence_name      = oi_news_section_seq
+ base_table         = news_section
+ name               = section
+ object_name        = News Section
+
+Notice that the 'isa' field is absolutely empty. Here's what it would
+look like after the rewriting process at server startup:
+
+ [news_section]
+ class              = OpenInteract2::NewsSection
+ isa                = OpenInteract2::SPOPS::DBI
+ isa                = SPOPS::DBI::Pg
+ isa                = SPOPS::DBI
+ field              = 
+ field_discover     = yes
+ id_field           = news_section_id
+ no_insert          = news_section_id
+ increment_field    = yes
+ sequence_name      = oi_news_section_seq
+ base_table         = news_section
+ name               = section
+ object_name        = News Section
+
+=head1 SECURITY TAGGING
+
+One of the other rewriting features deals with security. In OI 1.x you
+were forced to place L<SPOPS::Secure|SPOPS::Secure> in the 'isa' key
+of your configuration. In OI 2.x it's more declarative. You just need
+to specify 'yes' for the 'is_secure' configuration key. Here's an example:
+
+ [news_section]
+ class              = OpenInteract2::NewsSection
+ isa                = 
+ is_secure          = yes
+ ...
+
+And after the rewriting process:
+
+ [news_section]
+ class              = OpenInteract2::NewsSection
+ isa                = OpenInteract2::SPOPS::DBI
+ isa                = SPOPS::Secure
+ isa                = SPOPS::DBI::Pg
+ isa                = SPOPS::DBI
+ is_secure          = yes
+ ...
+
+=head1 CREATION SECURITY CONVERSION
+
+Another part of the rewriting process makes it easier to declare the
+object creation security for groups. Instead of specifying the ID of a
+group, you can specify its name as listed under the server
+configuration key 'default_objects'. For instance, say we wanted to
+create a new group 'content_admin' for use in our object
+'document'. We'd first declare the group in the server configuration:
+
+ [default_objects]
+ ...
+ public_group        = 2
+ site_admin_group    = 3
+ content_admin_group = 5
+
+And then we'd be able to set relevant SPOPS 'creation_security' key
+with the group name and level:
+
+ [document]
+ class     = OpenInteract2::Document
+ is_secure = yes
+ ...
+ 
+ [document creation_security]
+ user   = 
+ group  = content_admin_group:WRITE
+ world  = READ
+
+=head1 DISPLAY/EDIT URL
+
+SPOPS allows you to specify a URL for display/editing in the
+configuration key 'display'. OpenInteract2 enhances this by allowing
+you to use the common 'ACTION' and 'TASK' keys and have the URL be
+generated at runtime, including the deployment context. This allows
+you to focus on the action and not worry about deployment details.
+
+Here's an example using the 'news' object:
+
+ [news]
+ class  = OpenInteract2::News
+ ...
+
+ [news display]
+ ACTION    = news
+ TASK      = display
+ TASK_EDIT = display_form
+
+So this says to generate the URL to display a news object, first
+lookup the URL for the 'news' action, use the 'display' task and then
+append the ID of the object as necessary. So when you call:
+
+ my $news = eval {
+     CTX->lookup_object( 'news ' )->fetch( 15 )
+ };
+ my $object_info = $news->object_description;
+ print "URL to display this news object: $object_info->{url}";
+ print "URL to edit this news object: $object_info->{url_edit}";
+
+the result would be:
+
+ URL to display this news object: /News/display/?news_id=15
+ URL to edit this news object: /News/display_form/?news_id=15
+
+And if you were deployed under the URL space '/MyApp' it would look
+like this:
+
+ URL to display this news object: /MyApp/News/display/?news_id=15
+ URL to edit this news object: /MyApp/News/display_form/?news_id=15
+
+=head1 DATE CONVERSION
+
+OpenInteract can perform round-trip date conversion for you. This
+means that when a date is pulled out of the database it will be
+converted into a L<DateTime|DateTime> object and when you execute a
+C<save()> against an object it will be converted from the object
+format into one your database can understand.
+
+Setting it up is simple. Just set the key 'convert_date_field' in your
+SPOPS configuration to an array reference with the fields in your
+object of date/datetime format. Here's an example using the 'news'
+object again:
+
+ [news]
+ class              = OpenInteract2::News
+ ...
+ convert_date_field = posted_on
+ convert_date_field = active_on
+ convert_date_field = expires_on
+
+And an example of usage:
+
+ my $news = eval {
+     CTX->lookup_object( 'news ' )->fetch( 15 )
+ };
+ my $posted_on_display = "Posted on " .
+                          $news->posted_on->day_of_year .
+                          " day of the year";
+
+You also need to specify the format your database requires for
+dates. This format is used to read the date from the database into a
+L<DateTime|DateTime> object (when doing a SELECT) and to transform the
+L<DateTime|DateTime> object value into something your database can
+recognize (when doing a INSERT or UPDATE).
+
+The format is listed in the 'convert_date_format' key of your SPOPS
+configuration. It uses the standard C<strftime> formatting codes --
+see L<DateTime|DateTime> and
+L<DateTime::Format::Strptime|DateTime::Format::Strptime> for
+specifics. If you do not provide a format you'll get a warning in your
+logs and OI will supply '%Y-%m-%d %H:%M:%S' as a default. This should
+work with most databases.
+
+=head1 FULLTEXT SEARCHING
+
+The C<full_text> package is now a core OpenInteract package. And you
+can just indicate that your object is indexable along with the fields
+that should be indexed:
+
+ is_searchable = yes
+ fulltext_field = indexable_field_one
+ fulltext_field = indexable_field_two
+ fulltext_field = indexable_field_three
+
+=head1 SEE ALSO
+
+L<OpenInteract2::Config::Initializer|OpenInteract2::Config::Initializer> 
+
+L<DateTime|DateTime>
+
+L<SPOPS::Tool::DateConvert|SPOPS::Tool::DateConvert>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

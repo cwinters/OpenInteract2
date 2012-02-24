@@ -1,0 +1,16 @@
+[%########################################
+  label_form_text_row( label, count, name, value, field_label )
+     Display a row to input text: label on left, text input on right.
+  ########################################-%]
+
+[%- DEFAULT colspan = 2;
+    IF action_errors.$name;
+       color = '#ffffe0';
+    END; -%]
+[%- INCLUDE label_row_begin( colspan = 1 ) -%]
+[%- INCLUDE data_cell_begin %][% INCLUDE form_text %]
+</td></tr>
+[% IF action_messages.$name -%]
+[% INCLUDE label_error_row_extra( color   = color,
+                                  message = action_messages.$name ) -%]
+[% END -%]

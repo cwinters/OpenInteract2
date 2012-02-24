@@ -1,0 +1,14 @@
+[%- DEFAULT theme = OI.theme_properties -%]
+
+[% FOREACH package = templates_used.keys.sort -%]
+[% IF package %]<b>[% package %]</b>
+[%- ELSE -%]<b>[% MSG( 'base_template.usedbox.global' ) %]</b>[% END %]<br>
+  [% FOREACH template_info = templates_used.$package -%]
+      [%- edit_url = OI.make_url( ACTION   = 'template',
+                                  TASK     = 'display_form',
+                                  name     = template_info.name,
+                                  package  = package ) -%]
+      [% theme.bullet -%]
+         <a href="[% edit_url %]">[% template_info.name -%]</a><br>
+  [% END -%]
+[% END -%]

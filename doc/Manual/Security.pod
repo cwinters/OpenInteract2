@@ -1,0 +1,264 @@
+=head1 NAME
+
+OpenInteract2::Manual::Security - Security in OpenInteract2
+
+=head1 SYNOPSIS
+
+This part of the OpenInteract manual describes how the security
+subsystem works.
+
+=head1 BASICS
+
+There are two layers of security in OpenInteract:
+
+=over
+
+=item 1.
+
+B<Action security>
+
+=item 2.
+
+B<Data security>
+
+=back
+
+Action security specifies whether a particular user can generally
+accomplish a particular task. Data security determines whether the
+user can perform a particular action on a particular object, or even
+see the object at all. The distinction between the two is important
+for application programmers, but they're implemented in a unified
+fashion. This method of implementation is a good thing but it might be
+confusing to newcomers.
+
+=head1 IMPLEMENTATION
+
+Every SPOPS class can have security implemented by setting the
+configuration key C<is_secure> to 'yes'.
+
+B<NOTE>: This is different than OI 1.x where you had to place
+L<SPOPS::Secure|SPOPS::Secure> in the 'isa' configuration key.
+
+Removing security from the class is as simple as setting C<is_secure>
+to something other than 'yes', but note that doing so will not remove
+the actual security objects that were previously created.
+
+=head2 Setup of database
+
+Here's an idea of how the table for security objects is setup (using
+PostgreSQL syntax):
+
+ CREATE TABLE security (
+  sid          int not null,
+  object_id    varchar(200) not null,
+  class        varchar(20) not null,
+  scope        char(1) not null,
+  scope_id     varchar(16) not null default 'world',
+  level        char(1) not null,
+  primary key  ( sid ),
+  unique       ( object_id, class, scope, scope_id )
+ )
+
+Some notes on this table:
+
+=over
+
+=item *
+
+B<sid>: a unique number is necessary for each security object
+(auto-increment/sequence).
+
+=item *
+
+B<object_id>: represents the unique ID for the object being
+secured. For handlers this is generally '0'.
+
+=item *
+
+B<class>: the class of the object being secured (e.g,
+'OpenInteract2::User')
+
+=item *
+
+B<scope>: w (world) | g (group) | u (user)
+
+=item *
+
+B<scope_id>: the ID of the user or group for which the scope holds;
+the default takes hold when we do not specify a scope_id, which should
+only be when we specify a scope of 'w'
+
+=item *
+
+B<level>: 1 (none) | 4 (read) | 8 (write) (actual numbers not final;
+use the exported constants specified by
+L<SPOPS::Secure|SPOPS::Secure>.)
+
+=back
+
+We use C<sid> as a primary key but also enforce uniqueness to ensure
+we do not try to specify two different levels of security for the user
+or group (or for the whole world) on the same object.
+
+=head2 Security as object
+
+Each setting to an object is itself an object. In this manner we can
+use the SPOPS framework to create/edit/remove security settings. (Note
+that if you modify the L<SPOPS::Secure::DBI|SPOPS::Secure::DBI> class
+to use L<SPOPS::Secure|SPOPS::Secure> in its @ISA, you'll probably
+collapse the Earth in a self-referential object definition
+cycle. Don't do that.)
+
+The security object has some extra methods you can use to easily
+retrieve security information for a particular object or class. The
+C<fetch_by_object()> method will return a hashref (indexed by scope)
+of security settings for a particular object, and the C<fetch_match()>
+method will return the particular security object matching an object
+and a specific scope (e.g., 'user ID 1, group ID 5'). See
+L<SPOPS::Secure::DBI|SPOPS::Secure::DBI> for usage details and more
+information.
+
+=head1 USING SECURITY
+
+Security is interwoven into SPOPS. So when you try to perform any
+action upon an object, its security is checked. (If you're using SPOPS
+by itself you need tell it how to fetch User and Group objects. But
+OpenInteract2 already does this for you.)
+
+For instance, when you do a simple fetch on a class that has
+implemented security:
+
+ my $file = eval {
+     OpenInteract2::MyFileClass->fetch( $id )
+ };
+
+SPOPS first ensures that the current user can READ it before fetching
+it. It does so by checking the permissions that have been previously
+set on an object. If the current user has no permissions on the object,
+SPOPS throws a security error explaining that the current user has no
+permission to see the requested object. Since this is not a fatal
+error, your action can continue working but display an error to the
+user, or whatever you want.
+
+You can check for this as follows:
+
+ my $file = eval {
+     OpenInteract2::MyFileClass->fetch( $id )
+ };
+ if ( $@->isa( 'SPOPS::Exception::Security' ) ) {
+     warn "You do not have permission to look at item $id";
+ }
+ else {
+     warn "Error when trying to retrieve item $id: $@";
+ }
+
+Similarly, if you try to retrieve a group of objects, SPOPS will only
+return those objects for which the current user has READ (or higher)
+permission. You can determine which objects the user has WRITE access
+to by inspecting the object property {tmp_security_level}, which is
+always set by the C<fetch()> method. For instance:
+
+ my $file = eval {
+     OpenInteract2::MyFileClass->fetch( $id )
+ };
+ if ( $obj->{tmp_security_level} == SEC_LEVEL_READ ) { 
+    warn "User has READ access";
+ }
+ elsif ( $obj->{tmp_security_level} == SEC_LEVEL_WRITE ) { 
+    warn "User has WRITE access";
+ }
+
+If you try to write (create, update or remove) an object, SPOPS ensures
+that the current user has permission to do so. Note that while updating
+or removing an object is fairly simple -- we just check the permissions
+on the existing item -- creating an object is somewhat more difficult.
+
+Creating an object can be very application specific. For instance, if
+you're implementing a file explorer program the permission to upload a
+new file (or create a new file object) depends on the user's permission
+for the directory object the file is being uploaded to. If the user
+only has READ permission, then creating a new file is prohibited.
+However, WRITE permission allows the file to be uploaded properly.
+
+And once the object has been created, what other users/groups should
+have permission and at what level? Since this is very
+application-specific, so SPOPS does not impose a particular behavior
+on your objects. Instead, it allows you to setup default permissions
+on the class. (See below.)
+
+=head2 Default Object Permissions
+
+Even though we've covered object security and data security, there
+remains a little hole.
+
+Each SPOPS class can have default permissions setup. This should
+alleviate the need to create specific security_* handlers for your
+class. For instance, you can specify that you want all users to be
+able to create objects of a particular class and each created object
+will have READ permission enabled for the 'Public' group and WRITE
+permission for the 'Site Admin' group.
+
+Here's how to setup default security in an INI file found in the
+C<base_user> package:
+
+ [user]
+ class     = OpenInteract2::User
+ is_secure = yes
+ ...
+ 
+ [user creation_security]
+ user   = 
+ group  = site_admin_group:WRITE
+ world  = READ
+
+So here we've declared that every 'user' object created by the system
+will have READ permission for the world and WRITE permission for the
+group key 'site_admin_group'. This key corresponds to an entry in your
+server configuration file under 'default_objects', and you can add
+your own. For instance, say you had a 'content admin' group that
+should have WRITE access to all instances of the 'document' SPOPS
+object. First, declare the group and its ID (we'll assume '5' for our
+example) in your server configuration:
+
+ [default_objects]
+ ...
+ public_group        = 2
+ site_admin_group    = 3
+ content_admin_group = 5
+
+Then set the relevant SPOPS 'creation_security' key:
+
+ [document]
+ class     = OpenInteract2::Document
+ is_secure = yes
+ ...
+ 
+ [document creation_security]
+ user   = 
+ group  = content_admin_group:WRITE
+ world  = READ
+
+=head1 FUTURE WORK
+
+In the future, we may implement a 'Security Policy' which tells the
+system what you or members of your group should do when creating an
+object. Currently, the permissions are specified in the SPOPS object
+configuration file using the 'initial security' key.
+
+=head1 SEE ALSO
+
+L<SPOPS::Manual::Security|SPOPS::Manual::Security>
+
+L<SPOPS::Secure::DBI|SPOPS::Secure::DBI>
+
+L<SPOPS::Secure|SPOPS::Secure>
+
+L<SPOPS::Secure::Hierarchy|SPOPS::Secure::Hierarchy>
+
+=head1 COPYRIGHT
+
+Copyright (c) 2002-2005 Chris Winters. All rights reserved.
+
+=head1 AUTHORS
+
+Chris Winters E<lt>chris@cwinters.comE<gt>

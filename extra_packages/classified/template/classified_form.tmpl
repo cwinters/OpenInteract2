@@ -1,0 +1,116 @@
+[%- OI.page_title( "Modify a Classified" );
+    DEFAULT theme = OI.theme_properties;
+    OI.box_add( 'classified_tools_box', object = classified, view = 'form' ) -%]
+
+[% PROCESS error_message %]
+
+<div align="center">
+
+[%- display_action = ( classified.id ) ? 'Update' : 'Create' -%]
+<h2>[% display_action %] a Classified Ad</h2>
+
+[% PROCESS form_begin( ACTION = 'classified',
+                       TASK   = 'edit',
+                       method = 'POST',
+                       name   = 'classified' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '80%', border_width = 1 ) -%]
+
+   <tr valign="top" bgcolor="[% theme.head_bgcolor %]">
+    <th colspan="2">
+      <font color="[% theme.head_font_color %]">
+        [% display_action %] a Classified Item
+      </font>
+   </th>
+   </tr>
+
+[%- count = 0 -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Title', is_required = 1,
+                                name = 'title', value = classified.title,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label = 'Description', is_required = 1,
+                                    name = 'description', rows = 4,
+                                    cols = 30, wrap = virtual,
+                                    value = OI.html_encode( classified.description ) ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label = 'Required Skills',
+                                    name = 'required_skills', rows = 4,
+                                    cols = 30, wrap = virtual,
+                                    value = OI.html_encode( classified.required_skills ) ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label = 'Recommended Skills',
+                                    name = 'recommended_skills', rows = 4,
+                                    cols = 30, wrap = virtual,
+                                    value = OI.html_encode( classified.recommended_skills ) ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Location',
+                                name = 'location', value = classified.location,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_textarea_row( label = 'Application Instructions',
+                                    name = 'application_info', rows = 4,
+                                    cols = 30, wrap = virtual,
+                                    value = OI.html_encode( classified.application_info ) ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Contact Person',
+                                name = 'contact', value = classified.contact,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Organization',
+                                name = 'organization', value = classified.organization,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Phone',
+                                name = 'phone', value = classified.phone,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Fax',
+                                name = 'fax', value = classified.fax,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'E-Mail',
+                                name = 'email', value = classified.email,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label = 'Website URL',
+                                name = 'url', value = classified.url,
+                                size = 20, maxlength = 50 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_date_row( label = 'Deadline',
+                                name = 'deadline', value = classified.deadline ) -%]
+
+[% IF classified.tmp_security_level >= OI.security_level.write -%]
+   [%- active_choice = classified.active || 'no' -%]
+   [% INCLUDE label_form_select_row( color = theme.admin_color,
+                                     label = 'Active?',
+                                     picked = active_choice,
+                                     name = 'active', plain  = 1,
+                                     value_list = [ 'yes', 'no' ],
+                                     label_list = [ 'Yes', 'No' ] ) -%]
+[% END -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = 'Modify' ) -%]
+
+[% PROCESS table_bordered_end -%]  
+
+[% PROCESS form_hidden( name = 'classified_id', value = classified.id ) -%]
+
+[% PROCESS form_end %]
+
+</div>

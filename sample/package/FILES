@@ -1,0 +1,15 @@
+# Items to copy from the sample directory to the created package;
+# left-hand side is the filename here, right-hand side are the
+# destinations directories and filename, space-separated.
+#
+# Left-hand filenames prefixed by a '*' will not have the
+# 'package_name' and 'class_name' template keys replaced.
+
+package.ini    --> package.ini
+MANIFEST.SKIP  --> MANIFEST.SKIP
+spops.ini      --> conf spops.ini
+action.ini     --> conf action.ini
+SQLInstall.pm  --> OpenInteract2 SQLInstall [% class_name %].pm
+Action.pm      --> OpenInteract2 Action [% class_name %].pm
+App.pm         --> OpenInteract2 App [% class_name %].pm
+*sample.tmpl   --> template sample.tmpl

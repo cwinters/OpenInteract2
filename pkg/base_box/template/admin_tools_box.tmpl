@@ -1,0 +1,26 @@
+[%- DEFAULT theme = OI.theme_properties;
+    error_url      = OI.make_url( ACTION = 'error_browser' );
+    group_list_url = OI.make_url( ACTION = 'group', TASK = 'list' );
+    group_new_url  = OI.make_url( ACTION = 'group', TASK = 'display_add' );
+    lookup_url     = OI.make_url( ACTION = 'lookups' );
+    activity_url   = OI.make_url( ACTION = 'objectactivity' );
+    page_url       = OI.make_url( ACTION = 'page', TASK = 'actions' );
+    security_url   = OI.make_url( ACTION = 'security' );
+    tmpl_list_url  = OI.make_url( ACTION = 'template' );
+    tmpl_new_url   = OI.make_url( ACTION = 'template', TASK   = 'display_add');
+    docs_url       = OI.make_url( ACTION = 'systemdoc' );
+    theme_list_url = OI.make_url( ACTION = 'theme', TASK = 'list' );
+    theme_new_url  = OI.make_url( ACTION = 'theme', TASK = 'display_add' );
+    user_search_url= OI.make_url( ACTION = 'user' );
+    user_new_url   = OI.make_url( ACTION = 'user', TASK = 'display_add' );
+ -%]
+[% theme.bullet %] [% MSG( 'admin_tools_box.error_browser', error_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.group', group_list_url, group_new_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.lookup', lookup_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.activity', activity_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.page', page_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.security', security_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.template', tmpl_list_url, tmpl_new_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.doc', docs_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.theme', theme_list_url, theme_new_url ) %]<br>
+[% theme.bullet %] [% MSG( 'admin_tools_box.user', user_search_url, user_new_url ) %]

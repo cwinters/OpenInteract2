@@ -1,0 +1,5 @@
+[% IF tag_and_count.size > 0 %]
+[% INCLUDE object_tags::tag_listing %]
+[% ELSE %]
+[% MSG( 'object_tags.no_related' ) %]
+[% END %]

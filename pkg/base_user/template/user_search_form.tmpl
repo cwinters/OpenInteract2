@@ -1,0 +1,45 @@
+[%- OI.page_title( MSG( 'base_user.search_form.title' ) );
+    DEFAULT theme = OI.theme_properties; -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2>[% MSG( 'base_user.search_form.title' ) %]</h2>
+
+[% PROCESS form_begin( ACTION = 'user',
+                       TASK   = 'search',
+                       method = 'GET' ) -%]
+
+[% INCLUDE table_bordered_begin( table_width = '50%' ) -%]
+[%- count = 0 -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_user.info.login',
+                                name      = 'login_name',
+                                size      = 25 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_user.info.first_name',
+                                name      = 'first_name',
+                                size      = 25 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_user.info.last_name',
+                                name      = 'last_name',
+                                size      = 25, ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label_key = 'base_user.info.email',
+                                name      = 'email',
+                                size      = 25 ) -%]
+
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = MSG( 'global.button.search' ) ) -%]
+
+[% INCLUDE table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+</div>

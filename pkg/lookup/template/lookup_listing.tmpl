@@ -1,0 +1,81 @@
+[%- OI.page_title( MSG( 'lookup.listing.page_title' ) );
+    DEFAULT theme       = OI.theme_properties;
+    DEFAULT blank_count = 5; -%]
+
+[%########################################
+  MACROS
+  ########################################-%]
+
+[% MACRO lookup_entry_table BLOCK -%]
+    <table border="0" cellpadding="4" cellspacing="0">
+  [% display_id = entry.id || 'New';
+     this_id    = entry.id || id -%]
+      <tr><td colspan="2">[% display_id %]</td></tr>
+  [% FOREACH idx = [ 0 .. field_list.max ] -%]
+      <tr>
+         <td align="right"><b>[% label %]</b></td>
+         [%- field = field_list.$idx -%]
+         <td>[% PROCESS lookup::lookup_field( label = label_list.$idx,
+                                              id    = this_id,
+                                              size  = size_list.$idx, 
+                                              value = entry.$field,
+                                              name  = field ) -%]
+         </td>
+      </tr>
+  [% END -%]
+    </table>
+[% END -%]
+
+
+[%########################################
+  DISPLAY START
+  ########################################-%]
+
+[%- PROCESS error_message -%]
+
+<div align="center">
+
+<h1>[% MSG( 'lookup.listing.title', lookup_type ) %]</h1>
+
+<p>
+[% MSG( 'lookup.listing.summary', lookup_type ) %]
+[% IF partition_field;
+     MSG( 'lookup.listing.summary', partition_label, partition_value );
+   END -%].
+</p>
+
+[% PROCESS form_begin( ACTION = 'lookups',
+                       TASK   = 'edit',
+                       method = 'POST',
+                       name   = 'lookup_listing' ) -%]
+
+[% INCLUDE table_bordered_begin -%]
+
+[% FOREACH item = lookup_list -%]
+  <tr [% PROCESS row_color( count = loop.count ) %] valign="top" align="left">
+   <td>[% lookup_entry_table( entry = item ) -%]</td>
+   <td>[% PROCESS form_checkbox( name  = "$remove_key-$item.id",
+                                 value = 'yes' ) %] [% MSG( 'lookup.listing.remove' ) %]</td>
+  </tr>
+[% END -%]
+  <tr bgcolor="#ffffe0" align="center">
+    <td colspan="2"><b>[% MSG( 'lookup.listing.new_entries' ) %]</b></td>
+  </tr>
+[% FOREACH blank_num = [ 1 .. blank_count ] -%]
+  <tr [% PROCESS row_color( count = loop.count ) %] valign="top" align="left">
+   <td colspan="2">
+   [%- lookup_entry_table( id = "${new_key}${blank_num}" ) -%]
+   </td>
+  </tr>
+[% END -%]
+
+[%- PROCESS form_submit_row( value_key = 'global.button.save',
+                             color = theme.bgcolor ) -%]
+
+[%- PROCESS table_bordered_end -%]
+
+[%- PROCESS form_hidden( name = 'lookup_type', value = lookup_type ) -%]
+
+[% PROCESS form_end %]
+
+</div>

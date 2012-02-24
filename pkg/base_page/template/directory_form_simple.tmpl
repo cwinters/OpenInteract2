@@ -1,0 +1,47 @@
+[%- OI.page_title( "Create a New Directory" );
+    DEFAULT theme = OI.theme_properties;
+    count = 0;
+    OI.box_add( 'edit_document_box' ); -%]
+
+<div align="center">
+
+[%- PROCESS error_message -%]
+[%- PROCESS status_message -%]
+
+<h2>Create a New Directory</h2>
+
+[% IF parent_directory -%]
+
+[%- dir_url = OI.make_url( base = parent_directory ) -%]
+<p>Adding subdirectory to: 
+  <tt><b><a href="[% dir_url %]">[% parent_directory %]</a></b></tt></p>
+
+[% PROCESS form_begin( ACTION = 'page',
+                       TASK   = 'add_subdirectory',
+                       name   = 'page',
+                       method = 'POST' ) -%]
+
+[% INCLUDE form_hidden( name  = 'parent_directory',
+                        value = parent_directory ) -%]
+
+[% INCLUDE table_bordered_begin -%]
+[%- count = count + 1 -%]
+[% INCLUDE label_form_text_row( label     = 'Directory', 
+                                name      = 'directory'
+                                size      = 30,
+                                maxlength = 30 ) -%]
+[%- count = count + 1 -%]
+[% INCLUDE form_submit_row( value = 'Add' ) -%]
+
+[% PROCESS table_bordered_end -%]
+
+[% PROCESS form_end %]
+
+[% ELSE -%]
+
+ <p>Failed to display directory creation form. Reason: No directory
+ specified in parameters.</p>
+
+[% END -%]
+ 
+</div>

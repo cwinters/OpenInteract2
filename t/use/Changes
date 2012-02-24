@@ -1,0 +1,83 @@
+Revision history for OpenInteract package base_user.
+
+2.03  Sun Apr  6 22:45:18 EDT 2003
+
+      Force scalar context on ->id call. (From 1.x)
+
+2.02  Thu Apr  3 13:34:37 EST 2003
+
+      Allow non-matching passwords to get sent to the right
+      template. (From 1.x)
+
+2.01  Mon Mar 31 21:35:45 EST 2003
+
+      Update SPOPS config to INI, other changes.
+
+2.00  Tue Mar 25 22:00:16 EST 2003
+
+      Initial OI2 conversion.
+
+1.64  Wed Mar 4 17:12:29 EST 2003
+
+1.63  Wed Feb 28 06:41:11 EST 2003
+
+1.62  Wed Feb 26 06:55:53 EST 2003
+
+      Add 'autologin' action key. Set to 'yes' if you want new users
+      to be automatically logged in after creating an account. Thanks
+      to Chris McDaniel <Chris.McDaniel@telus.com> for the idea.
+
+1.61  Mon Feb 17 16:07:41 EST 2003
+
+      Update package docs.
+
+1.60  Mon Jan  6 22:46:33 EST 2003
+
+      Change all 'datetime' datatypes to use the '%%DATETIME%%' key.
+
+1.59  Mon Nov 25 08:58:40 EST 2002
+
+      In OI/HAndler/NewUser.pm - use SPOPS::Utility->now() directly;
+      thanks to Nikollos <nick@fb.ru> for the report.
+
+1.58  Sun Aug 25 12:02:04 EDT 2002
+
+      Remove all template/*.meta files
+
+1.57  Tue Aug 13 07:18:00 EDT 2002
+
+      Ensure everything is up-to-date.
+
+1.56  Mon May 13 08:51:18 EDT 2002
+
+      Modified OpenInteract::Handler::NewUser to use either
+      Email::Valid or Mail::RFC822::Address to validate the email
+      address. (Email::Valid is not available via PPM for Win32
+      systems.) Responding to SF Bug #554665.
+
+1.55  Sun May  5 11:13:39 EDT 2002
+
+      Fix other 'datetime' -> 'date' in struct/sys_user_oracle.sql
+
+1.54  Thu May  2 09:00:03 EDT 2002
+
+      Add Interbase-specific table and generator.
+
+1.53  Tue Apr 16 15:04:37 EDT 2002
+
+      Change datatype from 'datetime' to 'date' in
+      struct/sys_user_oracle.sql
+
+1.52  Sat Apr 13 12:46:42 EDT 2002
+
+      In OI/Handler/NewUser.pm - use
+      SPOPS::Utility->generate_random_code() directly.
+
+1.51  Sat Apr 13 12:20:19 EDT 2002
+
+      Use SPOPS::Utility->crypt_it rather than have it in our ISA.
+
+1.50  Tue Apr  2 00:36:48 EST 2002
+
+      Add Oracle-specific table definitions; rename structure files to
+      match table names; add sequence.

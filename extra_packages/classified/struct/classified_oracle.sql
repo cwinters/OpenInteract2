@@ -1,0 +1,22 @@
+CREATE TABLE classified (
+ classified_id int not null,
+ posted_on     date not null, 
+ posted_by     %%USERID_TYPE%% not null,
+ title         varchar2(50) null,
+ organization  varchar2(75) null,
+ deadline      date null,
+ description   varchar2(2000) null,
+ location      varchar2(200) null,
+ required_skills varchar2(2000) null,
+ recommended_skills varchar2(2000) null,
+ application_info varchar2(2000) null,
+ contact       varchar2(100) null,
+ phone         varchar2(50) null,
+ fax           varchar2(50) null,
+ email         varchar2(75) null,
+ url           varchar2(75) null,
+ active        char(3) default 'yes',
+ expires_on    date null,
+ active_on     date null,
+ primary key   ( classified_id )
+)

@@ -1,0 +1,4 @@
+               ou=People --> From the object
+        + dc=MyCo,dc=com --> From the 'main' datasource
+        ================
+ou=People,dc=MyCo,dc=com --> Base DN used

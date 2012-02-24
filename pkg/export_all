@@ -1,0 +1,1 @@
+perl -I../lib ../script/oi2_manage export_package --package_dir=. --package=SYSTEM

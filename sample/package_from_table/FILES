@@ -1,0 +1,12 @@
+package.ini         --> package.ini
+MANIFEST.SKIP       --> MANIFEST.SKIP
+spops.ini           --> conf spops.ini
+action.ini          --> conf action.ini
+messages_en.msg     --> msg/[% package_name %]-messages-en.msg
+SQLInstall.pm       --> OpenInteract2 SQLInstall [% class_name %].pm
+Action.pm           --> OpenInteract2 Action [% class_name %].pm
+App.pm              --> OpenInteract2 App [% class_name %].pm
+form.tmpl           --> template form.tmpl
+display.tmpl        --> template display.tmpl
+search_form.tmpl    --> template search_form.tmpl
+search_results.tmpl --> template search_results.tmpl

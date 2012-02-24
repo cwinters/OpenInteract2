@@ -1,0 +1,23 @@
+[% INCLUDE table_bordered_begin -%]
+
+[% INCLUDE header_row( label_keys = [
+  'base_user.info.login', 'base_user.info.name',
+  'base_user.info.title', 'base_user.info.email',
+] ) -%]
+
+[%- count = 1 -%]
+[% WHILE ( user = iterator.get_next ) -%]
+  [%- display_url = OI.make_url( ACTION  = 'user',
+                                 TASK    = 'display',
+                                 user_id = user.id ) -%]
+  <tr [% PROCESS row_color %] valign="top">
+    <td><a href="[% display_url %]">[% user.login_name %]</a></td>
+    <td>[% user.full_name %] &nbsp;</td>
+    <td>[% user.title %] &nbsp;</td>
+    <td>[% IF user.email %]<a href="mailto:[% user.email %]">[% user.email %]</a>
+        [%- ELSE %]&nbsp;[% END %]</td>
+  </tr>
+  [%- count = count + 1 -%]
+[% END %]
+
+[% INCLUDE table_bordered_end -%]

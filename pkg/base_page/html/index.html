@@ -1,0 +1,67 @@
+<h2>Welcome to OpenInteract 2</h2>
+
+<p>OpenInteract 2 is a web application environment written in <a
+href="http://www.perl.org/">perl</a>. It runs in several different
+environments, the most popular being the <a
+href="http://www.apache.org/httpd.html">Apache web server</a>
+accompanied by the <a href="http://perl.apache.org/">mod_perl</a>
+module.</p>
+
+<p>The environment is built to be not only friendly to people
+editing and changing a website's content, but also for the
+developers who can write code (or complex templates) and create
+entire applications.</p>
+
+<p>Data can be brought into OpenInteract a multitude of ways. You
+can use it with most any SQL database that the rock-solid perl <a
+href="http://www.symbolstone.org/technology/perl/DBI/">DBI</a>
+(Database Interface) module supports -- which is just about
+everything! (We have tested so far with 
+<a href="http://www.postgresql.org">PostgreSQL</a>,
+<a href="http://www.mysql.com">MySQL</a>, 
+<a href="http://www.oracle.com">Oracle</a> (with caveats), 
+<a href="http://www.sybase.com/products/databaseservers/ase/">Sybase ASE</a>, 
+<a href="http://www.ianywhere.com/products/sql_anywhere.html">Sybase ASA</a>, and
+<a href="http://www.microsoft.com/sql/">Microsoft SQL Server</a>. 
+InterBase is on the TO DO database list, but someone needs an itch 
+to scratch first.) </p>
+
+<p>Out of the box, you can also use LDAP servers for
+authentication or data storage. Other types of data sources (CORBA
+data sources, XML data, CSV files, etc.) are available by custom
+modules -- or if you wait long enough, they'll be in the box
+too. Since you have the full power of perl at your fingertips, and
+perl is the ultimate glue language, the possibilities are
+endless.</p>
+
+<p>This page is currently stored in your filesystem -- but it
+could just as easily be in your SQL database. Either way, it looks
+and acts like a normal web page to all your users. But to
+OpenInteract, it's all data. And you can do anything you can
+imagine with it...</p>
+
+<p>This site is a simple working demo of the software. It has a
+few tools installed right now, but with the packaging system of
+OpenInteract 2, installing new functionality is a snap!</p>
+
+<p>For more information, check out:</p>
+
+<ul>
+
+  <li><a href="http://openinteract.sourceforge.net/">OpenInteract Wiki
+  Site</a>: This is where you'll find the latest development news,
+  tips and help for common problems.</li>
+
+  <li><a href="http://www.openinteract.com/">Website: OpenInteract
+  for Business</a></li>
+
+  <li><a href="http://sourceforge.net/projects/openinteract/">OpenInteract
+  on SourceForge</a> (mailing lists, source code, CVS repository, etc.)</li>
+
+  [% doc_url = OI.make_url( ACTION = 'systemdoc' ) -%]
+  <li><a href="[% doc_url %]">System documentation</a> installed on
+  your website right now!</li>
+
+</ul>
+
+<p>Good luck!</p>

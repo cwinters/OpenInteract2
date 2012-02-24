@@ -1,0 +1,16 @@
+[%- index_url  = OI.make_url( ACTION = 'systemdoc', TASK = 'home' );
+    module_url = OI.make_url( ACTION = 'systemdoc', TASK = 'module_list' );
+    OI.page_title( title ); -%]
+
+[%- PROCESS error_message %]
+
+<div class="demarcatePage">
+
+<p align="center" bgcolor="#eeeeee">
+<a href="[% index_url %]">[% MSG( 'sys_doc.info.system_doc' ) %]</a> |
+<a href="[% module_url %]">[% MSG( 'sys_doc.info.module_listing' ) %]</a>
+</p>
+
+[% content %]
+
+</div> <!-- demarcatePage -->

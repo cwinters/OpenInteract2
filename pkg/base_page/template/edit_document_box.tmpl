@@ -1,0 +1,23 @@
+[%- DEFAULT theme  = OI.theme_properties;
+    new_url        = OI.make_url( ACTION = 'page',
+                                  TASK   = 'display_add' ); -%]
+[% theme.bullet %] <a href="[% new_url %]">Create a new document</a><br>
+[% IF page %]
+
+[%- edit_url       = OI.make_url( ACTION   = 'page',
+                                  TASK     = 'display_form',
+                                  location = page.location );
+    remove_url     = OI.make_url( ACTION   = 'page',
+                                  TASK     = 'remove',
+                                  location = page.location );
+    page_info      = page.object_description;
+    security_url   = OI.make_url( ACTION       = 'security',
+                                  TASK         = 'display',
+                                  object_class = page_info.class,
+                                  object_id    = page.location  ); -%]
+Following actions apply to the document onscreen<br>
+[% theme.bullet %] <a href="[% edit_url %]">Edit this document</a><br>
+[% theme.bullet %] <a href="[% remove_url %]">Remove this document</a><br>
+[% theme.bullet %] <a href="[% security_url %]">Check document security</a>
+
+[% END %]

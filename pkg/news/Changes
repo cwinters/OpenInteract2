@@ -1,0 +1,376 @@
+Revision history for OpenInteract package news.
+
+2.29  Thu Oct 27 23:12:37 EDT 2005
+
+      Move script/update_to_linked_list.pl to management task,
+      OpenInteract2::Manage::Website::UpdateNewsLinkedList
+
+2.28  Mon Sep 19 22:12:12 EDT 2005
+
+      Remove security from news objects, rely on application-level
+      security instead.
+
+2.27  Sun Sep 18 20:59:38 EDT 2005
+
+      Update templates to use slightly different layout, based on CSS
+      instead of tables.
+
+2.26  Sun Jul  3 23:10:56 EDT 2005
+
+      Intermediate to see how the tag field change works...
+
+2.25  Thu Mar 17 21:35:30 EST 2005
+
+      Modify news SPOPS object display params to use REST; also
+      automatically add new 'news' objects to the "What's new?"
+      listing.
+
+2.24  Tue Mar  1 22:52:43 EST 2005
+
+      Add 'news_archive_monthly' box that displays the archive count
+      by year/month.
+
+2.23  Tue Mar  1 21:58:00 EST 2005
+
+      Add 'archive' task which just points to 'search' but we can grab
+      the extra REST parameters and use them differently.
+
+2.22  Mon Feb 28 20:33:57 EST 2005
+
+      OIN-72: move docs from doc/ into OI2::App class
+
+2.21  Sun Feb 27 16:07:21 EST 2005
+
+      OIN-137: change package.conf -> package.ini
+
+2.20  Sat Dec  4 12:52:09 EST 2004
+
+      Move errors to l10n file; use status/error shortcuts
+
+2.19  Sun Jun 20 00:07:22 EDT 2004
+
+      Use the CTX create_date() helper method so the timezone gets
+      used properly.
+
+2.18  Sat Jun 12 19:07:35 EDT 2004
+
+      Get rid of the referece to the 'object_modify_box'
+
+2.17  Tue Jun  8 22:17:52 EDT 2004
+
+      OIN-19: Also broken was the fact that we didn't use any 'name'
+      in declaring the date fields...
+
+2.16  Tue Jun  8 21:26:15 EDT 2004
+
+      OIN-19: date fields were declared incorrectly in conf/action.ini
+      (c_update_date_fields instead of c_update_fields_date)
+
+2.15  Tue Jun  8 21:13:04 EDT 2004
+
+      Fix 'posted_by' link in news_form (Salve Nilsen)
+
+2.14  Sun Jun  6 15:53:34 EDT 2004
+
+      Fix years in filter.
+
+2.13  Mon May 17 08:17:45 EDT 2004
+
+      Attach comments by default
+
+2.12  Mon Mar 15 16:46:13 EST 2004
+
+      Template changes.
+
+2.11  Sat Feb 28 12:16:22 EST 2004
+
+      Small template fix (thanks Salve Nilsen)
+
+2.10  Tue Feb 24 20:56:14 EST 2004
+
+      Pull all template text into message file
+
+2.09  Mon Dec  1 23:07:13 EST 2003
+
+      - Modify conf/action.ini to use the modified content generator
+      names for HTML::Template and Text::Template
+
+2.08  Sat Oct 18 13:39:34 EDT 2003
+
+      Add migration information to OI2::SQLInstall::News
+
+2.07  Fri Sep  5 10:30:40 EDT 2003
+
+      Doc updates, small.
+
+2.06  Thu Sep  4 00:11:39 EDT 2003
+
+      Add 'TASK_EDIT' key to 'display' entry in conf/spops_news.ini 
+
+2.05  Wed Sep  3 22:17:53 EDT 2003
+
+      Get searching working plus a few template items (links for
+      prev/next, etc.)
+
+2.04  Sat Aug 30 12:40:07 EDT 2003
+
+      Modify use of 'row_color' template widget.
+
+2.03  Tue Jul  1 00:34:21 EDT 2003
+
+      Content tasks have template specified in configuration rather
+      than 'generate_content' call; add sample templates for
+      Text::Template and HTML::Template using the 'latest' task.
+
+2.02  Wed Jun 25 10:29:24 EDT 2003
+
+      Lots of intervening changes; update to use log4p
+
+2.01  Mon Mar 31 21:35:45 EST 2003
+
+      Update SPOPS config to INI, other changes.
+
+2.00  Thu Mar 27 20:11:23 EST 2003
+
+      Initial OI2 conversion.
+
+1.54  Thu Jan  9 10:22:39 EST 2003
+
+      Ensure previous_id/next_id don't get changed on an update.
+
+1.53  Thu Jan  9 00:20:56 EST 2003
+
+      Add security requirement for 'home' task in news handler.
+
+1.52  Tue Jan  7 01:05:14 EST 2003
+
+      Updates for linked list changes (testing...)
+
+1.51  Tue Jan  7 00:56:50 EST 2003
+
+1.50  Mon Jan  6 22:46:33 EST 2003
+
+      Change all 'datetime' datatypes to use the '%%DATETIME%%' key.
+
+1.49  Sun Jan  5 19:25:06 EST 2003
+
+      - Update 'news' objects to use linked list functionality from
+      SPOPS::Tool::DBI::MaintainLinkedList. You will need to update
+      the 'news' schema and run a script to bring the objects
+      up-to-date (see UPGRADE for details). This means you will always
+      be able to get to the previous/next news objects and this create
+      a useful list of entries from anywhere.
+
+      - Add a portable component for searching news entries by
+      section/date (news_filter_form).
+
+      - Add 'news_home' template which is used for the base '/news/'
+      action, combining the last 10 news entries and the filter form.
+
+      - Modify 'news_detail' template with the filter form and
+      pointers to the next and previous news entries.
+
+1.48  Sun Sep  8 22:28:52 EDT 2002
+
+      Try new cache clearing in edit(), remove() and edit_summary()
+
+1.47  Sun Sep  8 16:31:45 EDT 2002
+
+      Activate caching in the news handler.
+
+1.46  Sun Sep  8 15:23:15 EDT 2002
+
+      Small fixes.
+
+1.45  Sun Sep  8 14:20:56 EDT 2002
+
+      Add a template for making changes to many news items at a single
+      time; add handler methods to fill in the template and to make
+      the changes from the form.
+
+1.44  Fri Sep  6 16:23:57 EDT 2002
+
+      Small fixes to forms, etc.
+
+1.43  Fri Sep  6 13:18:05 EDT 2002
+
+      Fun additions: you can now have an image associated with your
+      news item; the 'section' field is actually supported (displayed,
+      you can filter the listing, etc.); a new table 'news_section'
+      has been added and associated with a lookup action for easy
+      editing.
+
+      However, this requires a schema change. Sorry, but it had to be
+      done. See 'UPGRADE' for details.
+
+      A number of templates have changed as well: if you've got custom
+      ones you might want to take a look at the new templates to see
+      how they may fit in.
+
+1.42  Fri Aug 30 07:23:25 EDT 2002
+
+      Added sample scripts to manipulate news objects:
+      script/create_rss.pl and scripts/find_by_email.pl.
+
+1.41  Fri Aug 30 07:03:15 EDT 2002
+
+      Update handler to get rid of MAIN_SCRIPT and replace all uses in
+      templates with '/News/'; also pass 'date_object' instead of
+      'object' in the date rows of the news_form template. Thanks to
+      Adrian Arva <arva@cshl.edu> for pointing both of these out.
+
+1.40  Sun Aug 25 12:07:27 EDT 2002
+
+      Remove template/*.meta files
+
+1.39  Thu May  2 09:08:00 EDT 2002
+
+      Add Interbase-specific table and generator.
+
+1.38  Thu Apr 25 09:30:34 EDT 2002
+
+      Modify templates (widgets, cleanup, etc.)
+
+1.37  Thu Apr 25 08:42:27 EDT 2002
+
+      Get rid of date-formatting stuff.
+
+1.36  Thu Apr 25 08:36:53 EDT 2002
+
+      Use SPOPS::Utility->now in handler.
+
+1.35  Tue Apr 16 15:06:57 EDT 2002
+
+      Change datatype from 'datetime' to 'date' in
+      struct/news_oracle.sql
+
+1.34  Tue Apr  2 00:49:57 EST 2002
+
+      Add Oracle-specific table definition; add sequence.
+
+1.33  Tue Aug 21 08:40:11 EDT 2001
+
+      Added 'USERID_TYPE' to the news schema. If you're
+      upgrading you won't need to change anything.
+
+1.32  Wed Aug 15 09:42:27 EDT 2001
+
+      Change <object>.OI.html_(en|de)code to OI.html_(en|de)code.
+
+1.31  Mon Aug 13 12:12:37 EDT 2001
+
+      Changed all relevant templates to new template format (using OI.blah)
+
+1.30  Mon Aug 13 11:26:12 EDT 2001
+
+      Modified template(s) with <!-- TEMPLATE SCRIPT --> key to have
+      normal <script>...</script> tags.
+
+1.29  Sun Aug 12 11:17:21 EDT 2001
+
+      Modify data/install_security.dat to use new
+      'transform_default_to_id' action.
+
+1.28  Sat Aug 11 17:36:51 EDT 2001
+
+      Changed conf/spops.conf->isa from OpenInteract::SPOPS to
+      OpenInteract::SPOPS::DBI
+
+1.27  Fri Jul 13 09:56:09 EDT 2001
+
+      Simple code cleanup.
+
+1.26  Fri Jun  8 09:24:53 EDT 2001
+
+       Add a field 'section' to enable partitioning of news items. See
+       'UPGRADE' for how to modify your table.
+
+1.25  Thu Jun  7 02:05:20 EDT 2001
+
+       Enable the _process_listing() handler method to order news
+       results as well as limit them.
+
+1.24  Thu Jun  7 01:38:06 EDT 2001
+
+      Add some primitive date formatting handling to the
+      _process_listing() handler method.
+
+1.23  Tue Jun  5 09:38:44 EDT 2001
+
+      Use the 'column_group' key in the 'fetch_group()' call.
+
+1.22  Tue Jun  5 09:22:42 EDT 2001
+
+      Added 'column_group' key to 'conf/spops.perl' for
+      non-memory-clogging listings.
+
+1.21  Thu May 31 21:58:12 EDT 2001
+
+      Changed the relevant ID fields from 'int' to
+      '%%INCREMENT_FIELD%%'.
+
+1.20  Tue May 29 23:31:36 EDT 2001
+
+      Changed all relevant '$R->scrib( ... )' calls to 
+      '$R->DEBUG && $R->scrib( ... )'
+
+1.19  Tue Mar 13 07:20:31 EST 2001
+
+      Changed security level data: 'oid' -> 'object_id'
+
+1.18  Thu Mar  8 00:03:02 EST 2001
+
+      In a stunning reversal of the previous action, remove all
+      null/not null properties of default fields (doh!)
+
+1.17  Wed Mar  7 06:53:31 EST 2001
+
+      Modified struct/news.sql to make all DEFAULT fields NOT NULL.
+
+1.16  Sun Mar  4 16:04:01 EST 2001
+
+      Changed security level data: 'level' -> 'security_level'
+
+1.15  Tue Feb 20 08:10:41 EST 2001
+
+      Modified conf/spops.perl to reflect SPOPS changes.
+
+1.14  Fri Feb  2 00:40:14 EST 2001
+
+      Fixed tools box
+
+1.13  Wed Jan 31 23:52:29 EST 2001
+
+      Cleanup
+
+1.12  Sat Jan 27 05:58:01 EST 2001
+
+      Modified templates to work with new stuff
+
+1.11  Wed Dec 27 23:14:57 EST 2000
+
+      Fixed error with displaying ALL news stories for the
+      'latestnews' component rather than just the specified number.
+
+1.10  Wed Dec 27 22:55:07 EST 2000
+
+      Updated OI/Handler/News.pm and template/news_list.tmpl,
+      template/news_latest.tmpl to set/get information about the user
+      who posted the news story from a temp variable stored in the
+      news object. This allows us to screen for unfetchable users
+      within the handler rather than get a template error.
+
+1.09  Fri Dec 22 23:44:12 EST 2000
+
+      Updated default documentation, cleaned up conf/spops.perl a little.
+
+1.08  Sun Nov 26 23:07:00 EST 2000
+
+      Final (?) touches on the Handler/News.pm file.
+
+1.07  Sun Nov 26 18:05:03 EST 2000
+
+      Modified listing routines in Handler/News.pm to use common
+      processor, which also takes the news item and scans it for TT
+      directives and if it finds them, gives the news item a process
+      before sending it on. Removed the related_items_box addition.
